@@ -1,15 +1,10 @@
-function hexToRgb(hex) {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.substring(0, 2), 16);
-    const g = parseInt(h.substring(2, 4), 16);
-    const b = parseInt(h.substring(4, 6), 16);
-
-    return { r, g, b }
+function hexToRgb (hex)  {
+    return utiles.colorHexaRgba(hex)
 }
 const canvasDom = document.getElementById("canvasPrincipal");
 canvasDom.width = mesaTrabajo.confCapas.largoLienzo
 canvasDom.height = mesaTrabajo.confCapas.altoLienzo
-const canvas = new lienzoHtml({ largo: canvasDom.width, alto: canvasDom.height, canvas: canvasDom })
+const canvas = lienzos.obtener({ largo: canvasDom.width, alto: canvasDom.height, canvas: canvasDom })
 
 
 const canvasInfo = canvasDom.getBoundingClientRect();
@@ -19,9 +14,6 @@ configuracion.configuracionesBase(canvasDom);
 
 document.getElementById('representacionGrupo0').querySelector('button').appendChild(mesaTrabajo.capas.lienzo.canvas).id = 'canvasgrupocapa0'
 document.getElementById('representacionCapa1').querySelector('button').appendChild(mesaTrabajo.capaActiva.lienzo.canvas).id = 'canvasindividualcapa0'
-
-
-// <canvas id="canvasindividualcapa0" height="720" width="1280"></canvas>
 
 function revertirTrazo() {
     canvas.limpiar()
@@ -432,6 +424,7 @@ canvasDom.addEventListener('pointermove', (e) => {
     }
     ultimoMovimiento = performance.now()
 });
+
 canvasDom.addEventListener('pointerup', (e) => {
     clickeando = false;
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)

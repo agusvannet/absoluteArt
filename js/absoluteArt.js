@@ -1,13 +1,257 @@
+class tramo {
+    constructor({ y, x0, x1 }) { // rgba , #681fadde hexadecimal de 4, osea 8 caracteres
+        this.x0 = x0
+        this.x1 = x1
+        this.y = y
+    }
+
+    tramoFronterizo(tramo) {
+        if (Math.abs(tramo.y - this.y) > 1) return false
+        return !(tramo.x1 < this.x0 - 1 || tramo.x0 > this.x1 + 1);
+    }
+
+    fusionarTramos(tramo) {
+        if (!(this.tramoFronterizo(tramo) && tramo.y === this.y)) return
+        return new tramo({ y: this.y, x0: Math.min(tramo.x0, this.x0), x1: Math.max(tramo.x1, this.x1) })
+    }
+}
+class manchaLienzo {
+    constructor({ tramos = [], color }) {
+        this.tramos = tramos
+        this.color = color
+
+        this.x0 = undefined;
+        this.x1 = undefined;
+        this.y0 = undefined;
+        this.y1 = undefined;
+
+        if (this.tramos.length > 0) {
+            this.actualizarDelimitadores();
+        }
+    }
+    actualizarDelimitadores() {
+        if (this.tramos.length < 1) return
+        this.x0 = this.tramos[this.tramos.length - 1].x0
+        this.y0 = this.tramos[this.tramos.length - 1].y
+        this.x1 = this.tramos[this.tramos.length - 1].x1
+        this.y1 = this.tramos[this.tramos.length - 1].y
+
+        for (const actual of this.tramos) {
+            this.x0 = Math.min(this.x0, actual.x0)
+            this.x1 = Math.max(this.x1, actual.x1)
+            this.y0 = Math.min(this.y0, actual.y)
+            this.y1 = Math.max(this.y1, actual.y)
+        }
+
+    }
+    manchaEnArea(mancha) {
+        if (mancha.y0 > this.y1 + 1 || this.y0 > mancha.y1 + 1) return false
+
+        if (mancha.x0 > this.x1 + 1 || this.x0 > mancha.x1 + 1) return false
+
+        return true
+    }
+    manchaFronteriza(mancha) {
+        if (!this.manchaEnArea(mancha)) return false
+        for (const tramoMancha of mancha.tramos) {
+            for (const tramo of this.tramos) {
+                if (tramoMancha.tramoFronterizo(tramo)) return true
+            }
+        }
+        return false
+    }
+    tramoPerteneciente(tramo) {
+        for (const tramoComprabar of this.tramos) {
+            if (tramo.tramoFronterizo(tramoComprabar)) return true
+        }
+        return false
+    }
+    agregarTramo(tramo) {
+        this.tramos.push(tramo)
+        if (this.x0 !== undefined &&
+            this.y0 !== undefined &&
+            this.x1 !== undefined &&
+            this.y1 !== undefined) {
+
+            this.x0 = Math.min(tramo.x0, this.x0)
+            this.y0 = Math.min(tramo.y, this.y0)
+            this.x1 = Math.max(tramo.x1, this.x1)
+            this.y1 = Math.max(tramo.y, this.y1)
+        } else {
+            this.x0 = tramo.x0
+            this.y0 = tramo.y
+            this.x1 = tramo.x1
+            this.y1 = tramo.y
+        }
+    }
+    agregarTramosMancha(mancha) {
+        for (const tramo of mancha.tramos) {
+            this.agregarTramo(tramo)
+        }
+    }
+    fusionarTramosMancha(mancha) {
+        if (!this.manchaFronteriza(mancha)) return
+        this.agregarTramosMancha(mancha)
+        this.color = mancha.color
+        let tramoFusionado = undefined;
+        let cambios = 1;
+
+        while (cambios !== 0) {
+            cambios = 0;
+            let indicePrincipal = this.tramos.length - 1
+            while (indicePrincipal >= 0) {
+
+                let indiceSecunadario = indicePrincipal - 1
+                while (indiceSecunadario >= 0) {
+                    if (this.tramos[indicePrincipal].y === this.tramos[indiceSecunadario].y) {
+                        tramoFusionado = this.tramos[indicePrincipal].fusionarTramos(this.tramos[indiceSecunadario])
+                        if (tramoFusionado) {
+                            this.tramos.push(tramoFusionado)
+                            this.tramos.splice(Math.max(indicePrincipal, indiceSecunadario), 1)
+                            this.tramos.splice(Math.min(indicePrincipal, indiceSecunadario), 1)
+                            cambios++;
+                            indicePrincipal--;
+                        }
+                    }
+                    indiceSecunadario--;
+                }
+                indicePrincipal--;
+
+            }
+        }
+        this.actualizarDelimitadores();
+    }
+    tramoEnArea(tramo) {
+        if (tramo.y < this.y0 - 1 || tramo.y > this.y1 + 1) return false;
+        if (tramo.x1 < this.x0 - 1 || tramo.x0 > this.x1 + 1) return false;
+
+        return true;
+    }
+    tramoFronterizo(tramo) {
+        if (!this.tramoEnArea(tramo)) return false
+        for (const tramoComprobar of this.tramos) {
+            if (tramoComprobar.tramoFronterizo(tramo)) return true
+        }
+        return false
+    }
+}
+class grupoManchas {
+    constructor({ manchas = [] }) {
+        this.manchas = manchas
+    }
+    agregarMancha({ tramos, color }) {
+        this.manchas.push(new manchaLienzo({ tramos, color }))
+    }
+    agregarTramo({ tramo, color }) {
+        for (const mancha of this.manchas) {
+            if (mancha.color !== color) continue
+            if (mancha.tramoFronterizo(tramo)) {
+                mancha.agregarTramo(tramo)
+                return
+            }
+        }
+        this.agregarMancha({ tramos: [tramo], color })
+    }
+    obtenerManchaClick(cord) {
+        for (const mancha of this.manchas) {
+            if (mancha.x0 <= cord.x && cord.x <= mancha.x1 &&
+                mancha.y0 <= cord.y && cord.y <= mancha.y1) {
+                for (const tramo of mancha.tramos) {
+                    if (cord.y === tramo.y && cord.x >= tramo.x0 && cord.x <= tramo.x1) return mancha
+                }
+            }
+        }
+    }
+    obtenerManchasFronterizas(mancha) {
+        const manchasFronterizas = []
+        for (const manchaActual of this.manchas) {
+            if (manchaActual === mancha) continue
+            if (mancha.manchaFronteriza(manchaActual))
+                manchasFronterizas.push(manchaActual);
+        }
+        return manchasFronterizas
+    }
+    fusionarManchasColorFronterizas() {
+        let cambios = 1;
+        while (cambios !== 0) {
+            cambios = 0;
+            let indicePrincipal = this.manchas.length - 1
+            while (indicePrincipal >= 0) {
+                let indiceSecunadario = indicePrincipal - 1
+                while (indiceSecunadario >= 0) {
+                    if (this.manchas[indicePrincipal].color === this.manchas[indiceSecunadario].color &&
+                        indicePrincipal !== indiceSecunadario) {
+                        if (this.manchas[indiceSecunadario].manchaFronteriza(this.manchas[indicePrincipal])) {
+                            this.manchas[indiceSecunadario].agregarTramosMancha(this.manchas[indicePrincipal])
+                            this.manchas.splice(Math.max(indicePrincipal, indiceSecunadario), 1)
+                            cambios++;
+                        }
+                    }
+                    indiceSecunadario--;
+                }
+                indicePrincipal--;
+
+            }
+        }
+    }
+
+}
 class lienzoBase {
-    constructor(largo, alto) {
+    constructor({ largo, alto, id, tipo }) {
         this.largo = largo;
         this.alto = alto;
-        this.canvas = undefined
+        this.id = id;
+        this.tipo = tipo
+    }
+
+    obtenerBuffer() {
+        console.log("nomas para q se vea , lo devuelve completo , desde el primer hasta el ultimo pixel,  no es seccion")
+    }
+
+    obtenerBufferSeccionado() {
+        const buffer = this.obtenerBuffer();
+        const obtenerPx = ({ x, y }) => {
+            const lugar = (y * this.largo + x) * 4
+            const toHex = (n) => {
+                const clamped = Math.max(0, Math.min(255, Math.round(n)));
+                return clamped.toString(16).padStart(2, '0');
+            };
+            let hex = `${toHex(buffer[lugar])}${toHex(buffer[lugar + 1])}${toHex(buffer[lugar + 2])}${toHex(buffer[lugar + 3])}`
+
+            return hex;
+        }
+        const lienzoSeccionado = new grupoManchas({});
+        for (let y = 0; y < this.alto; y++) {
+            let tramoActual = { x0: 0, x1: 0, y, color: undefined }
+            let ultX1Agregado = 0;
+            for (let x = 0; x < this.largo; x++) {
+                const px = obtenerPx({ x, y })
+                if (tramoActual.color === undefined) tramoActual.color = px;
+                if (tramoActual.color !== px) {
+                    lienzoSeccionado.agregarTramo({
+                        tramo: new tramo({ x0: tramoActual.x0, x1: tramoActual.x1, y }),
+                        color: tramoActual.color
+                    })
+                    ultX1Agregado = x;
+                    tramoActual.x0 = ultX1Agregado;
+                }
+                tramoActual.color = px
+                tramoActual.x1 = x;
+            }
+
+            lienzoSeccionado.agregarTramo({
+                tramo: new tramo({ x0: tramoActual.x0, x1: tramoActual.x1, y }),
+                color: tramoActual.color
+            })
+            tramoActual = { x0: 0, x1: 0, y, color: undefined }
+        }
+        lienzoSeccionado.fusionarManchasColorFronterizas();
+        return lienzoSeccionado
     }
 }
 class lienzoHtml extends lienzoBase {
-    constructor({ largo, alto, canvas, muchaLectura }) {
-        super(largo, alto)
+    constructor({ largo, alto, canvas, muchaLectura, id, tipo }) {
+        super({ largo, alto, id, tipo })
         if (canvas) {
             this.canvas = canvas;
         } else {
@@ -21,7 +265,6 @@ class lienzoHtml extends lienzoBase {
         this.canvas.width = this.largo
         this.canvas.height = this.alto
     }
-
     modosPegado = {
         normal: 'source-over',
         borrar: 'destination-out',
@@ -33,6 +276,8 @@ class lienzoHtml extends lienzoBase {
     }
 
     pegarLienzo({ lienzo, x, y, alpha, modoPegado }) { // pegar en ESTE lienzo
+        //const alphaValido = (alpha !== undefined) ? true : false
+        //const modoPegadoValido = (modosPegado[modoPegado] !== undefined) ? true : false
         if (alpha !== undefined || modoPegado)
             if (alpha !== undefined || this.modosPegado[modoPegado])
                 this.ctx.save();
@@ -187,6 +432,10 @@ class lienzoHtml extends lienzoBase {
     obtenerSeccionBuffer({ alto, largo, x, y }) {
         return this.ctx.getImageData(x, y, largo, alto)
     }
+    obtenerBuffer() {
+        console.trace("oh")
+        return this.ctx.getImageData(0, 0, this.largo, this.alto).data
+    }
     insertarSeccionBuffer({ buffer, x, y }) {
         this.ctx.putImageData(buffer, x, y);
     }
@@ -251,8 +500,6 @@ class grupoCapas extends capaBase { // ctx cambiado
         while (padreActual) {
             padreActual.preRenderizar()
             padreActual = padreActual.capaPadre;
-            // borrar luego de probar rendimiento
-            console.log("contador padres renderizados : ", contador)
             contador++;
         }
     }
@@ -597,6 +844,7 @@ class herramienta {
         this.nombre = nombre;
         this.categoria = categoria; // igual a carpeta padre
     }
+    preRenderizable = true;
     usar(lienzo, trazo) {
     }
 
@@ -1060,13 +1308,10 @@ class poligonoSimple extends figura {
     usar({ lienzo, trazo, lienzoIntermediario }) { // ({ x1, y1, x2, y2, grosor, r, g, b, a })
         if (!this.trazoValido(trazo)) return
         lienzos.acomodar({ lienzo: lienzoIntermediario.lienzoComunSecundario, alto: lienzo.alto, largo: lienzo.largo })
-
         pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, this.transformarTrazoEnPincel(trazo))
-
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
 
     }
-
     transformarTrazoEnPincel(trazo) {
         const trazoTransformado = trazo.clonar()
         for (let i = 1; i < trazoTransformado.trayectos.length; i++) {
@@ -1128,11 +1373,10 @@ class figuraSellos extends lineaSimple {
         const puntosVertices = this.transformarVerticesPuntos(trazo)
 
         clonTrazo.trayectos = puntosVertices;
-        console.log(clonTrazo)
         pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, clonTrazo)
 
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
-        
+
     }
 
     transformarVerticesPuntos(trazo) {
@@ -1155,6 +1399,45 @@ class figuraSellos extends lineaSimple {
             secciones.push(puntos)
         }
         return secciones;
+    }
+}
+
+class baldeSimple extends herramienta {
+    constructor(nombre, categoria) {
+        super(nombre, categoria)
+    }
+    preRenderizable = false;
+    usar({ lienzo, lienzoIntermediario, trazo, bufferSeccionado }) {
+        const puntoBalde = {
+            x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
+            y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
+        }
+        const seccionPintar = bufferSeccionado.obtenerManchaClick(puntoBalde);
+        const rgba = trazo.rgba[0]
+        for (const linea of seccionPintar.tramos) {
+            lienzoIntermediario.lienzoComun.pintarRectangulo({
+                x: linea.x0,
+                y: linea.y,
+                largo: linea.x1 - linea.x0 + 1,
+                alto: 1,
+                r: rgba.r,
+                g: rgba.g,
+                b: rgba.b,
+                a: rgba.a
+            });
+
+        }
+        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, modoPegado: trazo.modoDibujo })
+    }
+
+    trazoEnProceso(trazo) {
+        return false;
+    }
+    trazoValido(trazo) {
+        if (trazo.puntoInicial) return true
+    }
+    trazoComplejo(trazo) {
+        return true;
     }
 }
 class trazo {
@@ -1353,12 +1636,19 @@ class trazo {
 }
 const lienzos = {
     contadorLienzos: 0,
-    obtener({ largo, alto, canvas, muchaLectura }) { // faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien , todos deben tener las mismas funciones , porlomenos las qu ese usen al dibujar
+    obtener({ largo, alto, canvas, muchaLectura, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
+        //  todos deben tener las mismas funciones , porlomenos las que ese usen al dibujar
+        //   console.log('num lien crea : ', this.contadorLienzos)
+        //  console.log(' max ram  : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')// es por 8 para no meter un * 2 * mas 
         this.contadorLienzos++;
-        console.log('numero de lienzos creados : ', this.contadorLienzos)
-        console.log(' maxima ram utilizada (sin borrar lienzos) : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')
-        // es por 8 para no meter un * 2 * mas 
-        return new lienzoHtml({ largo, alto, canvas, muchaLectura })
+        return new lienzoHtml({
+            largo,
+            alto,
+            canvas,
+            muchaLectura,
+            id: this.contadorLienzos,
+            tipo // temporal o permanente , ya
+        })
     },
     acomodar({ lienzo, alto, largo, limpiar }) {
         if (lienzo.largo !== largo || lienzo.alto !== alto) {
@@ -1375,8 +1665,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 1280,
-        altoLienzo: 720
+        largoLienzo: 1920,
+        altoLienzo: 1080
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,
@@ -1421,7 +1711,6 @@ const mesaTrabajo = {
     arrastreClick({ cordenada, lienzoReal }) {
         if (this.capasIndividualesVivas.length === 0) return
 
-        lienzoReal.limpiar()
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             this.trazoGuardar.agregarCordenada(cordenada)
 
@@ -1437,11 +1726,14 @@ const mesaTrabajo = {
             }
         }
 
-        this.renderizarTrazo({
-            lienzoReal,
-            trazoTemporal: this.trazoTemporal,
-            trazoReal: this.trazoGuardar,
-        })
+        if (this.herramientaActiva.preRenderizable) {
+            lienzoReal.limpiar()
+            this.renderizarTrazo({
+                lienzoReal,
+                trazoTemporal: this.trazoTemporal,
+                trazoReal: this.trazoGuardar,
+            })
+        }
     },
 
     finClick({ cordenada, lienzoReal }) {
@@ -1476,6 +1768,7 @@ const mesaTrabajo = {
     },
 
     renderizarTrazo({ lienzoReal, trazoTemporal, trazoReal }) {
+        if (!this.herramientaActiva.preRenderizable) return
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal })
         } else {
@@ -1503,7 +1796,6 @@ const mesaTrabajo = {
 
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
     },
-
     rendreizarFigura({ lienzoReal, trazo }) {
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
         this.capaActiva.renderizar(lienzoReal)
@@ -1513,7 +1805,7 @@ const mesaTrabajo = {
     prepararLienzosSanduich() {
         const capasDivididas = this.capas.dividirCapas({ capa: this.capaActiva, })
         if (capasDivididas.anteriores.length > 0) {
-            if (!this.lienzoPrevio) this.lienzoPrevio = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo })
+            if (!this.lienzoPrevio) this.lienzoPrevio = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
 
             lienzos.acomodar({
                 lienzo: this.lienzoPrevio,
@@ -1529,7 +1821,7 @@ const mesaTrabajo = {
         }
 
         if (capasDivididas.posteriores.length > 0) {
-            if (!this.lienzoPosterior) this.lienzoPosterior = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo })
+            if (!this.lienzoPosterior) this.lienzoPosterior = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
             lienzos.acomodar({
                 lienzo: this.lienzoPosterior,
                 alto: this.confCapas.altoLienzo,
@@ -1543,7 +1835,7 @@ const mesaTrabajo = {
 
         }
         if (!this.lienzoCapaActual)
-            this.lienzoCapaActual = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo })
+            this.lienzoCapaActual = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
         this.lienzoCapaActual.limpiar()
         this.capaActiva.renderizar(this.lienzoCapaActual)
     },
@@ -1690,23 +1982,40 @@ const mesaTrabajo = {
 }
 const pintor = {
     lienzosIntermediarios: {
-        lienzoPincel: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1 }),
-        lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1 }),
-        lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1 }),
-        lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1 })
+        lienzoPincel: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' })
     },
     categorias: new categoria('herramientas'),
     listaHerramientas: [],
     listaCategorias: [],
+    bufferSeccionado: undefined,
+    herramientaUltimoDibujo: undefined,
+    ultimoLienzoId: undefined,
 
     dibujar(lienzoDibujar, trazo) {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
+        const herramienta = this.obtenerHerramienta(trazo.herramienta)
 
-        this.obtenerHerramienta(trazo.herramienta).usar({
+        if (herramienta.perteneceCategoria(this.obtenerCategoria("mutacionColor"))) {
+            if (this.herramientaUltimoDibujo === undefined || this.ultimoLienzoId === undefined) {
+                this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
+            }
+            else if (!this.herramientaUltimoDibujo.perteneceCategoria(this.obtenerCategoria("mutacionColor")) ||
+                lienzoDibujar.id !== this.ultimoLienzoId) {
+                this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
+            }
+
+        }
+        herramienta.usar({
             lienzo: lienzoDibujar,
             trazo,
-            lienzoIntermediario: this.lienzosIntermediarios
+            lienzoIntermediario: this.lienzosIntermediarios,
+            bufferSeccionado: this.bufferSeccionado
         })
+        this.herramientaUltimoDibujo = herramienta
+        if (lienzoDibujar.tipo !== 'temporal') this.ultimoLienzoId = lienzoDibujar.id
         this.lienzosIntermediarios.lienzoComun.limpiar()
     },
     trazoComplejo(trazo) {
@@ -1714,11 +2023,13 @@ const pintor = {
     },
     cargarCategorias() { // orden ordenado por dios
         const listaCategorias = [
-            { nombreCategoria: 'dibujo' },
+            { nombreCategoria: 'herramienta' },
+            { nombreCategoria: 'edicionLienzo', categoriaPadre: 'herramienta' },
+            { nombreCategoria: 'mutacionColor', categoriaPadre: 'edicionLienzo' },
+            { nombreCategoria: 'dibujo', categoriaPadre: 'herramienta' },
             { nombreCategoria: 'figuras', categoriaPadre: 'dibujo' },
             { nombreCategoria: 'pinceles', categoriaPadre: 'dibujo' },
             { nombreCategoria: 'sello', categoriaPadre: 'dibujo' },
-            { nombreCategoria: 'continuos', categoriaPadre: 'pinceles' },
         ]
         const agregarHerramienta = ({ nombreCategoria, categoriaPadre }) => {
             this.listaCategorias.push(this.agregarCategoria(new categoria(nombreCategoria, this.obtenerCategoria(categoriaPadre))))
@@ -1833,6 +2144,7 @@ const pintor = {
                 [{ x: 0, y: 0.80 }, { x: 1, y: 0.80 }], [{ x: 0, y: 0.84 }, { x: 1, y: 0.84 }], [{ x: 0, y: 0.88 }, { x: 1, y: 0.88 }], [{ x: 0, y: 0.92 }, { x: 1, y: 0.92 }],
                 [{ x: 0, y: 0.96 }, { x: 1, y: 0.96 }], [{ x: 0, y: 1.00 }, { x: 1, y: 1.00 }]])),
 
+            this.agregarHerramienta(new baldeSimple('baldeSimple', this.obtenerCategoria('mutacionColor'))),
 
         )
     },
@@ -1929,12 +2241,32 @@ const utiles = {
         const ubicacionClick = this.obtUbicClickElem(cordX, cordY, canvas);
         //return { x: ((ubicacionClick.x / tamanio.ancho) | 0) + 0.5, y: ((ubicacionClick.y / tamanio.alto) | 0) + 0.5 };
         //return { x: ((ubicacionClick.x / tamanio.ancho) ) , y: ((ubicacionClick.y / tamanio.alto))  };
-        return { x: (Math.ceil(ubicacionClick.x / tamanio.ancho)), y: (Math.ceil(ubicacionClick.y / tamanio.alto)) };
+        return { x: (Math.floor(ubicacionClick.x / tamanio.ancho)), y: (Math.floor(ubicacionClick.y / tamanio.alto)) };
     },
     obtUbicClickElem(cordX, cordY, elemento) {
         const infoObjeto = { x: elemento.getBoundingClientRect().x, y: elemento.getBoundingClientRect().y };
         return { x: cordX - infoObjeto.x, y: cordY - infoObjeto.y };
     },
+    colorHexaRgba(hex) {
+        const h = hex.replace('#', '');
+        const r = parseInt(h.substring(0, 2), 16);
+        const g = parseInt(h.substring(2, 4), 16);
+        const b = parseInt(h.substring(4, 6), 16);
+        const a = parseInt(h.substring(6, 8), 16)
+
+        const rgba = (a !== undefined && !Number.isNaN(a)) ? { r, g, b, a } : { r, g, b }
+        return rgba
+    },
+    colorRgbaHexa({ r, g, b, a }) {
+        // Asegura que los valores estén en el rango 0-255 y sean enteros
+        const toHex = (n) => {
+            const clamped = Math.max(0, Math.min(255, Math.round(n)));
+            return clamped.toString(16).padStart(2, '0');
+        };
+        let hex = (a !== undefined) ? `${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}` : `${toHex(r)}${toHex(g)}${toHex(b)}`
+
+        return hex;
+    }
 }
 const configuracion = {
     configurarEsteticaCanvas(canvas) { // se lo pedi a gemini
