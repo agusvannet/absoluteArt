@@ -1,13 +1,22 @@
 class tramo {
-    constructor({ y, x0, x1 }) { // rgba , #681fadde hexadecimal de 4, osea 8 caracteres
+    constructor(x0, x1, y) { // rgba , #681fadde hexadecimal de 4, osea 8 caracteres
         this.x0 = x0
         this.x1 = x1
         this.y = y
     }
 
     tramoFronterizo(tramo) {
-        if (Math.abs(tramo.y - this.y) > 1) return false
-        return !(tramo.x1 < this.x0 - 1 || tramo.x0 > this.x1 + 1);
+        const diffY = Math.abs(tramo.y - this.y);
+        if (diffY > 1) return false;
+
+        // Si están en la MISMA fila (Y == Y), son contiguos si están pegados (+-1 en X)
+        if (diffY === 0) {
+            return !(tramo.x1 < this.x0 - 1 || tramo.x0 > this.x1 + 1);
+        }
+
+        // Si están en filas DISTINTAS (Y +- 1), DEBEN solaparse verticalmente (sin el +-1)
+        // para no cruzarse en diagonal a través de líneas de 1px
+        return !(tramo.x1 < this.x0 || tramo.x0 > this.x1);
     }
 
     fusionarTramos(tramo) {
@@ -16,8 +25,8 @@ class tramo {
     }
 }
 class manchaLienzo {
-    constructor({ tramos = [], color }) {
-        this.tramos = tramos
+    constructor(tramos, color) {
+        this.tramos = {}
         this.color = color
 
         this.x0 = undefined;
@@ -25,49 +34,16 @@ class manchaLienzo {
         this.y0 = undefined;
         this.y1 = undefined;
 
-        if (this.tramos.length > 0) {
-            this.actualizarDelimitadores();
-        }
+        this.agregarTramos(tramos)
     }
-    actualizarDelimitadores() {
-        if (this.tramos.length < 1) return
-        this.x0 = this.tramos[this.tramos.length - 1].x0
-        this.y0 = this.tramos[this.tramos.length - 1].y
-        this.x1 = this.tramos[this.tramos.length - 1].x1
-        this.y1 = this.tramos[this.tramos.length - 1].y
-
-        for (const actual of this.tramos) {
-            this.x0 = Math.min(this.x0, actual.x0)
-            this.x1 = Math.max(this.x1, actual.x1)
-            this.y0 = Math.min(this.y0, actual.y)
-            this.y1 = Math.max(this.y1, actual.y)
+    agregarTramos(tramos) {
+        for (const tramo of tramos) {
+            this.agregarTramo(tramo)
         }
-
-    }
-    manchaEnArea(mancha) {
-        if (mancha.y0 > this.y1 + 1 || this.y0 > mancha.y1 + 1) return false
-
-        if (mancha.x0 > this.x1 + 1 || this.x0 > mancha.x1 + 1) return false
-
-        return true
-    }
-    manchaFronteriza(mancha) {
-        if (!this.manchaEnArea(mancha)) return false
-        for (const tramoMancha of mancha.tramos) {
-            for (const tramo of this.tramos) {
-                if (tramoMancha.tramoFronterizo(tramo)) return true
-            }
-        }
-        return false
-    }
-    tramoPerteneciente(tramo) {
-        for (const tramoComprabar of this.tramos) {
-            if (tramo.tramoFronterizo(tramoComprabar)) return true
-        }
-        return false
     }
     agregarTramo(tramo) {
-        this.tramos.push(tramo)
+        if (!this.tramos[tramo.y]) this.tramos[tramo.y] = []
+        this.tramos[tramo.y].push(tramo)
         if (this.x0 !== undefined &&
             this.y0 !== undefined &&
             this.x1 !== undefined &&
@@ -84,42 +60,65 @@ class manchaLienzo {
             this.y1 = tramo.y
         }
     }
-    agregarTramosMancha(mancha) {
-        for (const tramo of mancha.tramos) {
-            this.agregarTramo(tramo)
+    actualizarDelimitadores() {
+        if (this.tramos.length < 1) return
+        const listaTramos = Object.keys(this.tramos)
+        this.x0 = this.tramos[listaTramos.length - 1].x0
+        this.y0 = this.tramos[listaTramos.length - 1].y
+        this.x1 = this.tramos[listaTramos.length - 1].x1
+        this.y1 = this.tramos[listaTramos.length - 1].y
+
+        for (const actual of listaTramos) {
+            this.x0 = Math.min(this.x0, this.tramos[actual].x0)
+            this.x1 = Math.max(this.x1, this.tramos[actual].x1)
+            this.y0 = Math.min(this.y0, this.tramos[actual].y)
+            this.y1 = Math.max(this.y1, this.tramos[actual].y)
         }
+
     }
-    fusionarTramosMancha(mancha) {
-        if (!this.manchaFronteriza(mancha)) return
-        this.agregarTramosMancha(mancha)
-        this.color = mancha.color
-        let tramoFusionado = undefined;
-        let cambios = 1;
+    manchaEnArea(mancha) {
+        if (mancha.y0 > this.y1 + 1 || this.y0 > mancha.y1 + 1) return false
 
-        while (cambios !== 0) {
-            cambios = 0;
-            let indicePrincipal = this.tramos.length - 1
-            while (indicePrincipal >= 0) {
+        if (mancha.x0 > this.x1 + 1 || this.x0 > mancha.x1 + 1) return false
 
-                let indiceSecunadario = indicePrincipal - 1
-                while (indiceSecunadario >= 0) {
-                    if (this.tramos[indicePrincipal].y === this.tramos[indiceSecunadario].y) {
-                        tramoFusionado = this.tramos[indicePrincipal].fusionarTramos(this.tramos[indiceSecunadario])
-                        if (tramoFusionado) {
-                            this.tramos.push(tramoFusionado)
-                            this.tramos.splice(Math.max(indicePrincipal, indiceSecunadario), 1)
-                            this.tramos.splice(Math.min(indicePrincipal, indiceSecunadario), 1)
-                            cambios++;
-                            indicePrincipal--;
-                        }
+        return true
+    }
+    manchaFronteriza(mancha) {
+        if (!this.manchaEnArea(mancha)) return false
+        const y0 = Math.max(mancha.y0 - 1, this.y0 - 1);
+        const y1 = Math.min(mancha.y1 + 1, this.y1 + 1);
+
+        for (let i = y0; i <= y1; i++) {
+            const fila = this.tramos[i]
+            if (!fila) continue
+            for (const tramo of fila) {
+
+
+                for (let n = y0; n <= y1; n++) {
+                    const fila = this.tramos[n]
+                    if (!fila) continue
+                    for (const tramoComparar of fila) {
+                        if (tramo.tramoFronterizo(tramoComparar)) return true;
                     }
-                    indiceSecunadario--;
                 }
-                indicePrincipal--;
 
             }
         }
-        this.actualizarDelimitadores();
+    }
+    tramoPerteneciente(tramo) {
+        for (const tramoComprabar of this.tramos) {
+            if (tramo.tramoFronterizo(tramoComprabar)) return true
+        }
+        return false
+    }
+    agregarTramosMancha(mancha) {
+        for (let i = mancha.y0; i <= mancha.y1; i++) {
+            const linea = mancha.tramos[i];
+            if (!linea) continue
+            for (const tramo of linea) {
+                this.agregarTramo(tramo)
+            }
+        }
     }
     tramoEnArea(tramo) {
         if (tramo.y < this.y0 - 1 || tramo.y > this.y1 + 1) return false;
@@ -127,37 +126,67 @@ class manchaLienzo {
 
         return true;
     }
-    tramoFronterizo(tramo) {
-        if (!this.tramoEnArea(tramo)) return false
-        for (const tramoComprobar of this.tramos) {
-            if (tramoComprobar.tramoFronterizo(tramo)) return true
+    tramoFronterizo(tramoComprobar) {
+        if (!this.tramoEnArea(tramoComprobar)) return false
+        for (let i = tramoComprobar.y - 1; i <= tramoComprobar.y + 1; i++) {
+            const fila = this.tramos[i]
+            if (!fila) continue
+            for (const tramo of fila) {
+                if (tramoComprobar.tramoFronterizo(tramo)) return true
+            }
+        }
+    }
+    recorrerTramos(inicio = this.y0, fin = this.y1, accion) {
+
+        for (let i = inicio; i <= fin; i++) {
+            const fila = this.tramos[i]
+            if (!fila) continue
+            for (const tramo of fila) {
+                if (accion(tramo)) return true
+            }
         }
         return false
     }
-}
-class grupoManchas {
-    constructor({ manchas = [] }) {
-        this.manchas = manchas
-    }
-    agregarMancha({ tramos, color }) {
-        this.manchas.push(new manchaLienzo({ tramos, color }))
-    }
-    agregarTramo({ tramo, color }) {
-        for (const mancha of this.manchas) {
-            if (mancha.color !== color) continue
-            if (mancha.tramoFronterizo(tramo)) {
-                mancha.agregarTramo(tramo)
-                return
+    obtenerTramosPlano() {
+        const tramosPlano = []
+        for (let i = this.y0; i < this.y1; i++) {
+            for (const tramo of this.tramos[i]) {
+                tramosPlano.push(tramo)
             }
         }
-        this.agregarMancha({ tramos: [tramo], color })
+        return tramosPlano
+    }
+}
+class grupoManchas {
+    constructor() {
+        this.manchas = []
+    }
+    agregarMancha(tramos, color) {
+        const nuevaMancha = new manchaLienzo(tramos, color)
+        this.manchas.push(nuevaMancha)
+        return nuevaMancha
+    }
+    agregarTramo(tramo, color, manchasComparar) {
+        for (const mancha of manchasComparar) {
+            if (!mancha.tramoEnArea(tramo)) continue
+            if (mancha.color !== color) continue
+
+            if (mancha.tramoFronterizo(tramo)) {
+                mancha.agregarTramo(tramo)
+                return mancha
+            }
+        }
+        return this.agregarMancha([tramo], color)
     }
     obtenerManchaClick(cord) {
         for (const mancha of this.manchas) {
             if (mancha.x0 <= cord.x && cord.x <= mancha.x1 &&
                 mancha.y0 <= cord.y && cord.y <= mancha.y1) {
-                for (const tramo of mancha.tramos) {
-                    if (cord.y === tramo.y && cord.x >= tramo.x0 && cord.x <= tramo.x1) return mancha
+
+                const fila = mancha.tramos[cord.y]
+                if (!fila) continue
+                for (const tramo of fila) {
+                    if (cord.x >= tramo.x0 && cord.x <= tramo.x1) return mancha
                 }
             }
         }
@@ -171,31 +200,8 @@ class grupoManchas {
         }
         return manchasFronterizas
     }
-    fusionarManchasColorFronterizas() {
-        let cambios = 1;
-        while (cambios !== 0) {
-            cambios = 0;
-            let indicePrincipal = this.manchas.length - 1
-            while (indicePrincipal >= 0) {
-                let indiceSecunadario = indicePrincipal - 1
-                while (indiceSecunadario >= 0) {
-                    if (this.manchas[indicePrincipal].color === this.manchas[indiceSecunadario].color &&
-                        indicePrincipal !== indiceSecunadario) {
-                        if (this.manchas[indiceSecunadario].manchaFronteriza(this.manchas[indicePrincipal])) {
-                            this.manchas[indiceSecunadario].agregarTramosMancha(this.manchas[indicePrincipal])
-                            this.manchas.splice(Math.max(indicePrincipal, indiceSecunadario), 1)
-                            cambios++;
-                        }
-                    }
-                    indiceSecunadario--;
-                }
-                indicePrincipal--;
-
-            }
-        }
-    }
-
 }
+
 class lienzoBase {
     constructor({ largo, alto, id, tipo }) {
         this.largo = largo;
@@ -209,44 +215,49 @@ class lienzoBase {
     }
 
     obtenerBufferSeccionado() {
-        const buffer = this.obtenerBuffer();
-        const obtenerPx = ({ x, y }) => {
-            const lugar = (y * this.largo + x) * 4
-            const toHex = (n) => {
-                const clamped = Math.max(0, Math.min(255, Math.round(n)));
-                return clamped.toString(16).padStart(2, '0');
-            };
-            let hex = `${toHex(buffer[lugar])}${toHex(buffer[lugar + 1])}${toHex(buffer[lugar + 2])}${toHex(buffer[lugar + 3])}`
+        let contadorSeguridad = 0;
+        let manchasLineaAnterior = []
+        let manchasLineaActual = []
 
-            return hex;
-        }
-        const lienzoSeccionado = new grupoManchas({});
+        const buffer = this.obtenerBuffer();
+        const buffer32 = new Uint32Array(buffer.buffer);
+        let pixelActual = 0;
+        const lienzoSeccionado = new grupoManchas();
+
         for (let y = 0; y < this.alto; y++) {
-            let tramoActual = { x0: 0, x1: 0, y, color: undefined }
-            let ultX1Agregado = 0;
+            let colorActual = buffer32[pixelActual]
+            let x0 = 0;
+
             for (let x = 0; x < this.largo; x++) {
-                const px = obtenerPx({ x, y })
-                if (tramoActual.color === undefined) tramoActual.color = px;
-                if (tramoActual.color !== px) {
-                    lienzoSeccionado.agregarTramo({
-                        tramo: new tramo({ x0: tramoActual.x0, x1: tramoActual.x1, y }),
-                        color: tramoActual.color
-                    })
-                    ultX1Agregado = x;
-                    tramoActual.x0 = ultX1Agregado;
+                const px = buffer32[pixelActual]
+
+                if (px !== colorActual) {
+                    manchasLineaActual.push(
+                        lienzoSeccionado.agregarTramo(
+                            new tramo(x0, x - 1, y),
+                            colorActual,
+                            manchasLineaAnterior
+                        ))
+                    contadorSeguridad++;
+
+                    colorActual = px;
+                    x0 = x;
                 }
-                tramoActual.color = px
-                tramoActual.x1 = x;
+                pixelActual += 1;
             }
 
-            lienzoSeccionado.agregarTramo({
-                tramo: new tramo({ x0: tramoActual.x0, x1: tramoActual.x1, y }),
-                color: tramoActual.color
-            })
-            tramoActual = { x0: 0, x1: 0, y, color: undefined }
+            manchasLineaActual.push(
+                lienzoSeccionado.agregarTramo(
+                    new tramo(x0, this.largo - 1, y),
+                    colorActual,
+                    manchasLineaAnterior
+                ));
+
+            manchasLineaAnterior = manchasLineaActual;
+            manchasLineaActual = []
         }
-        lienzoSeccionado.fusionarManchasColorFronterizas();
-        return lienzoSeccionado
+
+        return lienzoSeccionado;
     }
 }
 class lienzoHtml extends lienzoBase {
@@ -433,7 +444,6 @@ class lienzoHtml extends lienzoBase {
         return this.ctx.getImageData(x, y, largo, alto)
     }
     obtenerBuffer() {
-        console.trace("oh")
         return this.ctx.getImageData(0, 0, this.largo, this.alto).data
     }
     insertarSeccionBuffer({ buffer, x, y }) {
@@ -1401,7 +1411,6 @@ class figuraSellos extends lineaSimple {
         return secciones;
     }
 }
-
 class baldeSimple extends herramienta {
     constructor(nombre, categoria) {
         super(nombre, categoria)
@@ -1413,19 +1422,19 @@ class baldeSimple extends herramienta {
             y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
         }
         const seccionPintar = bufferSeccionado.obtenerManchaClick(puntoBalde);
+        const tramosPintar = seccionPintar.obtenerTramosPlano()
         const rgba = trazo.rgba[0]
-        for (const linea of seccionPintar.tramos) {
+        for (const tramo of tramosPintar) {
             lienzoIntermediario.lienzoComun.pintarRectangulo({
-                x: linea.x0,
-                y: linea.y,
-                largo: linea.x1 - linea.x0 + 1,
+                x: tramo.x0,
+                y: tramo.y,
+                largo: tramo.x1 - tramo.x0 + 1,
                 alto: 1,
                 r: rgba.r,
                 g: rgba.g,
                 b: rgba.b,
                 a: rgba.a
             });
-
         }
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, modoPegado: trazo.modoDibujo })
     }
@@ -1636,7 +1645,7 @@ class trazo {
 }
 const lienzos = {
     contadorLienzos: 0,
-    obtener({ largo, alto, canvas, muchaLectura, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
+    obtener({ largo, alto, canvas, muchaLectura = true, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
         //  todos deben tener las mismas funciones , porlomenos las que ese usen al dibujar
         //   console.log('num lien crea : ', this.contadorLienzos)
         //  console.log(' max ram  : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')// es por 8 para no meter un * 2 * mas 
@@ -2004,7 +2013,13 @@ const pintor = {
             }
             else if (!this.herramientaUltimoDibujo.perteneceCategoria(this.obtenerCategoria("mutacionColor")) ||
                 lienzoDibujar.id !== this.ultimoLienzoId) {
+                utiles.calentarMotorGrafico()
+                const t0 = performance.now();
+
                 this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
+
+                const t1 = performance.now();
+                console.log(`Tiempo de escaneo: ${(t1 - t0).toFixed(2)} ms`);
             }
 
         }
@@ -2266,6 +2281,16 @@ const utiles = {
         let hex = (a !== undefined) ? `${toHex(r)}${toHex(g)}${toHex(b)}${toHex(a)}` : `${toHex(r)}${toHex(g)}${toHex(b)}`
 
         return hex;
+    },
+    calentarMotorGrafico() { // segun gemini el motor de crhome necesita calentar motores digamos
+        // Creamos un buffer dummy chico para no congelar la carga
+        const lienzoCalenton = lienzos.obtener({ largo: 64, alto: 64, muchaLectura: true })
+
+        // Lo corremos unas cuantas veces para forzar al compilador TurboFan de V8
+        // a generar código de máquina nativo para la función
+        for (let i = 0; i < 50; i++) {
+            lienzoCalenton.obtenerBufferSeccionado();
+        }
     }
 }
 const configuracion = {
