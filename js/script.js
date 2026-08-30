@@ -120,7 +120,6 @@ function seleccionarCapa(id, tipo) {
         if (eliminar) {
             eliminar.classList.remove('activo')
         }
-        console.log(('representacionGrupo' + id))
         document.getElementById('representacionGrupo' + id).classList.add('activo')
         abrirConfiguracionCapa()
         if (capaActual.id !== 0) {
