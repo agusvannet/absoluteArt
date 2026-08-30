@@ -278,40 +278,49 @@ class lienzoBase {
     }
 
     obtenerManchaInundacion({ cordenada, sensibilidad = () => { return false } }) {
-        const buffer = this.obtenerBuffer()
-        const estadosPixel = new Uint8Array(buffer.length / 4)
-        const mancha = {}
-        const obtenerPixel = (x, y) => {
-            let ubicacion = (y * this.largo + x) * 4;
-            return {
-                r: buffer[ubicacion],
-                g: buffer[ubicacion + 1],
-                b: buffer[ubicacion + 2],
-                a: buffer[ubicacion + 3],
-            }
-        }
-        const colorBase = obtenerPixel(cordenada.x, cordenada.y)
-        const pixelValido = (pixel) => {
-            if (pixel.r === colorBase.r &&
-                pixel.g === colorBase.g &&
-                pixel.b === colorBase.b &&
-                pixel.a === colorBase.a) {
-                return true;
-            }
-            return sensibilidad({
-                r: pixel.r,
-                g: pixel.g,
-                b: pixel.b,
-                a: pixel.a,
-                colorBase
-            })
-        }
+        const buffer = new Uint32Array(this.obtenerBuffer().buffer);
+        const estadosPixel = new Uint8Array(this.largo * this.alto);
+        const mancha = {};
 
-        const tramoHorizontalidad = (x, y) => { // aca va lo de acomodar la tolerancia, sino aunque sea tolerado se agrega como mismo color
-            let pixelTramoBase = this.largo * y + x
-            if (estadosPixel[pixelTramoBase] !== 0) return false
-            estadosPixel[pixelTramoBase] = 1
-            if (!pixelValido(obtenerPixel(x, y))) return false
+        const indiceBase = cordenada.y * this.largo + cordenada.x;
+        const colorBaseUint32 = buffer[indiceBase];
+
+        const baseObj = {
+            r: colorBaseUint32 & 0xFF,
+            g: (colorBaseUint32 >> 8) & 0xFF,
+            b: (colorBaseUint32 >> 16) & 0xFF,
+            a: (colorBaseUint32 >> 24) & 0xFF
+        };
+
+        const obtenerPixel = (x, y) => {
+            const p32 = buffer[y * this.largo + x];
+            return {
+                r: p32 & 0xFF,
+                g: (p32 >> 8) & 0xFF,
+                b: (p32 >> 16) & 0xFF,
+                a: (p32 >> 24) & 0xFF
+            };
+        };
+
+        const pixelValido = (indice) => {
+            const p32 = buffer[indice];
+            if (p32 === colorBaseUint32) return true;
+
+            return sensibilidad({
+                r: p32 & 0xFF,
+                g: (p32 >> 8) & 0xFF,
+                b: (p32 >> 16) & 0xFF,
+                a: (p32 >> 24) & 0xFF,
+                colorBase: baseObj
+            });
+        };
+
+        const tramoHorizontalidad = (x, y) => {
+            let pixelTramoBase = this.largo * y + x;
+            if (estadosPixel[pixelTramoBase] !== 0) return false;
+            estadosPixel[pixelTramoBase] = 1;
+            if (!pixelValido(pixelTramoBase)) return false;
+
             let indiceX0 = pixelTramoBase;
             let indiceX1 = pixelTramoBase;
             let x0 = x;
@@ -320,75 +329,76 @@ class lienzoBase {
 
             while (x0 > 0) {
                 indiceX0--;
-                estadosPixel[indiceX0] = 1
-                if (!pixelValido(obtenerPixel(x0 - 1, y))) break;
+                estadosPixel[indiceX0] = 1;
+                if (!pixelValido(indiceX0)) break;
                 x0--;
             }
 
             while (this.largo > x1) {
-                indiceX1++
-                estadosPixel[indiceX1] = 1
-                if (!pixelValido(obtenerPixel(x1 + 1, y))) break;
-                x1++
+                indiceX1++;
+                estadosPixel[indiceX1] = 1;
+                if (!pixelValido(indiceX1)) break;
+                x1++;
             }
 
             let x0Color = x0;
-            let x1Color = x0;
-            let pixelAnterior = obtenerPixel(x0, y)
-            for (let n = x0; n <= x1; n++) {
-                const pixelActual = obtenerPixel(n, y);
+            let pixelAnterior = utiles.colorRgbaHexa(obtenerPixel(x0, y));
+
+            for (let n = x0 + 1; n <= x1; n++) {
+                const pixelActual = utiles.colorRgbaHexa(obtenerPixel(n, y));
 
                 if (pixelAnterior !== pixelActual) {
-                    const colorTramo = utiles.colorRgbaHexa({
-                        r: pixelAnterior.r,
-                        g: pixelAnterior.g,
-                        b: pixelAnterior.b,
-                        a: pixelAnterior.a
-                    })
-                    if (!mancha[colorTramo]) mancha[colorTramo] = []
-                    mancha[colorTramo].push(tramoAgregar)
+                    if (!mancha[pixelAnterior]) mancha[pixelAnterior] = [];
+                    mancha[pixelAnterior].push(new tramo(x0Color, n - 1, yTramo));
+
+                    x0Color = n;
+                    pixelAnterior = pixelActual;
                 }
             }
-            return new tramo(x0, x1, yTramo)
-        }
+
+            if (!mancha[pixelAnterior]) mancha[pixelAnterior] = [];
+            mancha[pixelAnterior].push(new tramo(x0Color, x1, yTramo));
+
+            return new tramo(x0, x1, yTramo);
+        };
+
         const tramoVerticalidad = (tramo) => {
-            const tramosEncontrados = []
+            const tramosEncontrados = [];
             for (let x = tramo.x0; x <= tramo.x1; x++) {
                 if (tramo.y > 0) {
-                    const yBajo = tramoHorizontalidad(x, tramo.y - 1)
-                    if (yBajo) tramosEncontrados.push(yBajo)
+                    const yBajo = tramoHorizontalidad(x, tramo.y - 1);
+                    if (yBajo) tramosEncontrados.push(yBajo);
                 }
                 if (tramo.y + 1 < this.alto) {
-                    const yAlto = tramoHorizontalidad(x, tramo.y + 1)
-                    if (yAlto) tramosEncontrados.push(yAlto)
+                    const yAlto = tramoHorizontalidad(x, tramo.y + 1);
+                    if (yAlto) tramosEncontrados.push(yAlto);
                 }
             }
-            return tramosEncontrados
-        }
+            return tramosEncontrados;
+        };
+
         const tramoInicial = tramoHorizontalidad(cordenada.x, cordenada.y);
-        let listaTramos = [tramoInicial]
+        let listaTramos = tramoInicial ? [tramoInicial] : [];
+
         while (listaTramos.length) {
-            let nuevosTramos = []
+            let nuevosTramos = [];
 
             for (let i = 0; i < listaTramos.length; i++) {
-                let tramosAgregados = tramoVerticalidad(listaTramos[i])
+                let tramosAgregados = tramoVerticalidad(listaTramos[i]);
                 for (const tramo of tramosAgregados) {
-                    nuevosTramos.push(tramo)
+                    nuevosTramos.push(tramo);
                 }
             }
 
             listaTramos = nuevosTramos;
         }
+
         return {
             mancha,
-            colorBase: utiles.colorRgbaHexa({
-                r: colorBase.r,
-                g: colorBase.g,
-                b: colorBase.b,
-                a: colorBase.a
-            })
+            colorBase: utiles.colorRgbaHexa(baseObj)
         };
     }
+
 }
 class lienzoHtml extends lienzoBase {
     constructor({ largo, alto, canvas, muchaLectura, id, tipo }) {
@@ -1546,41 +1556,66 @@ class baldeSimple extends herramienta {
     }
     preRenderizable = false;
     usar({ lienzo, lienzoIntermediario, trazo }) {
-        const puntoBalde = {
-            x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
-            y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
-        }
-        const manchaClickeada = lienzo.obtenerManchaInundacion({
-            cordenada: puntoBalde,
-            sensibilidad: ({
-                r,
-                g,
-                b,
-                a,
-                colorBase
-            }) => {
-                if (r === colorBase.r && g === colorBase.g && b === colorBase.a) return true
-                return false
-            }
-        });
-        console.log(manchaClickeada)
-        const rgba = trazo.rgba[0]
-        const tramosPintar = manchaClickeada.mancha[manchaClickeada.colorBase]
+    const tInicioTotal = performance.now();
 
-        for (const tramo of tramosPintar) {
-            lienzoIntermediario.lienzoComun.pintarRectangulo({
-                x: tramo.x0,
-                y: tramo.y,
-                largo: tramo.x1 - tramo.x0 + 1,
-                alto: 1,
-                r: rgba.r,
-                g: rgba.g,
-                b: rgba.b,
-                a: rgba.a
-            });
+    const puntoBalde = {
+        x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
+        y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
+    };
+
+    const t0 = performance.now();
+    const manchaClickeada = lienzo.obtenerManchaInundacion({
+        cordenada: puntoBalde,
+        sensibilidad: ({
+            r,
+            g,
+            b,
+            colorBase
+        }) => {
+            if (r === colorBase.r &&
+                g === colorBase.g &&
+                b === colorBase.b) return true;
+            return false;
         }
-        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, modoPegado: trazo.modoDibujo })
+    });
+    const t1 = performance.now();
+
+    const rgba = trazo.rgba[0];
+    const tramosPintar = manchaClickeada.mancha[manchaClickeada.colorBase] || [];
+
+    // 2. Pintado de rectángulos en el lienzo intermediario
+    const t2 = performance.now();
+    for (const tramo of tramosPintar) {
+        lienzoIntermediario.lienzoComun.pintarRectangulo({
+            x: tramo.x0,
+            y: tramo.y,
+            largo: tramo.x1 - tramo.x0 + 1,
+            alto: 1,
+            r: rgba.r,
+            g: rgba.g,
+            b: rgba.b,
+            a: rgba.a
+        });
     }
+    const t3 = performance.now();
+
+    // 3. Pegado / Composite del lienzo
+    const t4 = performance.now();
+    lienzo.pegarLienzo({ 
+        lienzo: lienzoIntermediario.lienzoComun, 
+        x: 0, 
+        y: 0, 
+        modoPegado: trazo.modoDibujo 
+    });
+    const t5 = performance.now();
+
+    // Resumen de rendimiento
+    console.log(`--- TIEMPOS DEL BALDE ---`);
+    console.log(`1. Algoritmo Escaneo: ${(t1 - t0).toFixed(2)} ms (${tramosPintar.length} tramos)`);
+    console.log(`2. Pintar Rectángulos: ${(t3 - t2).toFixed(2)} ms`);
+    console.log(`3. Pegar Lienzo: ${(t5 - t4).toFixed(2)} ms`);
+    console.log(`TOTAL COMPLETO: ${(t5 - tInicioTotal).toFixed(2)} ms`);
+}
 
     trazoEnProceso() {
         return false;
@@ -1817,8 +1852,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 1920,
-        altoLienzo: 1080
+        largoLienzo: 4000,
+        altoLienzo: 3000
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,
