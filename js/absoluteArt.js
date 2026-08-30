@@ -1852,8 +1852,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 4000,
-        altoLienzo: 3000
+        largoLienzo: 1920,
+        altoLienzo: 1080
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,
