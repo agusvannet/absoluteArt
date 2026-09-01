@@ -221,6 +221,53 @@ class grupoManchas {
     }
 }
 
+class comparadorPixel {
+    constructor() {
+    }
+    obtenerComparador(pixelBase) {
+
+    }
+    obtenerEquivalenciaAlpha({ alphaBase, alphaTolerado, alphaModificar }) {
+        const base = alphaBase || 1; // Prevenir división por cero
+        const factor = alphaTolerado / base;
+
+        return Math.max(Math.min(Math.round(alphaModificar * factor), 255), 0)
+    }
+}
+
+class comparadorPixelRGBA extends comparadorPixel {
+    constructor({ toleranciaR = 0, toleranciaG = 0, toleranciaB = 0, toleranciaA = 0 }) {
+        super()
+        this.toleranciaR = toleranciaR;
+        this.toleranciaG = toleranciaG;
+        this.toleranciaB = toleranciaB;
+        this.toleranciaA = toleranciaA;
+    }
+    obtenerComparador(pixelBase) {
+        let rTolerado = 255 * this.toleranciaR;
+        let gTolerado = 255 * this.toleranciaG;
+        let bTolerado = 255 * this.toleranciaB;
+        let aTolerado = 255 * this.toleranciaA;
+
+        let maximoR = pixelBase.r + rTolerado
+        let maximoG = pixelBase.g + gTolerado
+        let maximoB = pixelBase.b + bTolerado
+        let maximoA = pixelBase.a + aTolerado
+
+        let minimoR = pixelBase.r - rTolerado
+        let minimoG = pixelBase.g - gTolerado
+        let minimoB = pixelBase.b - bTolerado
+        let minimoA = pixelBase.a - aTolerado
+
+        return (r, g, b, a) => {
+            return (minimoR <= r && r <= maximoR) &&
+                (minimoG <= g && g <= maximoG) &&
+                (minimoB <= b && b <= maximoB) &&
+                (minimoA <= a && a <= maximoA)
+        }
+    }
+}
+
 class lienzoBase {
     constructor({ largo, alto, id, tipo }) {
         this.largo = largo;
@@ -277,7 +324,7 @@ class lienzoBase {
         return lienzoSeccionado;
     }
 
-    obtenerManchaInundacion({ cordenada, sensibilidad = () => { return false } }) {
+    obtenerManchaInundacion({ cordenada, comparadorPixel }) {
         const buffer = new Uint32Array(this.obtenerBuffer().buffer);
         const estadosPixel = new Uint8Array(this.largo * this.alto);
         const mancha = {};
@@ -292,6 +339,8 @@ class lienzoBase {
             a: (colorBaseUint32 >> 24) & 0xFF
         };
 
+        const compararPixel = (comparadorPixel) ? comparadorPixel.obtenerComparador(baseObj) : () => { return false }
+
         const obtenerPixel = (x, y) => {
             const p32 = buffer[y * this.largo + x];
             return {
@@ -305,14 +354,12 @@ class lienzoBase {
         const pixelValido = (indice) => {
             const p32 = buffer[indice];
             if (p32 === colorBaseUint32) return true;
-
-            return sensibilidad({
-                r: p32 & 0xFF,
-                g: (p32 >> 8) & 0xFF,
-                b: (p32 >> 16) & 0xFF,
-                a: (p32 >> 24) & 0xFF,
-                colorBase: baseObj
-            });
+            return compararPixel(
+                p32 & 0xFF,
+                (p32 >> 8) & 0xFF,
+                (p32 >> 16) & 0xFF,
+                (p32 >> 24) & 0xFF
+            );
         };
 
         const tramoHorizontalidad = (x, y) => {
@@ -1556,66 +1603,84 @@ class baldeSimple extends herramienta {
     }
     preRenderizable = false;
     usar({ lienzo, lienzoIntermediario, trazo }) {
-    const tInicioTotal = performance.now();
+        const comparadorPixel = new comparadorPixelRGBA({
+            toleranciaR: trazo.toleranciaRGB.r,
+            toleranciaG: trazo.toleranciaRGB.g,
+            toleranciaB: trazo.toleranciaRGB.b,
+            toleranciaA: trazo.toleranciaAlpha
+        })
 
-    const puntoBalde = {
-        x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
-        y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
-    };
+        const puntoBalde = {
+            x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
+            y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
+        };
 
-    const t0 = performance.now();
-    const manchaClickeada = lienzo.obtenerManchaInundacion({
-        cordenada: puntoBalde,
-        sensibilidad: ({
-            r,
-            g,
-            b,
-            colorBase
-        }) => {
-            if (r === colorBase.r &&
-                g === colorBase.g &&
-                b === colorBase.b) return true;
-            return false;
+        const manchaClickeada = lienzo.obtenerManchaInundacion({
+            cordenada: puntoBalde,
+            comparadorPixel
+        });
+
+        const rgba = trazo.rgba[0];
+        const coloresMancha = Object.keys(manchaClickeada.mancha)
+
+        console.log(manchaClickeada)
+
+        let alphaBase = utiles.colorHexaRgba(manchaClickeada.colorBase).a
+
+        if (trazo.alphaEquivalente)
+            if (trazo.baldeMaximoAlpha)
+                for (const colorActual of coloresMancha)
+                    alphaBase = Math.max(parseInt(colorActual.substring(6, 8), 16), alphaBase)
+
+        for (const color of coloresMancha) {
+            let alpha = rgba.a
+            if (trazo.alphaEquivalente) {
+                alpha = comparadorPixel.obtenerEquivalenciaAlpha({
+                    alphaBase,
+                    alphaTolerado: utiles.colorHexaRgba(color).a,
+                    alphaModificar: Math.floor(255 * alpha)
+                })
+                alpha = alpha / 255
+            }
+
+            for (const tramo of manchaClickeada.mancha[color]) {
+                lienzoIntermediario.lienzoComun.pintarRectangulo({
+                    x: tramo.x0,
+                    y: tramo.y,
+                    largo: tramo.x1 - tramo.x0 + 1,
+                    alto: 1,
+                    r: rgba.r,
+                    g: rgba.g,
+                    b: rgba.b,
+                    a: alpha,
+                });
+            }
         }
-    });
-    const t1 = performance.now();
 
-    const rgba = trazo.rgba[0];
-    const tramosPintar = manchaClickeada.mancha[manchaClickeada.colorBase] || [];
+        if (trazo.setearBalde) {
+            for (const color of coloresMancha) {
+                for (const tramo of manchaClickeada.mancha[color]) {
+                    lienzo.limpiarRectangulo({
+                        x: tramo.x0,
+                        y: tramo.y,
+                        largo: tramo.x1 - tramo.x0 + 1,
+                        alto: 1,
+                        r: 255,
+                        g: 255,
+                        b: 255,
+                        a: 1,
+                    });
+                }
+            }
+        }
 
-    // 2. Pintado de rectángulos en el lienzo intermediario
-    const t2 = performance.now();
-    for (const tramo of tramosPintar) {
-        lienzoIntermediario.lienzoComun.pintarRectangulo({
-            x: tramo.x0,
-            y: tramo.y,
-            largo: tramo.x1 - tramo.x0 + 1,
-            alto: 1,
-            r: rgba.r,
-            g: rgba.g,
-            b: rgba.b,
-            a: rgba.a
+        lienzo.pegarLienzo({
+            lienzo: lienzoIntermediario.lienzoComun,
+            x: 0,
+            y: 0,
+            modoPegado: trazo.modoDibujo
         });
     }
-    const t3 = performance.now();
-
-    // 3. Pegado / Composite del lienzo
-    const t4 = performance.now();
-    lienzo.pegarLienzo({ 
-        lienzo: lienzoIntermediario.lienzoComun, 
-        x: 0, 
-        y: 0, 
-        modoPegado: trazo.modoDibujo 
-    });
-    const t5 = performance.now();
-
-    // Resumen de rendimiento
-    console.log(`--- TIEMPOS DEL BALDE ---`);
-    console.log(`1. Algoritmo Escaneo: ${(t1 - t0).toFixed(2)} ms (${tramosPintar.length} tramos)`);
-    console.log(`2. Pintar Rectángulos: ${(t3 - t2).toFixed(2)} ms`);
-    console.log(`3. Pegar Lienzo: ${(t5 - t4).toFixed(2)} ms`);
-    console.log(`TOTAL COMPLETO: ${(t5 - tInicioTotal).toFixed(2)} ms`);
-}
 
     trazoEnProceso() {
         return false;
@@ -1628,7 +1693,21 @@ class baldeSimple extends herramienta {
     }
 }
 class trazo {
-    constructor({ trayectos, puntoInicial, rgba, grosor, herramienta, sello, continuidad, separacion, modoDibujo }) { // le puedo agregar cosas pero por ahora va este 
+    constructor({ trayectos,
+        puntoInicial,
+        rgba,
+        grosor,
+        herramienta,
+        sello,
+        continuidad,
+        separacion,
+        modoDibujo,
+        alphaEquivalente,
+        toleranciaAlpha,
+        toleranciaRGB,
+        setearBalde,
+        baldeMaximoAlpha
+    }) { // le puedo agregar cosas pero por ahora va este 
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
         this.rgba = rgba;
@@ -1638,6 +1717,15 @@ class trazo {
         this.continuidad = continuidad;
         this.separacion = separacion;
         this.modoDibujo = modoDibujo;
+        this.alphaEquivalente = alphaEquivalente;
+        this.toleranciaAlpha = toleranciaAlpha;
+        this.toleranciaRGB = {
+            r: toleranciaRGB.r,
+            g: toleranciaRGB.g,
+            b: toleranciaRGB.b
+        }
+        this.setearBalde = setearBalde;
+        this.baldeMaximoAlpha = baldeMaximoAlpha;
     }
     minimoSeparacion = 0.01
     velPxsMin = 300
@@ -1737,7 +1825,18 @@ class trazo {
             sello: this.sello,
             continuidad: this.continuidad,
             separacion: this.separacion,
-            modoDibujo: this.modoDibujo
+            modoDibujo: this.modoDibujo,
+            alphaEquivalente: this.alphaEquivalente,
+
+            toleranciaAlpha: this.toleranciaAlpha,
+            toleranciaRGB: {
+                r: this.toleranciaRGB.r,
+                g: this.toleranciaRGB.g,
+                b: this.toleranciaRGB.b
+            },
+            setearBalde: this.setearBalde,
+            baldeMaximoAlpha: this.baldeMaximoAlpha,
+
         })
     }
     agregarTrazo(cordenada) {
@@ -1821,6 +1920,7 @@ class trazo {
         return { trayectoSeccionado, sobrante };
     }
 }
+
 const lienzos = {
     contadorLienzos: 0,
     obtener({ largo, alto, canvas, muchaLectura = true, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
@@ -1852,8 +1952,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 1920,
-        altoLienzo: 1080
+        largoLienzo: 1280,
+        altoLienzo: 720
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,

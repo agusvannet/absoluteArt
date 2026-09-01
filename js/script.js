@@ -1,4 +1,4 @@
-function hexToRgb (hex)  {
+function hexToRgb(hex) {
     return utiles.colorHexaRgba(hex)
 }
 const canvasDom = document.getElementById("canvasPrincipal");
@@ -360,6 +360,15 @@ let nombreSello = 'selloCircular'
 let continuidad = false;
 let modoDibujo = 'normal';
 let separacion = 1
+let alphaEquivalente = false;
+let toleranciaAlpha = 0;
+let toleranciaRGB = {
+    r: 0,
+    g: 0,
+    b: 0
+}
+let setearBalde= true;
+let baldeMaximoAlpha = true;
 
 function obtenerColores() {
     const rgba = [{
@@ -386,7 +395,11 @@ function obtenerTrazoActual(cordInicial) {
         sello: nombreSello,
         continuidad,
         modoDibujo,
-        separacion
+        separacion,
+        alphaEquivalente,
+        toleranciaAlpha,
+        toleranciaRGB,
+        setearBalde
     })
     return trazoGuardar;
 }

@@ -72,7 +72,7 @@
 
             <select id="modoDibujoHerramienta">
             </select>
-   
+
             <div id="continuidad" class="checkboxHerramienta">
                 <p>Continuidad</p>
                 <input type="checkbox" id="continuidadCheckBox">
@@ -132,16 +132,58 @@
                 </div>
             </div>
 
-            <div id="historialTrazos" style="display: none;">
-                <button type="button" class="configuracionTrazos">
-                    configuracion listado
-                </button>
+            <div class="configuracionBalde">
+                <div class="slidersTolerancia">
+                    <div class="tolerancia rojo">
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaR').value = this.value, toleranciaRGB.r = Number(this.value)"
+                            value="0" id="rangoToleranciaR" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaR').value = this.value, toleranciaRGB.r = Number(this.value)"
+                            value="0" id="numberToleranciaR" min="0" max="1" step="0.01">
+                    </div>
 
-                <div id="listaTrazos">
-                    <button type="button" class="trazo">
-                        <p>indice trazo</p>
-                        <canvas id="trazo1" width="200" height="100"></canvas>
-                    </button>
+                    <div class="tolerancia verde">
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaG').value = this.value, toleranciaRGB.g = Number(this.value)"
+                            value="0" id="rangoToleranciaG" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaG').value = this.value, toleranciaRGB.g = Number(this.value)"
+                            value="0" id="numberToleranciaG" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia azul">
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaB').value = this.value, toleranciaRGB.b = Number(this.value)"
+                            value="0" id="rangoToleranciaB" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaB').value = this.value, toleranciaRGB.b = Number(this.value)"
+                            value="0" id="numberToleranciaB" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="tolerancia gris">
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaA').value = this.value, toleranciaAlpha = Number(this.value) "
+                            value="0" id="rangoToleranciaA" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaA').value = this.value , toleranciaAlpha = Number(this.value) "
+                            value="0" id="numberToleranciaA" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+                <div class="inputsBalde">
+                    <div class="opcion">
+                        <p>alpha Equivalente</p>
+                        <input type="checkbox"  name="" id="alphaEquivalente" oninput="alphaEquivalente = this.checked">
+                    </div>
+                    <div class="opcion">
+                        <p>setear</p>
+                        <input type="checkbox" checked name="" id="setearBalde" oninput="setearBalde = this.checked">
+                    </div>
+                    <div class="opcion">
+                        <p>baldeMaximoAlpha</p>
+                        <input type="checkbox" checked name="" oninput="baldeMaximoAlpha = this.checked">
+                    </div>
+
+
                 </div>
             </div>
         </div>
