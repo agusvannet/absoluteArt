@@ -556,3 +556,16 @@ select {
 .tolerancia.compensacion.azul {
     background: linear-gradient(to right, white, blue);
 }
+
+.inputsLapizFigura{
+    background-color: lightblue;
+}
+
+.opcion{
+    display: flex;
+    align-items: center;
+}
+
+.inputsLapizFigura .opcion{
+    background-color: rgb(0, 255, 251);
+}

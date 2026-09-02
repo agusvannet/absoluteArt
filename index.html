@@ -73,11 +73,6 @@
             <select id="modoDibujoHerramienta">
             </select>
 
-            <div id="continuidad" class="checkboxHerramienta">
-                <p>Continuidad</p>
-                <input type="checkbox" id="continuidadCheckBox">
-            </div>
-
             <button type="button" onclick=" nombreHerramienta = document.getElementById('herramientas').value ;
                                             nombreSello = document.getElementById('sellos').value ; modoDibujo
                                             modoDibujo = document.getElementById('modoDibujoHerramienta').value ;
@@ -101,7 +96,7 @@
     <section class="lienzo">
         <div class="seccionIzquierda">
 
-            <p>cosas lapiz o figura</p>
+            <p>cosas lapiz y figura</p>
             <div class="configuracionLapizFondo">
                 <div class="tolerancia verde  ">
                     <p>grosor</p>
@@ -140,6 +135,17 @@
                     <input type="number" name=""
                         oninput="document.getElementById('rangueSeparacionSello').value = this.value, separacion = Number(this.value)"
                         value="1" id="numberSeparacionSello" min="0" max="5" step="0.01">
+                </div>
+                <div class="inputsLapizFigura inputsBalde">
+
+                    <div class="opcion">
+                        <p>continuidad</p>
+                        <input type="checkbox" name="" oninput="continuidad = this.checked">
+                    </div>
+
+                    
+
+
                 </div>
             </div>
 
