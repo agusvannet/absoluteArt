@@ -222,26 +222,26 @@ class grupoManchas {
 }
 
 class comparadorPixel {
-    constructor() {
+    constructor({ toleranciaA = 0 }) {
+        this.toleranciaA = toleranciaA;
     }
     obtenerComparador(pixelBase) {
+    }
+    obtenerEquivalenciaAlpha({ alphaBase, alphaModificar, nivelRefjelo }) {
+        return (alphaBase * nivelRefjelo) + (alphaModificar * (1 - nivelRefjelo))
 
     }
-    obtenerEquivalenciaAlpha({ alphaBase, alphaTolerado, alphaModificar }) {
-        const base = alphaBase || 1; // Prevenir división por cero
-        const factor = alphaTolerado / base;
+    obtenerEquivalenciaCanales({ canalesBase, canalesModificar, nivelRefjelo }) {
 
-        return Math.max(Math.min(Math.round(alphaModificar * factor), 255), 0)
     }
 }
 
 class comparadorPixelRGBA extends comparadorPixel {
     constructor({ toleranciaR = 0, toleranciaG = 0, toleranciaB = 0, toleranciaA = 0 }) {
-        super()
+        super({ toleranciaA })
         this.toleranciaR = toleranciaR;
         this.toleranciaG = toleranciaG;
         this.toleranciaB = toleranciaB;
-        this.toleranciaA = toleranciaA;
     }
     obtenerComparador(pixelBase) {
         let rTolerado = 255 * this.toleranciaR;
@@ -266,6 +266,48 @@ class comparadorPixelRGBA extends comparadorPixel {
                 (minimoA <= a && a <= maximoA)
         }
     }
+    obtenerEquivalenciaCanales({ canalesBase, canalesModificar, nivelRefjelo }) {
+        return {
+            r: (canalesBase.r * nivelRefjelo.rgb.r) + (canalesModificar.r * (1 - nivelRefjelo.rgb.r)),
+            g: (canalesBase.g * nivelRefjelo.rgb.g) + (canalesModificar.g * (1 - nivelRefjelo.rgb.g)),
+            b: (canalesBase.b * nivelRefjelo.rgb.b) + (canalesModificar.b * (1 - nivelRefjelo.rgb.b)),
+            alpha: (canalesBase.alpha * nivelRefjelo.alpha) + (canalesModificar.alpha * (1 - nivelRefjelo.alpha)),
+        }
+    }
+}
+
+class compararPixelHsv extends comparadorPixel {
+    constructor({ toleranciaH = 0, toleranciaS = 0, toleranciaV = 0, toleranciaA = 0 }) {
+        super({ toleranciaA })
+        this.toleranciaH = toleranciaH;
+        this.toleranciaS = toleranciaS;
+        this.toleranciaV = toleranciaV;
+    }
+
+    obtenerComparador(pixelBase) {
+        let hTolerado = 360 * this.toleranciaH;
+        let sTolerado = 100 * this.toleranciaS;
+        let vTolerado = 100 * this.toleranciaV;
+        let aTolerado = 255 * this.toleranciaA;
+
+        let maximoR = pixelBase.r + rTolerado
+        let maximoG = pixelBase.g + gTolerado
+        let maximoB = pixelBase.b + bTolerado
+        let maximoA = pixelBase.a + aTolerado
+
+        let minimoR = pixelBase.r - rTolerado
+        let minimoG = pixelBase.g - gTolerado
+        let minimoB = pixelBase.b - bTolerado
+        let minimoA = pixelBase.a - aTolerado
+
+        return (r, g, b, a) => {
+            return (minimoR <= r && r <= maximoR) &&
+                (minimoG <= g && g <= maximoG) &&
+                (minimoB <= b && b <= maximoB) &&
+                (minimoA <= a && a <= maximoA)
+        }
+    }
+
 }
 
 class lienzoBase {
@@ -1602,14 +1644,7 @@ class baldeSimple extends herramienta {
         super(nombre, categoria)
     }
     preRenderizable = false;
-    usar({ lienzo, lienzoIntermediario, trazo }) {
-        const comparadorPixel = new comparadorPixelRGBA({
-            toleranciaR: trazo.toleranciaRGB.r,
-            toleranciaG: trazo.toleranciaRGB.g,
-            toleranciaB: trazo.toleranciaRGB.b,
-            toleranciaA: trazo.toleranciaAlpha
-        })
-
+    usar({ lienzo, lienzoIntermediario, trazo, comparadorPixel }) {
         const puntoBalde = {
             x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
             y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
@@ -1623,39 +1658,49 @@ class baldeSimple extends herramienta {
         const rgba = trazo.rgba[0];
         const coloresMancha = Object.keys(manchaClickeada.mancha)
 
-        console.log(manchaClickeada)
-
-        let alphaBase = utiles.colorHexaRgba(manchaClickeada.colorBase).a
-
-        if (trazo.alphaEquivalente)
-            if (trazo.baldeMaximoAlpha)
-                for (const colorActual of coloresMancha)
-                    alphaBase = Math.max(parseInt(colorActual.substring(6, 8), 16), alphaBase)
-
         for (const color of coloresMancha) {
             let alpha = rgba.a
-            if (trazo.alphaEquivalente) {
-                alpha = comparadorPixel.obtenerEquivalenciaAlpha({
-                    alphaBase,
-                    alphaTolerado: utiles.colorHexaRgba(color).a,
-                    alphaModificar: Math.floor(255 * alpha)
-                })
-                alpha = alpha / 255
-            }
+            let r = rgba.r;
+            let g = rgba.g;
+            let b = rgba.b;
 
+            if (trazo.reflejarCanales) {
+                const rgbaActual = utiles.colorHexaRgba(color)
+                const equivalentesCanales = comparadorPixel.obtenerEquivalenciaCanales({
+                    canalesBase: {
+                        r: rgbaActual.r,
+                        g: rgbaActual.g,
+                        b: rgbaActual.b,
+                        alpha: rgbaActual.a
+                    },
+                    canalesModificar: {
+                        r,
+                        g,
+                        b,
+                        alpha: alpha * 255
+                    },
+                    nivelRefjelo: trazo.reflejarCanal
+                })
+
+                r = Math.round(equivalentesCanales.r)
+                g = Math.round(equivalentesCanales.g)
+                b = Math.round(equivalentesCanales.b)
+                alpha = equivalentesCanales.alpha / 255
+            }
             for (const tramo of manchaClickeada.mancha[color]) {
                 lienzoIntermediario.lienzoComun.pintarRectangulo({
                     x: tramo.x0,
                     y: tramo.y,
                     largo: tramo.x1 - tramo.x0 + 1,
                     alto: 1,
-                    r: rgba.r,
-                    g: rgba.g,
-                    b: rgba.b,
+                    r,
+                    g,
+                    b,
                     a: alpha,
                 });
             }
         }
+
 
         if (trazo.setearBalde) {
             for (const color of coloresMancha) {
@@ -1665,21 +1710,19 @@ class baldeSimple extends herramienta {
                         y: tramo.y,
                         largo: tramo.x1 - tramo.x0 + 1,
                         alto: 1,
-                        r: 255,
-                        g: 255,
-                        b: 255,
-                        a: 1,
                     });
                 }
             }
         }
-
         lienzo.pegarLienzo({
             lienzo: lienzoIntermediario.lienzoComun,
             x: 0,
             y: 0,
             modoPegado: trazo.modoDibujo
         });
+
+        console.log(manchaClickeada)
+
     }
 
     trazoEnProceso() {
@@ -1702,11 +1745,12 @@ class trazo {
         continuidad,
         separacion,
         modoDibujo,
-        alphaEquivalente,
-        toleranciaAlpha,
-        toleranciaRGB,
+        toleranciaCanal,
+        reflejarCanal,
         setearBalde,
-        baldeMaximoAlpha
+        baldeMaximoAlpha,
+        modeloColorComparador,
+        reflejarCanales,
     }) { // le puedo agregar cosas pero por ahora va este 
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -1717,15 +1761,36 @@ class trazo {
         this.continuidad = continuidad;
         this.separacion = separacion;
         this.modoDibujo = modoDibujo;
-        this.alphaEquivalente = alphaEquivalente;
-        this.toleranciaAlpha = toleranciaAlpha;
-        this.toleranciaRGB = {
-            r: toleranciaRGB.r,
-            g: toleranciaRGB.g,
-            b: toleranciaRGB.b
+        this.toleranciaCanal = {
+            alpha: toleranciaCanal.alpha,
+            rgb: {
+                r: toleranciaCanal.rgb.r,
+                g: toleranciaCanal.rgb.g,
+                b: toleranciaCanal.rgb.b
+            },
+            hsv: {
+                h: toleranciaCanal.hsv.h,
+                s: toleranciaCanal.hsv.s,
+                v: toleranciaCanal.hsv.v
+            }
         }
-        this.setearBalde = setearBalde;
+        this.reflejarCanal = {
+            alpha: reflejarCanal.alpha,
+            rgb: {
+                r: reflejarCanal.rgb.r,
+                g: reflejarCanal.rgb.g,
+                b: reflejarCanal.rgb.b
+            },
+            hsv: {
+                h: reflejarCanal.hsv.h,
+                s: reflejarCanal.hsv.s,
+                v: reflejarCanal.hsv.v
+            }
+        },
+            this.setearBalde = setearBalde;
         this.baldeMaximoAlpha = baldeMaximoAlpha;
+        this.modeloColorComparador = modeloColorComparador;
+        this.reflejarCanales = reflejarCanales;
     }
     minimoSeparacion = 0.01
     velPxsMin = 300
@@ -1826,16 +1891,39 @@ class trazo {
             continuidad: this.continuidad,
             separacion: this.separacion,
             modoDibujo: this.modoDibujo,
-            alphaEquivalente: this.alphaEquivalente,
 
-            toleranciaAlpha: this.toleranciaAlpha,
-            toleranciaRGB: {
-                r: this.toleranciaRGB.r,
-                g: this.toleranciaRGB.g,
-                b: this.toleranciaRGB.b
+            toleranciaCanal: {
+                alpha: this.toleranciaCanal.alpha,
+                rgb: {
+                    r: this.toleranciaCanal.rgb.r,
+                    g: this.toleranciaCanal.rgb.g,
+                    b: this.toleranciaCanal.rgb.b
+                },
+                hsv: {
+                    h: this.toleranciaCanal.hsv.h,
+                    s: this.toleranciaCanal.hsv.s,
+                    v: this.toleranciaCanal.hsv.v
+                }
             },
+
+            reflejarCanal: {
+                alpha: this.reflejarCanal.alpha,
+                rgb: {
+                    r: this.reflejarCanal.rgb.r,
+                    g: this.reflejarCanal.rgb.g,
+                    b: this.reflejarCanal.rgb.b
+                },
+                hsv: {
+                    h: this.reflejarCanal.hsv.h,
+                    s: this.reflejarCanal.hsv.s,
+                    v: this.reflejarCanal.hsv.v
+                }
+            },
+
             setearBalde: this.setearBalde,
             baldeMaximoAlpha: this.baldeMaximoAlpha,
+            modeloColorComparador: this.modeloColorComparador,
+            reflejarCanales: this.reflejarCanales
 
         })
     }
@@ -2285,7 +2373,6 @@ const pintor = {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
 
-
         if (herramienta.requiereSegmentacion) {
             if (this.herramientaUltimoDibujo === undefined || this.ultimoLienzoId === undefined) {
                 this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
@@ -2305,7 +2392,8 @@ const pintor = {
             lienzo: lienzoDibujar,
             trazo,
             lienzoIntermediario: this.lienzosIntermediarios,
-            bufferSeccionado: this.bufferSeccionado
+            bufferSeccionado: this.bufferSeccionado,
+            comparadorPixel: this.obtenerGeneradorComparadorColor(trazo)
         })
 
         this.herramientaUltimoDibujo = herramienta
@@ -2471,6 +2559,26 @@ const pintor = {
         for (const actual of nombreLienzo) {
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios[actual], alto, largo })
         }
+    },
+    obtenerGeneradorComparadorColor(trazo) {
+        switch (trazo.modeloColorComparador) {
+            case 'hsv':
+                return new compararPixelHsv({
+                    toleranciaH: trazo.toleranciaCanal.hsv.h,
+                    toleranciaS: trazo.toleranciaCanal.hsv.s,
+                    toleranciaV: trazo.toleranciaCanal.hsv.v,
+                    toleranciaA: trazo.toleranciaCanal.alpha
+                })
+                break;
+            case 'rgb':
+                return new comparadorPixelRGBA({
+                    toleranciaR: trazo.toleranciaCanal.rgb.r,
+                    toleranciaG: trazo.toleranciaCanal.rgb.g,
+                    toleranciaB: trazo.toleranciaCanal.rgb.b,
+                    toleranciaA: trazo.toleranciaCanal.alpha
+                })
+                break;
+        }
     }
 }
 const utiles = {
@@ -2562,13 +2670,39 @@ const utiles = {
 
         return hex;
     },
+    colorRgbHvs({ r, g, b, }) {
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const v = max / 255;
+        const s = max === 0 ? 0 : (max - min) / max;
+        const delta = max - min;
+        let h = 0;
+        if (delta !== 0) {
+            if (max === r) {
+                h = 60 * ((g - b) / delta);
+            } else if (max === g) {
+                h = 120 + 60 * ((b - r) / delta);
+            } else {
+                // max === b
+                h = 240 + 60 * ((r - g) / delta);
+            }
+            if (h < 0) {
+                h += 360;
+            }
+        }
+        return {
+            h,
+            s,
+            v
+        }
+    },
     calentarMotorGrafico() { // segun gemini el motor de crhome necesita calentar motores digamos
 
         const lienzoCalenton = lienzos.obtener({ largo: 64, alto: 64, muchaLectura: true })
         for (let i = 0; i < 50; i++) {
             lienzoCalenton.obtenerBufferSeccionado();
         }
-    }
+    },
 }
 const configuracion = {
     configurarEsteticaCanvas(canvas) { // se lo pedi a gemini

@@ -336,6 +336,34 @@ function cambiarCapaGrupo() {
     seleccionarCapa(capaActual.id, capaActual.tipoCapa)
 }
 
+function mostrarHsv(elemento) {
+    document.getElementById('botonRGB').style.backgroundColor = 'white'
+    elemento.style.backgroundColor = 'green'
+    modeloColorComparador = 'hsv';
+    for (const rgb of document.getElementsByClassName('rgb')) {
+        rgb.style.display = 'none'
+    }
+
+    for (const hsv of document.getElementsByClassName('hsv')) {
+        hsv.style.display = 'flex'
+    }
+}
+function mostrarRgb(elemento) {
+    document.getElementById('botonHSV').style.backgroundColor = 'white'
+    elemento.style.backgroundColor = 'green'
+    modeloColorComparador = 'rgb';
+    for (const elem of document.getElementsByClassName('rgb')) {
+
+        elem.style.display = 'flex'
+    }
+
+    for (const elem of document.getElementsByClassName('hsv')) {
+        elem.style.display = 'none'
+    }
+}
+
+
+
 function listarHerramientas() {
     for (const herramienta of pintor.listaHerramientas) {
         if (herramienta.categoria.nombre === 'sello')
@@ -360,32 +388,73 @@ let nombreSello = 'selloCircular'
 let continuidad = false;
 let modoDibujo = 'normal';
 let separacion = 1
-let alphaEquivalente = false;
-let toleranciaAlpha = 0;
-let toleranciaRGB = {
-    r: 0,
-    g: 0,
-    b: 0
+let toleranciaCanal = {
+    alpha: 0,
+    rgb: {
+        r: 0,
+        g: 0,
+        b: 0
+    },
+    hsv: {
+        h: 0,
+        s: 0,
+        v: 0
+    }
 }
-let setearBalde= true;
+let reflejarCanal = {
+    alpha: 0,
+    rgb: {
+        r: 0,
+        g: 0,
+        b: 0
+    },
+    hsv: {
+        h: 0,
+        s: 0,
+        v: 0
+    }
+}
+
+let setearBalde = true;
 let baldeMaximoAlpha = true;
+let reflejarCanales = true;
+let modeloColorComparador = 'rgb'
 
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
         g: hexToRgb(document.getElementById('colorPrincipal').value).g,
         b: hexToRgb(document.getElementById('colorPrincipal').value).b,
-        a: Number(document.getElementById('opacidadPrincipal').value)
+        a: opacidadPrincipal
     }, {
         r: hexToRgb(document.getElementById('colorSecundario').value).r,
         g: hexToRgb(document.getElementById('colorSecundario').value).g,
         b: hexToRgb(document.getElementById('colorSecundario').value).b,
-        a: Number(document.getElementById('opacidadSecundaria').value)
+        a: opacidadSecundaria
     }];
     return rgba;
 }
 
 function obtenerTrazoActual(cordInicial) {
+    console.log({
+        trayectos: [],
+        puntoInicial: cordInicial,
+        rgba: obtenerColores(),
+        grosor: Number(grosor),
+        herramienta: nombreHerramienta,
+        sello: nombreSello,
+        continuidad,
+        modoDibujo,
+        separacion,
+
+        toleranciaCanal,
+        reflejarCanal,
+
+        setearBalde,
+        baldeMaximoAlpha,
+        modeloColorComparador,
+        reflejarCanales,
+    })
     const trazoGuardar = new trazo({
         trayectos: [],
         puntoInicial: cordInicial,
@@ -396,10 +465,14 @@ function obtenerTrazoActual(cordInicial) {
         continuidad,
         modoDibujo,
         separacion,
-        alphaEquivalente,
-        toleranciaAlpha,
-        toleranciaRGB,
-        setearBalde
+
+        toleranciaCanal,
+        reflejarCanal,
+
+        setearBalde,
+        baldeMaximoAlpha,
+        modeloColorComparador,
+        reflejarCanales,
     })
     return trazoGuardar;
 }

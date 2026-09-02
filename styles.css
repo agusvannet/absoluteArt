@@ -53,7 +53,7 @@ body {
 .seccionIzquierda {
     width: fit-content;
     height: fit-content;
-    background-color: darkblue;
+    background-color: rgb(133, 133, 255);
     position: absolute;
     bottom: 0;
     left: var(--padding);
@@ -63,10 +63,11 @@ body {
 }
 
 .configuracionLapizFondo {
-    height: 55vh;
-    width: fit-content;
+    height: fit-content;
+    width: 100%;
     display: flex;
-    gap: calc(var(--padding) / 2);
+    flex-direction: column;
+    gap: .6vh;
 }
 
 .seccionDerecha {
@@ -143,17 +144,16 @@ select {
 
 .rango {
     background-color: darkviolet;
-    width: 7.2vh;
-    height: 100%;
+    width: 100%;
+    padding: .4vh;
+    height: fit-content;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
-    gap: 4vh;
+    gap: 1vh;
 }
 
 .rango input {
-    transform: rotateZ(-90deg) translateY(-16.5vh);
-    width: 40vh;
+    width: 100%;
 }
 
 .representacionCapas {
@@ -415,12 +415,12 @@ select {
     background-color: var(--fondoCanvas);
 }
 
-.barraHerramientas button{
+.barraHerramientas button {
     height: 70%;
     padding-inline: 1.5vh;
 }
 
-.checkboxHerramienta{
+.checkboxHerramienta {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -430,52 +430,57 @@ select {
     padding: .3vh;
 
 }
-.checkboxHerramienta p{
-    width:11vh;
+
+.checkboxHerramienta p {
+    width: 11vh;
     font-size: 2vh;
     text-align: center;
 }
 
-.configuracionBalde{
+.configuracionBalde {
     background-color: violet;
-    height: 20vh;
+    height: fit-content;
     display: flex;
     flex-direction: column;
-    justify-content:start;
+    justify-content: start;
     align-items: center;
 }
 
-.slidersTolerancia{
+.slidersTolerancia {
     width: 100%;
 }
 
-.rojo{
+.rojo {
     background-color: rgb(255, 0, 0);
 }
-.verde{
+
+.verde {
     background-color: rgb(0, 255, 0);
 }
-.azul{
+
+.azul {
     background-color: rgb(0, 0, 255);
 }
-.gris{
+
+.gris {
     background-color: rgb(175, 175, 175);
 }
 
-.tolerancia{
+.tolerancia {
     display: flex;
-    justify-content: space-between
+    justify-content: space-between;
+    gap: 1vh;
 }
 
-.tolerancia input[type="range"]{
+.tolerancia input[type="range"] {
     width: 80%;
 }
 
-.tolerancia input[type="number"]{
-    width: 25%;
+.tolerancia input[type="number"] {
+    width: 6vh;
 }
 
-.inputsBalde{
+.inputsBalde {
     background-color: lightcoral;
     height: fit-content;
     width: 32.2vh;
@@ -485,7 +490,7 @@ select {
     flex-wrap: wrap;
 }
 
-.inputsBalde .opcion{
+.inputsBalde .opcion {
     display: flex;
     padding: 0.5vh;
     gap: 0.5vh;
@@ -494,4 +499,60 @@ select {
     width: fit-content;
     height: fit-content;
     background-color: red;
+}
+
+.degradado.h {
+    background: linear-gradient(to right, red, orange, yellow, green, cyan, blue, pink, red, red, red);
+}
+
+.degradado.compensacion.h {
+    background: linear-gradient(to right, rgba(255, 0, 0, 0.1), rgba(255, 166, 0, 0.225), rgba(255, 255, 0, 0.35), rgba(0, 128, 0, 0.475), rgba(0, 255, 255, 0.6), rgba(0, 0, 255, 0.85), rgba(255, 192, 203, 0.975), red, red, red);
+}
+
+.degradado.s {
+    background: linear-gradient(to right, black, red);
+}
+
+.degradado.compensacion.s {
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.75), red);
+}
+
+.degradado.s p {
+    color: white;
+}
+
+.degradado.v {
+    background: linear-gradient(to right, white, red);
+}
+
+.degradado.compensacion.v {
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.75), red);
+}
+
+.seleccionModeloColor {
+    padding: 1vh;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+}
+
+.seleccionModeloColor button {
+    width: 45%;
+    background-color: white;
+}
+
+.tolerancia.compensacion.gris {
+    background: linear-gradient(to right, white, black);
+}
+
+.tolerancia.compensacion.rojo {
+    background: linear-gradient(to right, white, red);
+}
+
+.tolerancia.compensacion.verde {
+    background: linear-gradient(to right, white, green);
+}
+
+.tolerancia.compensacion.azul {
+    background: linear-gradient(to right, white, blue);
 }

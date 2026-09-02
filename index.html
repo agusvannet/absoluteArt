@@ -101,79 +101,191 @@
     <section class="lienzo">
         <div class="seccionIzquierda">
 
+            <p>cosas lapiz o figura</p>
             <div class="configuracionLapizFondo">
-                <div class="rango">
+                <div class="tolerancia verde  ">
                     <p>grosor</p>
-                    <input type="range" name="" min="1" value="10" max="200" step="1" id="grosor"
-                        oninput="grosor = document.getElementById('grosor').value, document.getElementById('cartelGrosor').innerHTML = grosor">
-                    <p id="cartelGrosor">10</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberGrosor').value = this.value, grosor = Number(this.value)"
+                        value="10" id="rangeGrosor" min="1" max="300" step="1">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangeGrosor').value = this.value, grosor = Number(this.value)"
+                        value="10" id="numberGrosor" min="1" max="300" step="1">
                 </div>
 
-                <div class="rango">
+                <div class="tolerancia verde  ">
                     <p>opprin</p>
-                    <input type="range" name="" min="0" value="1" max="1" step="0.01" id="opacidadPrincipal"
-                        oninput="opacidadPrincipal = document.getElementById('opacidadPrincipal').value,
-                                                                                                         document.getElementById('cartelOpacPrin').innerHTML = opacidadPrincipal">
-                    <p id="cartelOpacPrin">1</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberOpacidadPrincipal').value = this.value, opacidadPrincipal = Number(this.value)"
+                        value="1" id="rangeOpacidadPrincipal" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangeOpacidadPrincipal').value = this.value, opacidadPrincipal = Number(this.value)"
+                        value="1" id="numberOpacidadPrincipal" min="0" max="1" step="0.01">
                 </div>
 
-                <div class="rango">
+                <div class="tolerancia verde  ">
                     <p>opsecu</p>
-                    <input type="range" name="" min="0" value="1" max="1" step="0.01" id="opacidadSecundaria" oninput="opacidadSecundaria = document.getElementById('opacidadSecundaria').value,
-                                 document.getElementById('cartelOpacSecu').innerHTML = opacidadSecundaria">
-                    <p id="cartelOpacSecu">1</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberOpacidadSecundaria').value = this.value, opacidadSecundaria = Number(this.value)"
+                        value="1" id="rangeOpacidadSecundaria" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangeOpacidadSecundaria').value = this.value, opacidadSecundaria = Number(this.value)"
+                        value="1" id="numberOpacidadSecundaria" min="0" max="1" step="0.01">
                 </div>
-
-                <div class="rango">
-                    <p>separac %</p>
-                    <input type="range" name="" min="0" value="1" max="5" step="0.01" id="separacion" oninput="separacion = document.getElementById('separacion').valueAsNumber,
-                                document.getElementById('cartelSepar').innerHTML = separacion">
-                    <p id="cartelSepar">1</p>
+                <div class="tolerancia verde  ">
+                    <p>sepa</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberSeparacionSello').value = this.value, separacion = Number(this.value)"
+                        value="1" id="rangueSeparacionSello" min="0" max="5" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangueSeparacionSello').value = this.value, separacion = Number(this.value)"
+                        value="1" id="numberSeparacionSello" min="0" max="5" step="0.01">
                 </div>
             </div>
 
             <div class="configuracionBalde">
+                <p>cosas del balde</p>
                 <div class="slidersTolerancia">
-                    <div class="tolerancia rojo">
+                    <div class="tolerancia rojo rgb">
+                        <p>TolR</p>
                         <input type="range" name=""
-                            oninput="document.getElementById('numberToleranciaR').value = this.value, toleranciaRGB.r = Number(this.value)"
+                            oninput="document.getElementById('numberToleranciaR').value = this.value, toleranciaCanal.rgb.r = Number(this.value)"
                             value="0" id="rangoToleranciaR" min="0" max="1" step="0.01">
                         <input type="number" name=""
-                            oninput="document.getElementById('rangoToleranciaR').value = this.value, toleranciaRGB.r = Number(this.value)"
+                            oninput="document.getElementById('rangoToleranciaR').value = this.value, toleranciaCanal.rgb.r = Number(this.value)"
                             value="0" id="numberToleranciaR" min="0" max="1" step="0.01">
                     </div>
 
-                    <div class="tolerancia verde">
+                    <div class="tolerancia rojo compensacion rgb">
+                        <p>comR</p>
                         <input type="range" name=""
-                            oninput="document.getElementById('numberToleranciaG').value = this.value, toleranciaRGB.g = Number(this.value)"
+                            oninput="document.getElementById('numberCompensacionR').value = this.value, reflejarCanal.rgb.r = Number(this.value)"
+                            value="0" id="rangoCompensacionR" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionR').value = this.value, reflejarCanal.rgb.r = Number(this.value)"
+                            value="0" id="numberCompensacionR" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia verde rgb">
+                        <p>TolG</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaG').value = this.value, toleranciaCanal.rgb.g = Number(this.value)"
                             value="0" id="rangoToleranciaG" min="0" max="1" step="0.01">
                         <input type="number" name=""
-                            oninput="document.getElementById('rangoToleranciaG').value = this.value, toleranciaRGB.g = Number(this.value)"
+                            oninput="document.getElementById('rangoToleranciaG').value = this.value, toleranciaCanal.rgb.g = Number(this.value)"
                             value="0" id="numberToleranciaG" min="0" max="1" step="0.01">
                     </div>
 
-                    <div class="tolerancia azul">
+                    <div class="tolerancia verde compensacion rgb">
+                        <p>comG</p>
                         <input type="range" name=""
-                            oninput="document.getElementById('numberToleranciaB').value = this.value, toleranciaRGB.b = Number(this.value)"
+                            oninput="document.getElementById('numberCompensacionG').value = this.value, reflejarCanal.rgb.g = Number(this.value)"
+                            value="0" id="rangoCompensacionG" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionG').value = this.value, reflejarCanal.rgb.g = Number(this.value)"
+                            value="0" id="numberCompensacionG" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia azul rgb">
+                        <p>TolB</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaB').value = this.value, toleranciaCanal.rgb.b = Number(this.value)"
                             value="0" id="rangoToleranciaB" min="0" max="1" step="0.01">
                         <input type="number" name=""
-                            oninput="document.getElementById('rangoToleranciaB').value = this.value, toleranciaRGB.b = Number(this.value)"
+                            oninput="document.getElementById('rangoToleranciaB').value = this.value, toleranciaCanal.rgb.b = Number(this.value)"
                             value="0" id="numberToleranciaB" min="0" max="1" step="0.01">
                     </div>
-                    <div class="tolerancia gris">
+
+                    <div class="tolerancia azul compensacion rgb">
+                        <p>comB</p>
                         <input type="range" name=""
-                            oninput="document.getElementById('numberToleranciaA').value = this.value, toleranciaAlpha = Number(this.value) "
+                            oninput="document.getElementById('numberCompensacionB').value = this.value, reflejarCanal.rgb.b = Number(this.value)"
+                            value="0" id="rangoCompensacionB" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionB').value = this.value, reflejarCanal.rgb.b = Number(this.value)"
+                            value="0" id="numberCompensacionB" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia degradado h hsv" style="display: none;">
+                        <p>TolH</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaH').value = this.value, toleranciaCanal.hsv.h = Number(this.value)"
+                            value="0" id="rangoToleranciaH" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaH').value = this.value, toleranciaCanal.hsv.h = Number(this.value)"
+                            value="0" id="numberToleranciaH" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="tolerancia degradado h hsv compensacion" style="display: none;">
+                        <p>comH</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberCompensacionH').value = this.value, reflejarCanal.hsv.h = Number(this.value)"
+                            value="0" id="rangoCompensacionH" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionH').value = this.value, reflejarCanal.hsv.h = Number(this.value)"
+                            value="0" id="numberCompensacionH" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia degradado s hsv" style="display: none;">
+                        <p>TolS</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaS').value = this.value, toleranciaCanal.hsv.s = Number(this.value)"
+                            value="0" id="rangoToleranciaS" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaS').value = this.value, toleranciaCanal.hsv.s = Number(this.value)"
+                            value="0" id="numberToleranciaS" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="tolerancia degradado s hsv compensacion" style="display: none;">
+                        <p>comS</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberCompensacionS').value = this.value, reflejarCanal.hsv.s = Number(this.value)"
+                            value="0" id="rangoCompensacionS" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionS').value = this.value, reflejarCanal.hsv.s = Number(this.value)"
+                            value="0" id="numberCompensacionS" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia degradado v hsv" style="display: none;">
+                        <p>TolV</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaV').value = this.value, toleranciaCanal.hsv.v = Number(this.value)"
+                            value="0" id="rangoToleranciaV" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoToleranciaV').value = this.value, toleranciaCanal.hsv.v = Number(this.value)"
+                            value="0" id="numberToleranciaV" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia degradado v hsv compensacion" style="display: none;">
+                        <p>comV</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberCompensacionV').value = this.value, reflejarCanal.hsv.v = Number(this.value)"
+                            value="0" id="rangoCompensacionV" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionV').value = this.value, reflejarCanal.hsv.v = Number(this.value)"
+                            value="0" id="numberCompensacionV" min="0" max="1" step="0.01">
+                    </div>
+
+
+                    <div class="tolerancia gris">
+                        <p>TolA</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberToleranciaA').value = this.value, toleranciaCanal.alpha = Number(this.value) "
                             value="0" id="rangoToleranciaA" min="0" max="1" step="0.01">
                         <input type="number" name=""
-                            oninput="document.getElementById('rangoToleranciaA').value = this.value , toleranciaAlpha = Number(this.value) "
+                            oninput="document.getElementById('rangoToleranciaA').value = this.value , toleranciaCanal.alpha = Number(this.value) "
                             value="0" id="numberToleranciaA" min="0" max="1" step="0.01">
+                    </div>
+
+                    <div class="tolerancia compensacion gris">
+                        <p>compA</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberCompensacionA').value = this.value, reflejarCanal.alpha = Number(this.value) "
+                            value="0" id="rangoCompensacionA" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoCompensacionA').value = this.value , reflejarCanal.alpha = Number(this.value) "
+                            value="0" id="numberCompensacionA" min="0" max="1" step="0.01">
                     </div>
                 </div>
                 <div class="inputsBalde">
-                    <div class="opcion">
-                        <p>alpha Equivalente</p>
-                        <input type="checkbox"  name="" id="alphaEquivalente" oninput="alphaEquivalente = this.checked">
-                    </div>
                     <div class="opcion">
                         <p>setear</p>
                         <input type="checkbox" checked name="" id="setearBalde" oninput="setearBalde = this.checked">
@@ -182,8 +294,18 @@
                         <p>baldeMaximoAlpha</p>
                         <input type="checkbox" checked name="" oninput="baldeMaximoAlpha = this.checked">
                     </div>
+                    <div class="opcion">
+                        <p>reflejarCanales</p>
+                        <input type="checkbox" checked name="" oninput="reflejarCanales = this.checked">
+                    </div>
 
 
+                </div>
+                <div class="seleccionModeloColor">
+                    <button id="botonRGB" type="button" style="background-color: green;" onclick="mostrarRgb(this)
+                        ">RGB</button>
+                    <button id="botonHSV" type="button" onclick="mostrarHsv(this)
+                        ">HSV</button>
                 </div>
             </div>
         </div>
