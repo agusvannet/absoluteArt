@@ -57,13 +57,13 @@
             <button type="button" id="recuperarTrazo" onclick="recuperarTrazo()">adeltante</button>
         </div>
         <div class="barraHerramientas">
-            <select id="sellos">
+            <select id="sellos" onchange=" nombreSello = this.value ; console.log(' deberia cambiaaaar')">
             </select>
 
-            <select id="herramientas">
+            <select id="herramientas" onchange="  nombreHerramienta = this.value ; console.log(' deberia cambiaaaar')">
             </select>
 
-            <select id="modoDibujoHerramienta">
+            <select id="modoDibujoHerramienta" onchange=" modoDibujo = this.value ; console.log(' deberia cambiaaaar')">
             </select>
 
             <button type="button" onclick=" nombreHerramienta = document.getElementById('herramientas').value ;
