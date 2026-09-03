@@ -38,14 +38,7 @@
                 </div>
 
             </div>
-            <div class="variableCapa">
-                <p>cordenadaX : </p>
-                <input type="number" name="" id="capaCordenadaX" value="0" step="1">
-            </div>
-            <div class="variableCapa">
-                <p>cordenadaY : </p>
-                <input type="number" name="" id="capaCordenadaY" value="0" step="1">
-            </div>
+
 
         </div>
 
@@ -75,8 +68,7 @@
 
             <button type="button" onclick=" nombreHerramienta = document.getElementById('herramientas').value ;
                                             nombreSello = document.getElementById('sellos').value ; modoDibujo
-                                            modoDibujo = document.getElementById('modoDibujoHerramienta').value ;
-                                            continuidad = document.getElementById('continuidadCheckBox').checked">
+                                            modoDibujo = document.getElementById('modoDibujoHerramienta').value ">
                 seleccionar herramienta</button>
 
             <div class="color">
@@ -137,14 +129,10 @@
                         value="1" id="numberSeparacionSello" min="0" max="5" step="0.01">
                 </div>
                 <div class="inputsLapizFigura inputsBalde">
-
                     <div class="opcion">
                         <p>continuidad</p>
                         <input type="checkbox" name="" oninput="continuidad = this.checked">
                     </div>
-
-                    
-
 
                 </div>
             </div>
@@ -163,7 +151,7 @@
                     </div>
 
                     <div class="tolerancia rojo compensacion rgb">
-                        <p>comR</p>
+                        <p>RefR</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionR').value = this.value, reflejarCanal.rgb.r = Number(this.value)"
                             value="0" id="rangoCompensacionR" min="0" max="1" step="0.01">
@@ -183,7 +171,7 @@
                     </div>
 
                     <div class="tolerancia verde compensacion rgb">
-                        <p>comG</p>
+                        <p>RefG</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionG').value = this.value, reflejarCanal.rgb.g = Number(this.value)"
                             value="0" id="rangoCompensacionG" min="0" max="1" step="0.01">
@@ -203,7 +191,7 @@
                     </div>
 
                     <div class="tolerancia azul compensacion rgb">
-                        <p>comB</p>
+                        <p>RefB</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionB').value = this.value, reflejarCanal.rgb.b = Number(this.value)"
                             value="0" id="rangoCompensacionB" min="0" max="1" step="0.01">
@@ -222,7 +210,7 @@
                             value="0" id="numberToleranciaH" min="0" max="1" step="0.01">
                     </div>
                     <div class="tolerancia degradado h hsv compensacion" style="display: none;">
-                        <p>comH</p>
+                        <p>RefH</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionH').value = this.value, reflejarCanal.hsv.h = Number(this.value)"
                             value="0" id="rangoCompensacionH" min="0" max="1" step="0.01">
@@ -231,7 +219,7 @@
                             value="0" id="numberCompensacionH" min="0" max="1" step="0.01">
                     </div>
 
-                    <div class="tolerancia degradado s hsv" style="display: none;">
+                    <div class="tolerancia degradado v hsv" style="display: none;">
                         <p>TolS</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberToleranciaS').value = this.value, toleranciaCanal.hsv.s = Number(this.value)"
@@ -240,8 +228,8 @@
                             oninput="document.getElementById('rangoToleranciaS').value = this.value, toleranciaCanal.hsv.s = Number(this.value)"
                             value="0" id="numberToleranciaS" min="0" max="1" step="0.01">
                     </div>
-                    <div class="tolerancia degradado s hsv compensacion" style="display: none;">
-                        <p>comS</p>
+                    <div class="tolerancia degradado v hsv compensacion" style="display: none;">
+                        <p>RefS</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionS').value = this.value, reflejarCanal.hsv.s = Number(this.value)"
                             value="0" id="rangoCompensacionS" min="0" max="1" step="0.01">
@@ -250,7 +238,7 @@
                             value="0" id="numberCompensacionS" min="0" max="1" step="0.01">
                     </div>
 
-                    <div class="tolerancia degradado v hsv" style="display: none;">
+                    <div class="tolerancia degradado s hsv" style="display: none;">
                         <p>TolV</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberToleranciaV').value = this.value, toleranciaCanal.hsv.v = Number(this.value)"
@@ -260,8 +248,8 @@
                             value="0" id="numberToleranciaV" min="0" max="1" step="0.01">
                     </div>
 
-                    <div class="tolerancia degradado v hsv compensacion" style="display: none;">
-                        <p>comV</p>
+                    <div class="tolerancia degradado s hsv compensacion" style="display: none;">
+                        <p>RefV</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionV').value = this.value, reflejarCanal.hsv.v = Number(this.value)"
                             value="0" id="rangoCompensacionV" min="0" max="1" step="0.01">
@@ -295,10 +283,6 @@
                     <div class="opcion">
                         <p>setear</p>
                         <input type="checkbox" checked name="" id="setearBalde" oninput="setearBalde = this.checked">
-                    </div>
-                    <div class="opcion">
-                        <p>baldeMaximoAlpha</p>
-                        <input type="checkbox" checked name="" oninput="baldeMaximoAlpha = this.checked">
                     </div>
                     <div class="opcion">
                         <p>reflejarCanales</p>

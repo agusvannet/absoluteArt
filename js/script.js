@@ -416,7 +416,6 @@ let reflejarCanal = {
 }
 
 let setearBalde = true;
-let baldeMaximoAlpha = true;
 let reflejarCanales = true;
 let modeloColorComparador = 'rgb'
 
@@ -436,25 +435,6 @@ function obtenerColores() {
 }
 
 function obtenerTrazoActual(cordInicial) {
-    console.log({
-        trayectos: [],
-        puntoInicial: cordInicial,
-        rgba: obtenerColores(),
-        grosor: Number(grosor),
-        herramienta: nombreHerramienta,
-        sello: nombreSello,
-        continuidad,
-        modoDibujo,
-        separacion,
-
-        toleranciaCanal,
-        reflejarCanal,
-
-        setearBalde,
-        baldeMaximoAlpha,
-        modeloColorComparador,
-        reflejarCanales,
-    })
     const trazoGuardar = new trazo({
         trayectos: [],
         puntoInicial: cordInicial,
@@ -470,7 +450,6 @@ function obtenerTrazoActual(cordInicial) {
         reflejarCanal,
 
         setearBalde,
-        baldeMaximoAlpha,
         modeloColorComparador,
         reflejarCanales,
     })

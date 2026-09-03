@@ -285,25 +285,48 @@ class compararPixelHsv extends comparadorPixel {
     }
 
     obtenerComparador(pixelBase) {
+        const pixelHvsBase = utiles.colorRgbHvs({
+            r: pixelBase.r,
+            g: pixelBase.g,
+            b: pixelBase.b,
+        })
         let hTolerado = 360 * this.toleranciaH;
         let sTolerado = 100 * this.toleranciaS;
         let vTolerado = 100 * this.toleranciaV;
         let aTolerado = 255 * this.toleranciaA;
 
-        let maximoR = pixelBase.r + rTolerado
-        let maximoG = pixelBase.g + gTolerado
-        let maximoB = pixelBase.b + bTolerado
+        let maximoH = pixelHvsBase.h + hTolerado
+        let maximoS = pixelHvsBase.s + sTolerado
+        let maximoV = pixelHvsBase.v + vTolerado
         let maximoA = pixelBase.a + aTolerado
 
-        let minimoR = pixelBase.r - rTolerado
-        let minimoG = pixelBase.g - gTolerado
-        let minimoB = pixelBase.b - bTolerado
+        let minimoH = pixelHvsBase.h - hTolerado
+        let minimoS = pixelHvsBase.s - sTolerado
+        let minimoV = pixelHvsBase.v - vTolerado
         let minimoA = pixelBase.a - aTolerado
 
         return (r, g, b, a) => {
-            return (minimoR <= r && r <= maximoR) &&
-                (minimoG <= g && g <= maximoG) &&
-                (minimoB <= b && b <= maximoB) &&
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const v = max / 255;
+            const s = max === 0 ? 0 : (max - min) / max;
+            const delta = max - min;
+            let h = 0;
+            if (delta !== 0) {
+                if (max === r) {
+                    h = 60 * ((g - b) / delta);
+                } else if (max === g) {
+                    h = 120 + 60 * ((b - r) / delta);
+                } else {
+                    h = 240 + 60 * ((r - g) / delta);
+                }
+                if (h < 0) {
+                    h += 360;
+                }
+            }
+            return (minimoH <= h && h <= maximoH) &&
+                (minimoS <= s && s <= maximoS) &&
+                (minimoV <= v && v <= maximoV) &&
                 (minimoA <= a && a <= maximoA)
         }
     }
@@ -1701,7 +1724,6 @@ class baldeSimple extends herramienta {
             }
         }
 
-
         if (trazo.setearBalde) {
             for (const color of coloresMancha) {
                 for (const tramo of manchaClickeada.mancha[color]) {
@@ -1722,7 +1744,6 @@ class baldeSimple extends herramienta {
         });
 
         console.log(manchaClickeada)
-
     }
 
     trazoEnProceso() {
@@ -1748,7 +1769,6 @@ class trazo {
         toleranciaCanal,
         reflejarCanal,
         setearBalde,
-        baldeMaximoAlpha,
         modeloColorComparador,
         reflejarCanales,
     }) { // le puedo agregar cosas pero por ahora va este 
@@ -1788,7 +1808,6 @@ class trazo {
             }
         },
             this.setearBalde = setearBalde;
-        this.baldeMaximoAlpha = baldeMaximoAlpha;
         this.modeloColorComparador = modeloColorComparador;
         this.reflejarCanales = reflejarCanales;
     }
@@ -1921,7 +1940,6 @@ class trazo {
             },
 
             setearBalde: this.setearBalde,
-            baldeMaximoAlpha: this.baldeMaximoAlpha,
             modeloColorComparador: this.modeloColorComparador,
             reflejarCanales: this.reflejarCanales
 
@@ -2438,6 +2456,22 @@ const pintor = {
                 { x: 1, y: 1 }],
                 [{ x: 1, y: 0 },
                 { x: 0, y: 1 }]])),
+
+            this.agregarHerramienta(new figuraSellos('letraASello', this.obtenerCategoria('figuras'),
+                [[{ x: 0, y: 1 },
+                { x: 0.5, y: 0 },
+                { x: 1, y: 1 }],
+                [{ x: 0.19, y: 0.62 },
+                { x: 0.81, y: 0.62 }]])),
+            this.agregarHerramienta(new figuraSellos('letraNSello', this.obtenerCategoria('figuras'),
+                [[{ x: 0, y: 1 },
+                { x: 0, y: 0 },
+                { x: 1, y: 1 },
+                { x: 1, y: 0 },],])),
+            this.agregarHerramienta(new figuraSellos('letraLSello', this.obtenerCategoria('figuras'),
+                [[{ x: 0, y: 0 },
+                { x: 0, y: 1 },
+                { x: 1, y: 1 }],])),
             this.agregarHerramienta(new figuraSellos('trianguloSellos', this.obtenerCategoria('figuras'),
                 [[{ x: 0, y: 1 },
                 { x: 1, y: 1 },
@@ -2449,6 +2483,12 @@ const pintor = {
                 { x: 1, y: 1 },
                 { x: 1, y: 0 },
                 { x: 0, y: 0 },]])),
+            this.agregarHerramienta(new figuraSellos('romboSello', this.obtenerCategoria('figuras'),
+                [[{ x: 0.5, y: 0 },
+                { x: 1, y: 0.5 },
+                { x: 0.5, y: 1 },
+                { x: 0, y: 0.5 },
+                { x: 0.5, y: 0 },]])),
             this.agregarHerramienta(new figuraSellos('pentagonoSello', this.obtenerCategoria('figuras'),
                 [[{ x: 0.8, y: 1 },
                 { x: 0.2, y: 1 },
@@ -2683,7 +2723,6 @@ const utiles = {
             } else if (max === g) {
                 h = 120 + 60 * ((b - r) / delta);
             } else {
-                // max === b
                 h = 240 + 60 * ((r - g) / delta);
             }
             if (h < 0) {
