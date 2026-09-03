@@ -2456,7 +2456,6 @@ const pintor = {
                 { x: 1, y: 1 }],
                 [{ x: 1, y: 0 },
                 { x: 0, y: 1 }]])),
-
             this.agregarHerramienta(new figuraSellos('letraASello', this.obtenerCategoria('figuras'),
                 [[{ x: 0, y: 1 },
                 { x: 0.5, y: 0 },
