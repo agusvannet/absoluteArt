@@ -59,23 +59,19 @@ function abrirConfiguracionCapa() {
     }
 
     actualizarSelectorCapaPadre();
+    actualizarSelectorModoFusion();
 
     if (capaActual.tipoCapa === 'grupo') {
         document.getElementById('letreroCapaEditabilidad').parentElement.style.display = 'none'
         if (capaActual.id === 0) {
             document.getElementById('letreroCapaPadre').parentElement.style.display = 'none'
-            document.getElementById('capaCordenadaX').parentElement.style.display = 'none'
-            document.getElementById('capaCordenadaY').parentElement.style.display = 'none'
+
         } else {
             document.getElementById('letreroCapaPadre').parentElement.style.display = 'flex'
-            document.getElementById('capaCordenadaX').parentElement.style.display = 'flex';
-            document.getElementById('capaCordenadaY').parentElement.style.display = 'flex';
         }
     } else {
         document.getElementById('letreroCapaEditabilidad').parentElement.style.display = 'flex'
         document.getElementById('letreroCapaPadre').parentElement.style.display = 'flex'
-        document.getElementById('capaCordenadaX').parentElement.style.display = 'flex'
-        document.getElementById('capaCordenadaY').parentElement.style.display = 'flex';
     }
 
 
@@ -323,10 +319,33 @@ function actualizarSelectorCapaPadre() {
                 </option>
                 `);
         }
+    }
+}
 
-
+function actualizarSelectorModoFusion() {
+    const select = document.getElementById('selectorModoFusion')
+    for (const borrar of select.querySelectorAll('option')) {
+        borrar.remove();
     }
 
+    const modosPegado = Object.keys(capaActual.lienzo.modosPegado)
+    for (const modo of modosPegado) {
+        console.log(capaActual.modoFusion , ' ', modo)
+        if (capaActual.modoFusion !== modo) {
+            select.insertAdjacentHTML('afterbegin', `
+                    <option value="${modo}">
+                        ${modo}
+                    </option>
+                `);
+        } else {
+            console.log(" e?")
+            select.insertAdjacentHTML('afterbegin', `
+                    <option value="${modo}" disabled selected>
+                        ${modo}
+                    </option>
+                `);
+        }
+    }
 }
 
 function cambiarCapaGrupo() {
@@ -334,6 +353,11 @@ function cambiarCapaGrupo() {
     mesaTrabajo.capas.moverCapaDeGrupo(capaActual, nuevaCapaPadre)
     agregarContenidoGrupo(mesaTrabajo.capas)
     seleccionarCapa(capaActual.id, capaActual.tipoCapa)
+}
+
+function cambiarModoFusion() {
+    const nuevoModoFusion = document.getElementById('selectorModoFusion').value
+    capaActual.cambiarModoFusion(nuevoModoFusion)
 }
 
 function mostrarHsv(elemento) {
@@ -533,7 +557,7 @@ function llenarElCanvasHSVcompleto(idCapa) {
     mesaTrabajo.capas.preRenderizar()
     console.log(canvas)
     mesaTrabajo.capas.renderizar(canvasLienzo)
-    
+
     console.log(`✓ Grid de prueba inyectado (${ANCHO}x${ALTO}): Hue doble en X, Saturación en mitad superior y Brillo en mitad inferior.`);
 
 }

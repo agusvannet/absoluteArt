@@ -449,7 +449,7 @@ class lienzoBase {
         this.largo = largo;
         this.alto = alto;
         this.id = id;
-        this.tipo = tipo
+        this.tipo = tipo;
     }
 
     obtenerBuffer() {
@@ -622,6 +622,7 @@ class lienzoBase {
         };
     }
 
+
 }
 class lienzoHtml extends lienzoBase {
     constructor({ largo, alto, canvas, muchaLectura, id, tipo }) {
@@ -639,7 +640,7 @@ class lienzoHtml extends lienzoBase {
         this.canvas.width = this.largo
         this.canvas.height = this.alto
     }
-    modosPegado = {
+    modosPegado = { // por anda del mundo agregar source-in
         normal: 'source-over',
         borrar: 'destination-out',
         multiplicar: 'multiply',
@@ -647,6 +648,7 @@ class lienzoHtml extends lienzoBase {
         iluminar: 'lighter',
         aclarar: 'lighten',
         diferencia: 'difference',
+        recortar: 'source-atop',
     }
 
     pegarLienzo({ lienzo, x, y, alpha, modoPegado }) { // pegar en ESTE lienzo
@@ -833,10 +835,11 @@ class lienzoHtml extends lienzoBase {
     }
 }
 class capaBase {
-    constructor(capaPadre, idCapa, lienzo) {
+    constructor(capaPadre, idCapa, lienzo, modoFusion = 'normal') {
         this.lienzo = lienzo
         this.id = idCapa
         this.capaPadre = capaPadre;
+        this.modoFusion = modoFusion;
     }
     x = 0;
     y = 0;
@@ -844,17 +847,24 @@ class capaBase {
     opacidad = 1;
     renderizar(lienzo) {
         if (!this.visible || this.opacidad === 0) return
-        lienzo.pegarLienzo({ lienzo: this.lienzo, x: this.x, y: this.y, alpha: this.opacidad })
+        lienzo.pegarLienzo({ lienzo: this.lienzo, x: this.x, y: this.y, alpha: this.opacidad, modoPegado: this.modoFusion })
     }
 
     cambiarOpacidad(nuevaOpacidad) {
         this.opacidad = nuevaOpacidad
         if (this.capaPadre) this.capaPadre.preRenderizar();
     }
+    cambiarModoFusion(nuevoModoFusion) {
+        if (this.lienzo.modosPegado[nuevoModoFusion] !== undefined)
+            this.modoFusion = nuevoModoFusion
+        else
+            this.modoFusion = 'normal'
+
+    }
 }
 class grupoCapas extends capaBase {
-    constructor({ capaPadre, idCapa, lienzo }) {
-        super(capaPadre, idCapa, lienzo)
+    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal' }) {
+        super(capaPadre, idCapa, lienzo, modoFusion)
         this.nombre = 'grupo ' + idCapa
     }
     tipoCapa = 'grupo';
@@ -1023,8 +1033,8 @@ class grupoCapas extends capaBase {
 
 }
 class capa extends capaBase {
-    constructor({ capaPadre, idCapa, lienzo, frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial }) {
-        super(capaPadre, idCapa, lienzo)
+    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal', frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial }) {
+        super(capaPadre, idCapa, lienzo, modoFusion)
         this.historial = new historial(
             frecuenciaCapturas,
             trayectoMuyLargo,
