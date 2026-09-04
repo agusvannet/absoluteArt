@@ -57,19 +57,16 @@
             <button type="button" id="recuperarTrazo" onclick="recuperarTrazo()">adeltante</button>
         </div>
         <div class="barraHerramientas">
-            <select id="sellos" onchange=" nombreSello = this.value ; console.log(' deberia cambiaaaar')">
+            <select id="sellos" onchange=" nombreSello = this.value ">
             </select>
 
-            <select id="herramientas" onchange="  nombreHerramienta = this.value ; console.log(' deberia cambiaaaar')">
+            <select id="herramientas" onchange="  nombreHerramienta = this.value ">
             </select>
 
-            <select id="modoDibujoHerramienta" onchange=" modoDibujo = this.value ; console.log(' deberia cambiaaaar')">
+            <select id="modoDibujoHerramienta" onchange=" modoDibujo = this.value ">
             </select>
 
-            <button type="button" onclick=" nombreHerramienta = document.getElementById('herramientas').value ;
-                                            nombreSello = document.getElementById('sellos').value ; modoDibujo
-                                            modoDibujo = document.getElementById('modoDibujoHerramienta').value ">
-                seleccionar herramienta</button>
+
 
             <div class="color">
                 <p>colorPrincipal</p>
@@ -204,19 +201,19 @@
                         <p>TolH</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberToleranciaH').value = this.value, toleranciaCanal.hsv.h = Number(this.value)"
-                            value="0" id="rangoToleranciaH" min="0" max="1" step="0.01">
+                            value="0" id="rangoToleranciaH" min="0" max="360" step="1">
                         <input type="number" name=""
                             oninput="document.getElementById('rangoToleranciaH').value = this.value, toleranciaCanal.hsv.h = Number(this.value)"
-                            value="0" id="numberToleranciaH" min="0" max="1" step="0.01">
+                            value="0" id="numberToleranciaH" min="0" max="360" step="1">
                     </div>
                     <div class="tolerancia degradado h hsv compensacion" style="display: none;">
                         <p>RefH</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionH').value = this.value, reflejarCanal.hsv.h = Number(this.value)"
-                            value="0" id="rangoCompensacionH" min="0" max="1" step="0.01">
+                            value="0" id="rangoCompensacionH" min="0" max="1" step="0.00277777778">
                         <input type="number" name=""
                             oninput="document.getElementById('rangoCompensacionH').value = this.value, reflejarCanal.hsv.h = Number(this.value)"
-                            value="0" id="numberCompensacionH" min="0" max="1" step="0.01">
+                            value="0" id="numberCompensacionH" min="0" max="1" step="0.00277777778">
                     </div>
 
                     <div class="tolerancia degradado v hsv" style="display: none;">
@@ -286,10 +283,12 @@
                     </div>
                     <div class="opcion">
                         <p>reflejarCanales</p>
-                        <input type="checkbox" checked name="" oninput="reflejarCanales = this.checked">
+                        <input type="checkbox" name="" oninput="reflejarCanales = this.checked">
                     </div>
 
-
+                    <button type="button" onclick="llenarElCanvasHSVcompleto()">
+                        colTes
+                    </button>
                 </div>
                 <div class="seleccionModeloColor">
                     <button id="botonRGB" type="button" style="background-color: green;" onclick="mostrarRgb(this)

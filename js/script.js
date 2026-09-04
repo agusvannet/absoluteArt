@@ -5,7 +5,7 @@ const canvasDom = document.getElementById("canvasPrincipal");
 canvasDom.width = mesaTrabajo.confCapas.largoLienzo
 canvasDom.height = mesaTrabajo.confCapas.altoLienzo
 const canvas = lienzos.obtener({ largo: canvasDom.width, alto: canvasDom.height, canvas: canvasDom })
-
+const canvasLienzo = canvas
 
 const canvasInfo = canvasDom.getBoundingClientRect();
 
@@ -416,7 +416,7 @@ let reflejarCanal = {
 }
 
 let setearBalde = true;
-let reflejarCanales = true;
+let reflejarCanales = false;
 let modeloColorComparador = 'rgb'
 
 function obtenerColores() {
@@ -454,6 +454,88 @@ function obtenerTrazoActual(cordInicial) {
         reflejarCanales,
     })
     return trazoGuardar;
+}
+
+function llenarElCanvasHSVcompleto(idCapa) {
+    const capa = mesaTrabajo.capas.contenido[0].lienzo;
+    const canvas = capa.canvas;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    const ANCHO = canvas.width;
+    const ALTO = canvas.height;
+    const MITAD_ALTO = (ALTO / 2) | 0;
+
+    const imgData = ctx.createImageData(ANCHO, ALTO);
+    const data = imgData.data;
+
+    // Conversión HSV completo (H: 0-1, S: 0-1, V: 0-1) a RGB [0-255]
+    function hsvToRgb(h, s, v) {
+        const c = v * s;
+        const hp = (h * 6) % 6;
+        const x = c * (1 - Math.abs((hp % 2) - 1));
+        const m = v - c;
+
+        let r = 0, g = 0, b = 0;
+        if (hp < 1) { r = c; g = x; }
+        else if (hp < 2) { r = x; g = c; }
+        else if (hp < 3) { g = c; b = x; }
+        else if (hp < 4) { g = x; b = c; }
+        else if (hp < 5) { r = x; b = c; }
+        else { r = c; b = x; }
+
+        return [
+            ((r + m) * 255) | 0,
+            ((g + m) * 255) | 0,
+            ((b + m) * 255) | 0
+        ];
+    }
+
+    // Precalculamos los valores de H para cada columna (2 ciclos)
+    const hues = new Float32Array(ANCHO);
+    for (let x = 0; x < ANCHO; x++) {
+        hues[x] = ((x / ANCHO) * 2) % 1;
+    }
+
+    // Llenamos el buffer
+    for (let y = 0; y < ALTO; y++) {
+        const offsetFila = y * ANCHO * 4;
+
+        let s, v;
+        if (y < MITAD_ALTO) {
+            // Mitad superior: S varía de 0.0 (arriba) a 1.0 (medio), V fijo en 1.0
+            s = y / MITAD_ALTO;
+            v = 1.0;
+        } else {
+            // Mitad inferior: S fija en 1.0, V varía de 1.0 (medio) a 0.0 (fondo)
+            s = 1.0;
+            v = 1.0 - ((y - MITAD_ALTO) / (ALTO - MITAD_ALTO));
+        }
+
+        for (let x = 0; x < ANCHO; x++) {
+            const [r, g, b] = hsvToRgb(hues[x], s, v);
+            const idx = offsetFila + (x * 4);
+
+            data[idx] = r;
+            data[idx + 1] = g;
+            data[idx + 2] = b;
+            data[idx + 3] = 255;
+        }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+
+    if (capa.buffer) {
+        capa.buffer.set(new Uint32Array(imgData.data.buffer));
+    }
+
+    if (typeof mesaTrabajo.render === 'function') mesaTrabajo.render();
+    else if (typeof mesaTrabajo.dibujar === 'function') mesaTrabajo.dibujar();
+    mesaTrabajo.capas.preRenderizar()
+    console.log(canvas)
+    mesaTrabajo.capas.renderizar(canvasLienzo)
+    
+    console.log(`✓ Grid de prueba inyectado (${ANCHO}x${ALTO}): Hue doble en X, Saturación en mitad superior y Brillo en mitad inferior.`);
+
 }
 
 document.getElementById('cerrarConfCapa').click()

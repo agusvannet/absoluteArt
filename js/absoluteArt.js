@@ -222,8 +222,10 @@ class grupoManchas {
 }
 
 class comparadorPixel {
-    constructor({ toleranciaA = 0 }) {
+    constructor({ toleranciaA = 0, nivelReflejoAlpha = 0 }) {
         this.toleranciaA = toleranciaA;
+        this.nivelReflejoAlpha = nivelReflejoAlpha;
+
     }
     obtenerComparador(pixelBase) {
     }
@@ -237,11 +239,16 @@ class comparadorPixel {
 }
 
 class comparadorPixelRGBA extends comparadorPixel {
-    constructor({ toleranciaR = 0, toleranciaG = 0, toleranciaB = 0, toleranciaA = 0 }) {
-        super({ toleranciaA })
+    constructor({ toleranciaR = 0, toleranciaG = 0, toleranciaB = 0, toleranciaA = 0,
+        nivelReflejoR = 0, nivelReflejoG = 0, nivelReflejoB = 0, nivelReflejoAlpha = 0
+    }) {
+        super({ toleranciaA, nivelReflejoAlpha })
         this.toleranciaR = toleranciaR;
         this.toleranciaG = toleranciaG;
         this.toleranciaB = toleranciaB;
+        this.nivelReflejoR = nivelReflejoR;
+        this.nivelReflejoG = nivelReflejoG;
+        this.nivelReflejoB = nivelReflejoB;
     }
     obtenerComparador(pixelBase) {
         let rTolerado = 255 * this.toleranciaR;
@@ -266,22 +273,29 @@ class comparadorPixelRGBA extends comparadorPixel {
                 (minimoA <= a && a <= maximoA)
         }
     }
-    obtenerEquivalenciaCanales({ canalesBase, canalesModificar, nivelRefjelo }) {
-        return {
-            r: (canalesBase.r * nivelRefjelo.rgb.r) + (canalesModificar.r * (1 - nivelRefjelo.rgb.r)),
-            g: (canalesBase.g * nivelRefjelo.rgb.g) + (canalesModificar.g * (1 - nivelRefjelo.rgb.g)),
-            b: (canalesBase.b * nivelRefjelo.rgb.b) + (canalesModificar.b * (1 - nivelRefjelo.rgb.b)),
-            alpha: (canalesBase.alpha * nivelRefjelo.alpha) + (canalesModificar.alpha * (1 - nivelRefjelo.alpha)),
+    obtenerEquivalenciaCanales(canalesBase) {
+
+        return (canalesModificar) => {
+            return {
+                r: (canalesBase.r * (1 - this.nivelReflejoR)) + (canalesModificar.r * this.nivelReflejoR),
+                g: (canalesBase.g * (1 - this.nivelReflejoG)) + (canalesModificar.g * this.nivelReflejoG),
+                b: (canalesBase.b * (1 - this.nivelReflejoB)) + (canalesModificar.b * this.nivelReflejoB),
+                alpha: (canalesBase.alpha * (1 - this.nivelReflejoAlpha)) + (canalesModificar.alpha * (this.nivelReflejoAlpha)),
+            }
         }
     }
 }
 
 class compararPixelHsv extends comparadorPixel {
-    constructor({ toleranciaH = 0, toleranciaS = 0, toleranciaV = 0, toleranciaA = 0 }) {
-        super({ toleranciaA })
+    constructor({ toleranciaH = 0, toleranciaS = 0, toleranciaV = 0, toleranciaA = 0,
+        nivelReflejoH = 0, nivelReflejoV = 0, nivelReflejoS = 0, nivelReflejoAlpha = 0 }) {
+        super({ toleranciaA, nivelReflejoAlpha })
         this.toleranciaH = toleranciaH;
         this.toleranciaS = toleranciaS;
         this.toleranciaV = toleranciaV;
+        this.nivelReflejoH = nivelReflejoH;
+        this.nivelReflejoS = nivelReflejoS;
+        this.nivelReflejoV = nivelReflejoV;
     }
 
     obtenerComparador(pixelBase) {
@@ -290,9 +304,9 @@ class compararPixelHsv extends comparadorPixel {
             g: pixelBase.g,
             b: pixelBase.b,
         })
-        let hTolerado = 360 * this.toleranciaH;
-        let sTolerado = 100 * this.toleranciaS;
-        let vTolerado = 100 * this.toleranciaV;
+        let hTolerado = this.toleranciaH;
+        let sTolerado = this.toleranciaS;
+        let vTolerado = this.toleranciaV;
         let aTolerado = 255 * this.toleranciaA;
 
         let maximoH = pixelHvsBase.h + hTolerado
@@ -305,11 +319,14 @@ class compararPixelHsv extends comparadorPixel {
         let minimoV = pixelHvsBase.v - vTolerado
         let minimoA = pixelBase.a - aTolerado
 
+        let reboteInferiorH = (maximoH > 360) ? maximoH - 360 : 0
+        let reboteSuperiorH = (0 > minimoH) ? minimoH + 360 : 360
+
         return (r, g, b, a) => {
             const max = Math.max(r, g, b);
             const min = Math.min(r, g, b);
-            const v = max / 255;
-            const s = max === 0 ? 0 : (max - min) / max;
+            const v = (max / 255);
+            const s = (max === 0 ? 0 : (max - min) / max);
             const delta = max - min;
             let h = 0;
             if (delta !== 0) {
@@ -324,13 +341,107 @@ class compararPixelHsv extends comparadorPixel {
                     h += 360;
                 }
             }
-            return (minimoH <= h && h <= maximoH) &&
-                (minimoS <= s && s <= maximoS) &&
-                (minimoV <= v && v <= maximoV) &&
-                (minimoA <= a && a <= maximoA)
+
+            if (minimoH >= 0 && maximoH <= 360) {
+                return (minimoH <= h && h <= maximoH) &&
+                    (minimoV <= v && v <= maximoV) &&
+                    (minimoS <= s && s <= maximoS) &&
+                    (minimoA <= a && a <= maximoA)
+            } else {
+                if (maximoH > 360) {
+                    return ((0 <= h && h <= reboteInferiorH) || (minimoH <= h && h <= 360)) &&
+                        (minimoV <= v && v <= maximoV) &&
+                        (minimoS <= s && s <= maximoS) &&
+                        (minimoA <= a && a <= maximoA)
+                } else {
+                    return ((0 <= h && h <= maximoH) || (reboteSuperiorH <= h && h <= 360)) &&
+                        (minimoV <= v && v <= maximoV) &&
+                        (minimoS <= s && s <= maximoS) &&
+                        (minimoA <= a && a <= maximoA)
+                }
+            }
+
         }
     }
 
+    obtenerEquivalenciaCanales(canalesBase) {
+        const hsvBase = utiles.colorRgbHvs({
+            r: canalesBase.r,
+            g: canalesBase.g,
+            b: canalesBase.b,
+        })
+
+        return (canalesModificar) => {
+
+            const max = Math.max(canalesModificar.r, canalesModificar.g, canalesModificar.b);
+            const min = Math.min(canalesModificar.r, canalesModificar.g, canalesModificar.b);
+            const vModificar = max / 255;
+            const sModificar = max === 0 ? 0 : (max - min) / max;
+            const delta = max - min;
+            let hModificar = 0;
+            if (delta !== 0) {
+                if (max === canalesModificar.r) {
+                    hModificar = 60 * ((canalesModificar.g - canalesModificar.b) / delta);
+                } else if (max === canalesModificar.g) {
+                    hModificar = 120 + 60 * ((canalesModificar.b - canalesModificar.r) / delta);
+                } else {
+                    hModificar = 240 + 60 * ((canalesModificar.r - canalesModificar.g) / delta);
+                }
+                if (hModificar < 0) {
+                    hModificar += 360;
+                }
+            }
+            const hModificado = (hsvBase.h * (1 - this.nivelReflejoH)) + (hModificar * this.nivelReflejoH)
+            const sModificado = (hsvBase.s * (1 - this.nivelReflejoS)) + (sModificar * this.nivelReflejoS)
+            const vModificado = (hsvBase.v * (1 - this.nivelReflejoV)) + (vModificar * this.nivelReflejoV)
+
+            const sat = sModificado;
+            const val = vModificado;
+
+            const c = val * sat;
+            const normH = ((hModificado % 360) + 360) % 360;
+            const x = c * (1 - Math.abs(((normH / 60) % 2) - 1));
+            const m = val - c;
+
+            let rPrime = 0;
+            let gPrime = 0;
+            let bPrime = 0;
+
+            if (normH < 60) {
+                rPrime = c;
+                gPrime = x;
+                bPrime = 0;
+            } else if (normH < 120) {
+                rPrime = x;
+                gPrime = c;
+                bPrime = 0;
+            } else if (normH < 180) {
+                rPrime = 0;
+                gPrime = c;
+                bPrime = x;
+            } else if (normH < 240) {
+                rPrime = 0;
+                gPrime = x;
+                bPrime = c;
+            } else if (normH < 300) {
+                rPrime = x;
+                gPrime = 0;
+                bPrime = c;
+            } else {
+                rPrime = c;
+                gPrime = 0;
+                bPrime = x;
+            }
+
+            return {
+                r: Math.round((rPrime + m) * 255),
+                g: Math.round((gPrime + m) * 255),
+                b: Math.round((bPrime + m) * 255),
+                alpha: (canalesBase.alpha * (1 - this.nivelReflejoAlpha)) + (canalesModificar.alpha * (this.nivelReflejoAlpha)),
+            }
+
+        }
+    }
 }
 
 class lienzoBase {
@@ -1672,15 +1783,18 @@ class baldeSimple extends herramienta {
             x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
             y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
         };
-
         const manchaClickeada = lienzo.obtenerManchaInundacion({
             cordenada: puntoBalde,
             comparadorPixel
         });
-
         const rgba = trazo.rgba[0];
+        const obtenerEquivalentes = comparadorPixel.obtenerEquivalenciaCanales({
+            r: rgba.r,
+            g: rgba.g,
+            b: rgba.b,
+            alpha: rgba.a * 255,
+        })
         const coloresMancha = Object.keys(manchaClickeada.mancha)
-
         for (const color of coloresMancha) {
             let alpha = rgba.a
             let r = rgba.r;
@@ -1689,22 +1803,12 @@ class baldeSimple extends herramienta {
 
             if (trazo.reflejarCanales) {
                 const rgbaActual = utiles.colorHexaRgba(color)
-                const equivalentesCanales = comparadorPixel.obtenerEquivalenciaCanales({
-                    canalesBase: {
-                        r: rgbaActual.r,
-                        g: rgbaActual.g,
-                        b: rgbaActual.b,
-                        alpha: rgbaActual.a
-                    },
-                    canalesModificar: {
-                        r,
-                        g,
-                        b,
-                        alpha: alpha * 255
-                    },
-                    nivelRefjelo: trazo.reflejarCanal
+                const equivalentesCanales = obtenerEquivalentes({
+                    r: rgbaActual.r,
+                    g: rgbaActual.g,
+                    b: rgbaActual.b,
+                    alpha: rgbaActual.a,
                 })
-
                 r = Math.round(equivalentesCanales.r)
                 g = Math.round(equivalentesCanales.g)
                 b = Math.round(equivalentesCanales.b)
@@ -1723,7 +1827,6 @@ class baldeSimple extends herramienta {
                 });
             }
         }
-
         if (trazo.setearBalde) {
             for (const color of coloresMancha) {
                 for (const tramo of manchaClickeada.mancha[color]) {
@@ -1742,10 +1845,7 @@ class baldeSimple extends herramienta {
             y: 0,
             modoPegado: trazo.modoDibujo
         });
-
-        console.log(manchaClickeada)
     }
-
     trazoEnProceso() {
         return false;
     }
@@ -2603,18 +2703,31 @@ const pintor = {
         switch (trazo.modeloColorComparador) {
             case 'hsv':
                 return new compararPixelHsv({
+                    nivelReflejoAlpha: trazo.reflejarCanal.alpha,
+                    toleranciaA: trazo.toleranciaCanal.alpha,
+
                     toleranciaH: trazo.toleranciaCanal.hsv.h,
                     toleranciaS: trazo.toleranciaCanal.hsv.s,
                     toleranciaV: trazo.toleranciaCanal.hsv.v,
-                    toleranciaA: trazo.toleranciaCanal.alpha
+
+                    nivelReflejoH: trazo.reflejarCanal.hsv.h,
+                    nivelReflejoS: trazo.reflejarCanal.hsv.s,
+                    nivelReflejoV: trazo.reflejarCanal.hsv.v,
                 })
                 break;
             case 'rgb':
                 return new comparadorPixelRGBA({
+                    nivelReflejoAlpha: trazo.reflejarCanal.alpha,
+                    toleranciaA: trazo.toleranciaCanal.alpha,
+
                     toleranciaR: trazo.toleranciaCanal.rgb.r,
                     toleranciaG: trazo.toleranciaCanal.rgb.g,
                     toleranciaB: trazo.toleranciaCanal.rgb.b,
-                    toleranciaA: trazo.toleranciaCanal.alpha
+
+                    nivelReflejoR: trazo.reflejarCanal.rgb.r,
+                    nivelReflejoG: trazo.reflejarCanal.rgb.g,
+                    nivelReflejoB: trazo.reflejarCanal.rgb.b,
+
                 })
                 break;
         }
@@ -2733,6 +2846,52 @@ const utiles = {
             s,
             v
         }
+    },
+    colorHsvRgb({ h, s, v }) {
+        // Normalizar S y V por si vienen en escala 0-100
+        const sat = s > 1 ? s / 100 : s;
+        const val = v > 1 ? v / 100 : v;
+
+        const c = val * sat;
+        const normH = ((h % 360) + 360) % 360;
+        const x = c * (1 - Math.abs(((normH / 60) % 2) - 1));
+        const m = val - c;
+
+        let rPrime = 0;
+        let gPrime = 0;
+        let bPrime = 0;
+
+        if (normH < 60) {
+            rPrime = c;
+            gPrime = x;
+            bPrime = 0;
+        } else if (normH < 120) {
+            rPrime = x;
+            gPrime = c;
+            bPrime = 0;
+        } else if (normH < 180) {
+            rPrime = 0;
+            gPrime = c;
+            bPrime = x;
+        } else if (normH < 240) {
+            rPrime = 0;
+            gPrime = x;
+            bPrime = c;
+        } else if (normH < 300) {
+            rPrime = x;
+            gPrime = 0;
+            bPrime = c;
+        } else {
+            rPrime = c;
+            gPrime = 0;
+            bPrime = x;
+        }
+
+        return {
+            r: Math.round((rPrime + m) * 255),
+            g: Math.round((gPrime + m) * 255),
+            b: Math.round((bPrime + m) * 255)
+        };
     },
     calentarMotorGrafico() { // segun gemini el motor de crhome necesita calentar motores digamos
 
