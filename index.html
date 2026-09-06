@@ -277,7 +277,7 @@
                     </div>
 
                     <div class="tolerancia compensacion gris">
-                        <p>compA</p>
+                        <p>RefA</p>
                         <input type="range" name=""
                             oninput="document.getElementById('numberCompensacionA').value = this.value, reflejarCanal.alpha = Number(this.value) "
                             value="0" id="rangoCompensacionA" min="0" max="1" step="0.01">
@@ -286,6 +286,7 @@
                             value="0" id="numberCompensacionA" min="0" max="1" step="0.01">
                     </div>
                 </div>
+
                 <div class="inputsBalde">
                     <div class="opcion">
                         <p>setear</p>
@@ -295,11 +296,33 @@
                         <p>reflejarCanales</p>
                         <input type="checkbox" name="" oninput="reflejarCanales = this.checked">
                     </div>
+                    <div class="opcion">
+                        <p>compColDist</p>
+                        <input type="checkbox" name="" oninput="compararColorDistinto = this.checked">
+                    </div>
 
                     <button type="button" onclick="llenarElCanvasHSVcompleto()">
                         colTes
                     </button>
                 </div>
+
+                <div class="colorBaldeComparar">
+                    <div class="color">
+                        <p>colorCompararBalde</p>
+                        <input type="color" name="" id="colorCompararBalde"
+                            onchange=" colorCompararBalde =  hexToRgb(document.getElementById('colorSecundario').value)">
+                    </div>
+                    <div class="tolerancia gris">
+                        <p>alpComp</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberAlphaComparar').value = this.value, alphaCompararBalde = Number(this.value) "
+                            value="1" id="rangoAlphaComparar" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoAlphaComparar').value = this.value , alphaCompararBalde = Number(this.value) "
+                            value="1" id="numberAlphaComparar" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+
                 <div class="seleccionModeloColor">
                     <button id="botonRGB" type="button" style="background-color: green;" onclick="mostrarRgb(this)
                         ">RGB</button>
@@ -340,7 +363,7 @@
                                 cambiarVisibilidadCapa('individual' , 1)">
                             <div class="portada">
                                 <label for="visibilidadCapa1" class="plegado">
-                                    <p>1</p>
+                                    <p>0</p>
                                 </label>
                                 <button type="button" class="infoPlegado" onclick="seleccionarCapa(1 , 'individual')">
                                     <p class="nombreCapa"> capa 1</p>

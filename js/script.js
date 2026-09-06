@@ -330,7 +330,7 @@ function actualizarSelectorModoFusion() {
 
     const modosPegado = Object.keys(capaActual.lienzo.modosPegado)
     for (const modo of modosPegado) {
-        console.log(capaActual.modoFusion , ' ', modo)
+        console.log(capaActual.modoFusion, ' ', modo)
         if (capaActual.modoFusion !== modo) {
             select.insertAdjacentHTML('afterbegin', `
                     <option value="${modo}">
@@ -406,6 +406,7 @@ let colorPrincipal = { r: 0, g: 0, b: 0, }
 let colorSecundario = { r: 0, g: 0, b: 0, }
 let opacidadPrincipal = 1;
 let opacidadSecundaria = 1;
+let alphaCompararBalde = 1;
 let grosor = 10;
 let nombreHerramienta = 'lineaSimple';
 let nombreSello = 'selloCircular'
@@ -438,10 +439,11 @@ let reflejarCanal = {
         v: 0
     }
 }
-
 let setearBalde = true;
 let reflejarCanales = false;
 let modeloColorComparador = 'rgb'
+
+let compararColorDistinto = false;
 
 function obtenerColores() {
     const rgba = [{
@@ -458,6 +460,24 @@ function obtenerColores() {
     return rgba;
 }
 
+function obtenerColorComparar(cordInicial) {
+    if (compararColorDistinto) {
+        return {
+            r: hexToRgb(document.getElementById('colorCompararBalde').value).r,
+            g: hexToRgb(document.getElementById('colorCompararBalde').value).g,
+            b: hexToRgb(document.getElementById('colorCompararBalde').value).b,
+            a: alphaCompararBalde
+        }
+    } else {
+        const colorClickeado = canvas.obtenerPixel(cordInicial);
+        return {
+            r: colorClickeado.r,
+            g: colorClickeado.g,
+            b: colorClickeado.b,
+            a: colorClickeado.a / 255,
+        }
+    }
+}
 function obtenerTrazoActual(cordInicial) {
     const trazoGuardar = new trazo({
         trayectos: [],
@@ -476,6 +496,7 @@ function obtenerTrazoActual(cordInicial) {
         setearBalde,
         modeloColorComparador,
         reflejarCanales,
+        colorCompararBalde: obtenerColorComparar(cordInicial)
     })
     return trazoGuardar;
 }

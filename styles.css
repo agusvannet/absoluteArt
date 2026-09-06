@@ -569,3 +569,13 @@ select {
 .inputsLapizFigura .opcion{
     background-color: rgb(0, 255, 251);
 }
+
+.colorBaldeComparar{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.colorBaldeComparar .color{
+    display: flex;
+    justify-content: space-evenly;
+}

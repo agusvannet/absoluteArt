@@ -220,7 +220,6 @@ class grupoManchas {
         return manchasFronterizas
     }
 }
-
 class comparadorPixel {
     constructor({ toleranciaA = 0, nivelReflejoAlpha = 0 }) {
         this.toleranciaA = toleranciaA;
@@ -237,7 +236,6 @@ class comparadorPixel {
 
     }
 }
-
 class comparadorPixelRGBA extends comparadorPixel {
     constructor({ toleranciaR = 0, toleranciaG = 0, toleranciaB = 0, toleranciaA = 0,
         nivelReflejoR = 0, nivelReflejoG = 0, nivelReflejoB = 0, nivelReflejoAlpha = 0
@@ -285,7 +283,6 @@ class comparadorPixelRGBA extends comparadorPixel {
         }
     }
 }
-
 class compararPixelHsv extends comparadorPixel {
     constructor({ toleranciaH = 0, toleranciaS = 0, toleranciaV = 0, toleranciaA = 0,
         nivelReflejoH = 0, nivelReflejoV = 0, nivelReflejoS = 0, nivelReflejoAlpha = 0 }) {
@@ -443,7 +440,6 @@ class compararPixelHsv extends comparadorPixel {
         }
     }
 }
-
 class lienzoBase {
     constructor({ largo, alto, id, tipo }) {
         this.largo = largo;
@@ -500,14 +496,13 @@ class lienzoBase {
         return lienzoSeccionado;
     }
 
-    obtenerManchaInundacion({ cordenada, comparadorPixel }) {
+    obtenerManchaInundacion({ cordenada, comparadorPixel, colorComparar }) {
         const buffer = new Uint32Array(this.obtenerBuffer().buffer);
         const estadosPixel = new Uint8Array(this.largo * this.alto);
         const mancha = {};
 
         const indiceBase = cordenada.y * this.largo + cordenada.x;
-        const colorBaseUint32 = buffer[indiceBase];
-
+        const colorBaseUint32 = (colorComparar) ? utiles.colorRgbaUint32(colorComparar) : buffer[indiceBase];
         const baseObj = {
             r: colorBaseUint32 & 0xFF,
             g: (colorBaseUint32 >> 8) & 0xFF,
@@ -516,7 +511,6 @@ class lienzoBase {
         };
 
         const compararPixel = (comparadorPixel) ? comparadorPixel.obtenerComparador(baseObj) : () => { return false }
-
         const obtenerPixel = (x, y) => {
             const p32 = buffer[y * this.largo + x];
             return {
@@ -526,7 +520,6 @@ class lienzoBase {
                 a: (p32 >> 24) & 0xFF
             };
         };
-
         const pixelValido = (indice) => {
             const p32 = buffer[indice];
             if (p32 === colorBaseUint32) return true;
@@ -537,7 +530,6 @@ class lienzoBase {
                 (p32 >> 24) & 0xFF
             );
         };
-
         const tramoHorizontalidad = (x, y) => {
             let pixelTramoBase = this.largo * y + x;
             if (estadosPixel[pixelTramoBase] !== 0) return false;
@@ -621,8 +613,6 @@ class lienzoBase {
             colorBase: utiles.colorRgbaHexa(baseObj)
         };
     }
-
-
 }
 class lienzoHtml extends lienzoBase {
     constructor({ largo, alto, canvas, muchaLectura, id, tipo }) {
@@ -1793,9 +1783,18 @@ class baldeSimple extends herramienta {
             x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
             y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
         };
+
+        const colorComparar = {
+            r: trazo.colorCompararBalde.r,
+            g: trazo.colorCompararBalde.g,
+            b: trazo.colorCompararBalde.b,
+            a: trazo.colorCompararBalde.a * 255
+        }
+
         const manchaClickeada = lienzo.obtenerManchaInundacion({
             cordenada: puntoBalde,
-            comparadorPixel
+            comparadorPixel,
+            colorComparar
         });
         const rgba = trazo.rgba[0];
         const obtenerEquivalentes = comparadorPixel.obtenerEquivalenciaCanales({
@@ -1881,6 +1880,7 @@ class trazo {
         setearBalde,
         modeloColorComparador,
         reflejarCanales,
+        colorCompararBalde,
     }) { // le puedo agregar cosas pero por ahora va este 
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -1920,6 +1920,7 @@ class trazo {
             this.setearBalde = setearBalde;
         this.modeloColorComparador = modeloColorComparador;
         this.reflejarCanales = reflejarCanales;
+        this.colorCompararBalde = colorCompararBalde;
     }
     minimoSeparacion = 0.01
     velPxsMin = 300
@@ -2020,7 +2021,6 @@ class trazo {
             continuidad: this.continuidad,
             separacion: this.separacion,
             modoDibujo: this.modoDibujo,
-
             toleranciaCanal: {
                 alpha: this.toleranciaCanal.alpha,
                 rgb: {
@@ -2048,10 +2048,15 @@ class trazo {
                     v: this.reflejarCanal.hsv.v
                 }
             },
-
             setearBalde: this.setearBalde,
             modeloColorComparador: this.modeloColorComparador,
-            reflejarCanales: this.reflejarCanales
+            reflejarCanales: this.reflejarCanales,
+            colorCompararBalde: {
+                r: this.colorCompararBalde.r,
+                g: this.colorCompararBalde.g,
+                b: this.colorCompararBalde.b,
+                a: this.colorCompararBalde.a
+            },
 
         })
     }
@@ -2903,13 +2908,12 @@ const utiles = {
             b: Math.round((bPrime + m) * 255)
         };
     },
-    calentarMotorGrafico() { // segun gemini el motor de crhome necesita calentar motores digamos
-
-        const lienzoCalenton = lienzos.obtener({ largo: 64, alto: 64, muchaLectura: true })
-        for (let i = 0; i < 50; i++) {
-            lienzoCalenton.obtenerBufferSeccionado();
-        }
-    },
+    colorRgbaUint32({ r, g, b, a }) { // alpha 0 255
+        return (((a & 0xFF) << 24) |
+            ((b & 0xFF) << 16) |
+            ((g & 0xFF) << 8) |
+            (r & 0xFF)) >>> 0;
+    }
 }
 const configuracion = {
     configurarEsteticaCanvas(canvas) { // se lo pedi a gemini
@@ -2921,8 +2925,8 @@ const configuracion = {
         ctx.mozImageSmoothingEnabled = false;
         ctx.webkitImageSmoothingEnabled = false;
         ctx.msImageSmoothingEnabled = false;
-        canvas.style.imageRendering = 'pixelated';
-        canvas.style.imageRendering = 'crisp-edges'; // me lo tiro gemini , para el navegador de mierda pq lo difumina
+        //canvas.style.imageRendering = 'pixelated';
+        //canvas.style.imageRendering = 'crisp-edges'; // me lo tiro gemini , para el navegador de mierda pq lo difumina
     },
     agregarCapaBase() {
         const lienzo = mesaTrabajo;
