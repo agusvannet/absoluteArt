@@ -1295,9 +1295,9 @@ class lineaSimple extends figura {
     constructor(nombre, categoria) {
         super(nombre, categoria)
     }
-    usar({ lienzo, trazo }) { // ({ x1, y1, x2, y2, grosor, r, g, b, a })
+    usar({ lienzo, trazo, lienzoIntermediario }) { // ({ x1, y1, x2, y2, grosor, r, g, b, a })
         if (!this.trazoValido(trazo)) return
-        lienzo.pintarLinea({
+        lienzoIntermediario.lienzoComun.pintarLinea({
             x1: trazo.trayectos[0][0].x + trazo.puntoInicial.x,
             y1: trazo.trayectos[0][0].y + trazo.puntoInicial.y,
             x2: trazo.trayectos[0][1].x + trazo.puntoInicial.x,
@@ -1308,6 +1308,7 @@ class lineaSimple extends figura {
             b: trazo.rgba[0].b,
             a: trazo.rgba[0].a
         })
+        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, modoPegado: trazo.modoDibujo })
     }
     condicionesEspeciales(trazo) {
         const tam = trazo.cajaDelimitadora();
@@ -2183,7 +2184,6 @@ const mesaTrabajo = {
     capasGrupoVivas: [],
     capaActiva: undefined,
     grupoCapasActiva: undefined,
-
     trazoTemporal: undefined,
     trazoGuardar: undefined,
 
@@ -2192,7 +2192,6 @@ const mesaTrabajo = {
     lienzoPosterior: undefined,
 
     herramientaActiva: undefined,
-
     inicioClick({ cordenada, lienzoReal, parametrosTrazo }) {
         if (this.capasIndividualesVivas.length === 0) return
         if (this.trazoGuardar)
@@ -2206,7 +2205,7 @@ const mesaTrabajo = {
 
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles')))
             lienzos.acomodar({
-                lienzo: pintor.lienzosIntermediarios.lienzoPincel,
+                lienzo: pintor.lienzosIntermediarios.lienzoPreVisualizacion,
                 alto: this.confCapas.altoLienzo,
                 largo: this.confCapas.largoLienzo
             })
@@ -2215,7 +2214,6 @@ const mesaTrabajo = {
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
     },
-
     arrastreClick({ cordenada, lienzoReal }) {
         if (this.capasIndividualesVivas.length === 0) return
 
@@ -2243,7 +2241,6 @@ const mesaTrabajo = {
             })
         }
     },
-
     finClick({ cordenada, lienzoReal }) {
         if (this.capasIndividualesVivas.length === 0) return
         if (!this.trazoGuardar) return
@@ -2274,7 +2271,6 @@ const mesaTrabajo = {
             this.renderizarTrazo({ lienzoReal: lienzoReal, trazoTemporal: this.trazoTemporal, trazoReal: this.trazoGuardar })
         }
     },
-
     renderizarTrazo({ lienzoReal, trazoTemporal, trazoReal }) {
         if (!this.herramientaActiva.preRenderizable) return
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
@@ -2284,7 +2280,7 @@ const mesaTrabajo = {
         }
     },
     renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal }) {
-        const lienzoPincel = pintor.lienzosIntermediarios.lienzoPincel;
+        const lienzoPincel = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
         lienzos.acomodar({ lienzo: lienzoPincel, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: false })
 
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0, })
@@ -2292,22 +2288,26 @@ const mesaTrabajo = {
         if (trazoReal.modoDibujo === "normal") {
             this.capaActiva.renderizar(lienzoReal)
             pintor.dibujar(lienzoPincel, trazoTemporal)
-            lienzoReal.pegarLienzo({ lienzo: lienzoPincel, y: 0, x: 0, alpha: this.trazoGuardar.rgba[0].a })
+            lienzoReal.pegarLienzo({ lienzo: lienzoPincel, y: 0, x: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: this.capaActiva.modoFusion })
         } else {
             this.lienzoCapaActual.limpiar()
             this.capaActiva.renderizar(this.lienzoCapaActual)
             this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
             this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
-            lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0 })
+            lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
         }
 
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
     },
     rendreizarFigura({ lienzoReal, trazo }) {
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
-        this.capaActiva.renderizar(lienzoReal)
-        pintor.dibujar(lienzoReal, trazo)
+
+        this.lienzoCapaActual.limpiar()
+        this.capaActiva.renderizar(this.lienzoCapaActual)
+        pintor.dibujar(this.lienzoCapaActual, trazo)
+        lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
+
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
     },
     prepararLienzosSanduich() {
@@ -2490,7 +2490,7 @@ const mesaTrabajo = {
 }
 const pintor = {
     lienzosIntermediarios: {
-        lienzoPincel: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoPreVisualizacion: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' })
@@ -2501,7 +2501,6 @@ const pintor = {
     bufferSeccionado: undefined,
     herramientaUltimoDibujo: undefined,
     ultimoLienzoId: undefined,
-
     dibujar(lienzoDibujar, trazo) {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)

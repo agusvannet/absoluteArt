@@ -69,7 +69,7 @@ body {
     flex-direction: column;
     gap: .6vh;
 }
-
+ 
 .seccionDerecha {
     height: calc(80vh - var(--padding));
     background-color: lightblue;

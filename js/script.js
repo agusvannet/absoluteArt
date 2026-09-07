@@ -469,7 +469,7 @@ function obtenerColorComparar(cordInicial) {
             a: alphaCompararBalde
         }
     } else {
-        const colorClickeado = canvas.obtenerPixel(cordInicial);
+        const colorClickeado = capaActual.lienzo.obtenerPixel(cordInicial);
         return {
             r: colorClickeado.r,
             g: colorClickeado.g,
@@ -500,7 +500,6 @@ function obtenerTrazoActual(cordInicial) {
     })
     return trazoGuardar;
 }
-
 function llenarElCanvasHSVcompleto(idCapa) {
     const capa = mesaTrabajo.capas.contenido[0].lienzo;
     const canvas = capa.canvas;
