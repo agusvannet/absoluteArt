@@ -2285,18 +2285,14 @@ const mesaTrabajo = {
 
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0, })
         trazoTemporal.rgba[0].a = 1
-        if (trazoReal.modoDibujo === "normal") {
-            this.capaActiva.renderizar(lienzoReal)
-            pintor.dibujar(lienzoPincel, trazoTemporal)
-            lienzoReal.pegarLienzo({ lienzo: lienzoPincel, y: 0, x: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: this.capaActiva.modoFusion })
-        } else {
-            this.lienzoCapaActual.limpiar()
-            this.capaActiva.renderizar(this.lienzoCapaActual)
-            this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
-            this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
-            lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
-        }
+        this.lienzoCapaActual.limpiar()
+        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
+        this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
+
+        lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
+
 
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
     },
