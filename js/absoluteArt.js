@@ -641,7 +641,7 @@ class lienzoHtml extends lienzoBase {
         recortar: 'source-atop',
     }
 
-    pegarLienzo({ lienzo, x, y, alpha, modoPegado }) { // pegar en ESTE lienzo
+    pegarLienzo({ lienzo, x = 0, y = 0, alpha, modoPegado }) { // pegar en ESTE lienzo
         if (alpha !== undefined || modoPegado)
             if (alpha !== undefined || this.modosPegado[modoPegado])
                 this.ctx.save();
@@ -758,7 +758,7 @@ class lienzoHtml extends lienzoBase {
         );
         this.ctx.fill();
     }
-    limpiarCirculo({ x, y, radio, r, g, b, a, rotacion, inicio, fin }) {
+    limpiarCirculo({ x, y, radio, rotacion, inicio, fin }) {
         this.ctx.globalCompositeOperation = "destination-out";
         this.ctx.fillStyle = 'rgba(255 , 255 , 255 , 1)';
         this.ctx.beginPath();
@@ -835,9 +835,9 @@ class capaBase {
     y = 0;
     visible = true;
     opacidad = 1;
-    renderizar(lienzo) {
-        if (!this.visible || this.opacidad === 0) return
-        lienzo.pegarLienzo({ lienzo: this.lienzo, x: this.x, y: this.y, alpha: this.opacidad, modoPegado: this.modoFusion })
+    renderizar({ receptor, modoFusion = this.modoFusion, x = this.x, y = this.y, opacidad = this.opacidad }) {
+        if (!this.visible) return
+        receptor.pegarLienzo({ lienzo: this.lienzo, x, y, alpha: opacidad, modoPegado: modoFusion })
     }
 
     cambiarOpacidad(nuevaOpacidad) {
@@ -859,32 +859,29 @@ class grupoCapas extends capaBase {
     }
     tipoCapa = 'grupo';
     contenido = [];
-    preRenderizar() {
+
+    preRenderizar({ capaSustituida, lienzoSustituto } = {}) {
         if (this.contenido.length === 0) return
         this.lienzo.limpiar()
         for (const capa of this.contenido) {
-            capa.renderizar(this.lienzo);
+            if (capa !== capaSustituida) {
+                capa.renderizar({ receptor: this.lienzo });
+            } else {
+                this.lienzo.pegarLienzo({
+                    lienzo: lienzoSustituto,
+                    x: capa.x,
+                    y: capa.y,
+                    modoPegado: capa.modoFusion
+                })
+            }
         }
-
         let padreActual = this.capaPadre
-        let contador = 1;// borrar luego de probar rendimiento
         while (padreActual) {
             padreActual.preRenderizar()
             padreActual = padreActual.capaPadre;
-            contador++;
         }
     }
-    dividirCapas({ capa }) {
-        let capaEncontrada = false;
-        let anteriores = [];
-        let posteriores = [];
-        for (const capaActual of this.contenido) {
-            if (capaEncontrada) posteriores.push(capaActual);
-            if (capaActual === capa) capaEncontrada = true
-            if (!capaEncontrada) anteriores.push(capaActual);
-        }
-        return { anteriores, posteriores }
-    }
+
     buscarCapa(id) {
         if (this.contenido.length > 0) {
             for (const lugar of this.contenido) {
@@ -2142,7 +2139,6 @@ class trazo {
         return { trayectoSeccionado, sobrante };
     }
 }
-
 const lienzos = {
     contadorLienzos: 0,
     obtener({ largo, alto, canvas, muchaLectura = true, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
@@ -2163,7 +2159,6 @@ const lienzos = {
         if (lienzo.largo !== largo || lienzo.alto !== alto) {
             lienzo.redimenzionar(largo, alto)
         } else {
-            //console.trace((limpiar !== false))
             if (limpiar !== false) lienzo.limpiar();
         }
 
@@ -2174,8 +2169,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 1280,
-        altoLienzo: 720
+        largoLienzo: 1920,
+        altoLienzo: 1080
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,
@@ -2187,9 +2182,7 @@ const mesaTrabajo = {
     trazoTemporal: undefined,
     trazoGuardar: undefined,
 
-    lienzoPrevio: undefined,
     lienzoCapaActual: undefined,
-    lienzoPosterior: undefined,
 
     herramientaActiva: undefined,
     inicioClick({ cordenada, lienzoReal, parametrosTrazo }) {
@@ -2209,7 +2202,11 @@ const mesaTrabajo = {
                 alto: this.confCapas.altoLienzo,
                 largo: this.confCapas.largoLienzo
             })
-        this.prepararLienzosSanduich()
+
+        if (!this.lienzoCapaActual)
+            this.lienzoCapaActual = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
+        this.lienzoCapaActual.limpiar()
+
         this.trazoGuardar.agregarTrazo(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
@@ -2255,7 +2252,7 @@ const mesaTrabajo = {
             }
             this.trazoGuardar = undefined;
             lienzoReal.limpiar();
-            this.capas.renderizar(lienzoReal)
+            this.capas.renderizar({ receptor: lienzoReal })
 
             return;
         }
@@ -2276,72 +2273,29 @@ const mesaTrabajo = {
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal })
         } else {
-            this.rendreizarFigura({ lienzoReal, trazo: trazoTemporal })
+            this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
         }
     },
     renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal }) {
         const lienzoPincel = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
-        lienzos.acomodar({ lienzo: lienzoPincel, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: false })
 
-        if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0, })
         trazoTemporal.rgba[0].a = 1
-
         this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capaActiva.renderizar({ receptor: this.lienzoCapaActual, modoFusion: 'normal' })
         this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
         this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
-
-
-        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
     },
-    rendreizarFigura({ lienzoReal, trazo }) {
-        if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
+    renderizarFigura({ lienzoReal, trazo }) {
 
         this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capaActiva.renderizar({ receptor: this.lienzoCapaActual, modoFusion: 'normal' })
         pintor.dibujar(this.lienzoCapaActual, trazo)
-        lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
 
-        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
-    },
-    prepararLienzosSanduich() {
-        const capasDivididas = this.capas.dividirCapas({ capa: this.capaActiva, })
-        if (capasDivididas.anteriores.length > 0) {
-            if (!this.lienzoPrevio) this.lienzoPrevio = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
+        this.capaActiva.capaPadre.preRenderizar({ capaSustituida: this.capaActiva, lienzoSustituto: this.lienzoCapaActual })
 
-            lienzos.acomodar({
-                lienzo: this.lienzoPrevio,
-                alto: this.confCapas.altoLienzo,
-                largo: this.confCapas.largoLienzo
-            })
-
-            for (const actual of capasDivididas.anteriores) {
-                actual.renderizar(this.lienzoPrevio)
-            }
-        } else {
-            if (this.lienzoPrevio) this.lienzoPrevio.limpiar()
-        }
-
-        if (capasDivididas.posteriores.length > 0) {
-            if (!this.lienzoPosterior) this.lienzoPosterior = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
-            lienzos.acomodar({
-                lienzo: this.lienzoPosterior,
-                alto: this.confCapas.altoLienzo,
-                largo: this.confCapas.largoLienzo
-            })
-            for (const actual of capasDivididas.posteriores) {
-                actual.renderizar(this.lienzoPosterior)
-            }
-        } else {
-            if (this.lienzoPosterior) this.lienzoPosterior.limpiar()
-
-        }
-        if (!this.lienzoCapaActual)
-            this.lienzoCapaActual = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
-        this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capas.renderizar({ receptor: lienzoReal })
     },
     clonarCapa(carpeta, capa) { //id carpeta es el padre, capa es la carpeta a clonar
         if (carpeta.tipoCapa === 'grupo') {
@@ -2457,7 +2411,7 @@ const mesaTrabajo = {
         this.capaActiva.recuperarTrazo()
     },
     renderizar(lienzo) {
-        this.capas.renderizar(lienzo)
+        this.capas.renderizar({ receptor: lienzo })
         this.trazoGuardar = undefined
         this.trazoTemporal = undefined
     },

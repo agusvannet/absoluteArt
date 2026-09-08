@@ -330,7 +330,6 @@ function actualizarSelectorModoFusion() {
 
     const modosPegado = Object.keys(capaActual.lienzo.modosPegado)
     for (const modo of modosPegado) {
-        console.log(capaActual.modoFusion, ' ', modo)
         if (capaActual.modoFusion !== modo) {
             select.insertAdjacentHTML('afterbegin', `
                     <option value="${modo}">
@@ -338,7 +337,6 @@ function actualizarSelectorModoFusion() {
                     </option>
                 `);
         } else {
-            console.log(" e?")
             select.insertAdjacentHTML('afterbegin', `
                     <option value="${modo}" disabled selected>
                         ${modo}
