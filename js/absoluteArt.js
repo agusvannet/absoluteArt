@@ -2294,7 +2294,7 @@ const mesaTrabajo = {
         pintor.dibujar(this.lienzoCapaActual, trazo)
 
         this.capaActiva.capaPadre.preRenderizar({ capaSustituida: this.capaActiva, lienzoSustituto: this.lienzoCapaActual })
-
+        lienzoReal.limpiar()
         this.capas.renderizar({ receptor: lienzoReal })
     },
     clonarCapa(carpeta, capa) { //id carpeta es el padre, capa es la carpeta a clonar
