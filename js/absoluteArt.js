@@ -852,8 +852,8 @@ class capaBase {
     }
 }
 class grupoCapas extends capaBase {
-    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal' }) {
-        super(capaPadre, idCapa, lienzo, modoFusion)
+    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal', mascaras = [] }) {
+        super(capaPadre, idCapa, lienzo, modoFusion, mascaras)
         this.nombre = 'grupo ' + idCapa
     }
     tipoCapa = 'grupo';
@@ -1037,11 +1037,10 @@ class grupoCapas extends capaBase {
         this.contenido.push(clon)
         return clon
     }
-
 }
 class capa extends capaBase {
-    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal', frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial }) {
-        super(capaPadre, idCapa, lienzo, modoFusion)
+    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal', frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial, mascaras = [] }) {
+        super(capaPadre, idCapa, lienzo, modoFusion, mascaras)
         this.historial = new historial(
             frecuenciaCapturas,
             trayectoMuyLargo,
@@ -1752,7 +1751,6 @@ class figuraSellos extends lineaSimple {
         super(nombre, categoria)
         this.verticesFigura = verticesFigura
     }
-
     usar({ lienzo, trazo, lienzoIntermediario }) {
         if (!this.trazoValido(trazo)) return
         lienzos.acomodar({ lienzo: lienzoIntermediario.lienzoComunSecundario, alto: lienzo.alto, largo: lienzo.largo })
@@ -1768,13 +1766,12 @@ class figuraSellos extends lineaSimple {
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
 
     }
-
     transformarVerticesPuntos(trazo) {
         const caja = trazo.cajaDelimitadora()
         const secciones = []
 
-        const restarX = (caja.x < 0) ? true : false
-        const restarY = (caja.y < 0) ? true : false
+        const restarX = (caja.x < 0 && trazo.respetarSignoX) ? true : false
+        const restarY = (caja.y < 0 && trazo.respetarSignoY) ? true : false
         for (const vertices of this.verticesFigura) {
             const puntos = []
             for (const vertice of vertices) {
@@ -1899,6 +1896,8 @@ class trazo {
         modeloColorComparador,
         reflejarCanales,
         colorCompararBalde,
+        respetarSignoX,
+        respetarSignoY,
     }) { // le puedo agregar cosas pero por ahora va este 
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -1939,6 +1938,8 @@ class trazo {
         this.modeloColorComparador = modeloColorComparador;
         this.reflejarCanales = reflejarCanales;
         this.colorCompararBalde = colorCompararBalde;
+        this.respetarSignoX = respetarSignoX;
+        this.respetarSignoY = respetarSignoY;
     }
     minimoSeparacion = 0.01
     velPxsMin = 300
@@ -2075,7 +2076,8 @@ class trazo {
                 b: this.colorCompararBalde.b,
                 a: this.colorCompararBalde.a
             },
-
+            respetarSignoX: this.respetarSignoX,
+            respetarSignoY: this.respetarSignoY,
         })
     }
     agregarTrazo(cordenada) {
@@ -2320,7 +2322,6 @@ const mesaTrabajo = {
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
 
-
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
     renderizarFigura({ lienzoReal, trazo }) {
@@ -2360,10 +2361,13 @@ const mesaTrabajo = {
                 alto: this.confCapas.altoLienzo,
                 largo: this.confCapas.largoLienzo
             })
-            for (const actual of capasDivididas.posteriores) {
-                actual.renderizar({ lienzoReceptor: this.lienzoPosterior })
-            }
+
+            console.log(capasDivididas.posteriores[0])
+            capasDivididas.posteriores[0].renderizar({ lienzoReceptor: this.lienzoPosterior, modoFusion: 'normal' })
             this.modoFusionPosterior = capasDivididas.posteriores[0].modoFusion
+            for (let i = 1; i < capasDivididas.posteriores.length; i++) {
+                capasDivididas.posteriores[i].renderizar({ lienzoReceptor: this.lienzoPosterior })
+            }
         } else {
             if (this.lienzoPosterior) this.lienzoPosterior.limpiar()
         }

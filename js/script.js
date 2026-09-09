@@ -442,7 +442,8 @@ let reflejarCanales = false;
 let modeloColorComparador = 'rgb'
 
 let compararColorDistinto = false;
-
+let respetarSignoX = true;
+let respetarSignoY = true;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -494,7 +495,9 @@ function obtenerTrazoActual(cordInicial) {
         setearBalde,
         modeloColorComparador,
         reflejarCanales,
-        colorCompararBalde: obtenerColorComparar(cordInicial)
+        colorCompararBalde: obtenerColorComparar(cordInicial),
+        respetarSignoX,
+        respetarSignoY,
     })
     return trazoGuardar;
 }
