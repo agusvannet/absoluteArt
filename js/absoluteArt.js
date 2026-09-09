@@ -835,11 +835,10 @@ class capaBase {
     y = 0;
     visible = true;
     opacidad = 1;
-    renderizar(lienzo) {
+    renderizar({ lienzoReceptor, modoFusion = this.modoFusion, x = this.x, y = this.y, alpha = this.opacidad }) {
         if (!this.visible || this.opacidad === 0) return
-        lienzo.pegarLienzo({ lienzo: this.lienzo, x: this.x, y: this.y, alpha: this.opacidad, modoPegado: this.modoFusion })
+        lienzoReceptor.pegarLienzo({ lienzo: this.lienzo, x, y, alpha, modoPegado: modoFusion })
     }
-
     cambiarOpacidad(nuevaOpacidad) {
         this.opacidad = nuevaOpacidad
         if (this.capaPadre) this.capaPadre.preRenderizar();
@@ -863,26 +862,44 @@ class grupoCapas extends capaBase {
         if (this.contenido.length === 0) return
         this.lienzo.limpiar()
         for (const capa of this.contenido) {
-            capa.renderizar(this.lienzo);
+            capa.renderizar({ lienzoReceptor: this.lienzo });
         }
 
-        let padreActual = this.capaPadre
-        let contador = 1;// borrar luego de probar rendimiento
-        while (padreActual) {
-            padreActual.preRenderizar()
-            padreActual = padreActual.capaPadre;
-            contador++;
-        }
+        if (this.capaPadre)
+            this.capaPadre.preRenderizar()
     }
     dividirCapas({ capa }) {
         let capaEncontrada = false;
         let anteriores = [];
         let posteriores = [];
-        for (const capaActual of this.contenido) {
-            if (capaEncontrada) posteriores.push(capaActual);
-            if (capaActual === capa) capaEncontrada = true
-            if (!capaEncontrada) anteriores.push(capaActual);
+        let ancestros = [];
+        let padre = capa.capaPadre
+        while (padre) {
+            ancestros.push(padre);
+            padre = padre.capaPadre
         }
+        const esAncestro = (grupo) => {
+            for (const ancestro of ancestros) {
+                if (grupo === ancestro) return true
+            }
+            return false
+        }
+        const recorrerCapa = (capa, grupoRecorrer) => {
+            for (const capaActual of grupoRecorrer) {
+                if (!esAncestro(capaActual)) {
+                    if (capaEncontrada) posteriores.push(capaActual);
+                    if (capaActual === capa) capaEncontrada = true
+                    if (!capaEncontrada) anteriores.push(capaActual);
+                } else {
+                    console.log(capaActual)
+                    recorrerCapa(capa, capaActual.contenido)
+                }
+            }
+        }
+
+        recorrerCapa(capa, this.contenido)
+
+        console.log(anteriores, posteriores, ancestros)
         return { anteriores, posteriores }
     }
     buscarCapa(id) {
@@ -2190,6 +2207,7 @@ const mesaTrabajo = {
     lienzoPrevio: undefined,
     lienzoCapaActual: undefined,
     lienzoPosterior: undefined,
+    modoFusionPosterior: 'normal',
 
     herramientaActiva: undefined,
     inicioClick({ cordenada, lienzoReal, parametrosTrazo }) {
@@ -2213,6 +2231,15 @@ const mesaTrabajo = {
         this.trazoGuardar.agregarTrazo(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
+
+        if (this.herramientaActiva.preRenderizable) {
+            lienzoReal.limpiar()
+            this.renderizarTrazo({
+                lienzoReal,
+                trazoTemporal: this.trazoTemporal,
+                trazoReal: this.trazoGuardar,
+            })
+        }
     },
     arrastreClick({ cordenada, lienzoReal }) {
         if (this.capasIndividualesVivas.length === 0) return
@@ -2255,7 +2282,7 @@ const mesaTrabajo = {
             }
             this.trazoGuardar = undefined;
             lienzoReal.limpiar();
-            this.capas.renderizar(lienzoReal)
+            this.capas.renderizar({ lienzoReceptor: lienzoReal })
 
             return;
         }
@@ -2276,7 +2303,7 @@ const mesaTrabajo = {
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal })
         } else {
-            this.rendreizarFigura({ lienzoReal, trazo: trazoTemporal })
+            this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
         }
     },
     renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal }) {
@@ -2287,24 +2314,26 @@ const mesaTrabajo = {
         trazoTemporal.rgba[0].a = 1
 
         this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
         this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
         this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
 
 
-        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
+        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
-    rendreizarFigura({ lienzoReal, trazo }) {
+    renderizarFigura({ lienzoReal, trazo }) {
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
 
+
         this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
         pintor.dibujar(this.lienzoCapaActual, trazo)
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
 
-        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0 })
+
+        if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
     prepararLienzosSanduich() {
         const capasDivididas = this.capas.dividirCapas({ capa: this.capaActiva, })
@@ -2318,7 +2347,7 @@ const mesaTrabajo = {
             })
 
             for (const actual of capasDivididas.anteriores) {
-                actual.renderizar(this.lienzoPrevio)
+                actual.renderizar({ lienzoReceptor: this.lienzoPrevio })
             }
         } else {
             if (this.lienzoPrevio) this.lienzoPrevio.limpiar()
@@ -2332,16 +2361,16 @@ const mesaTrabajo = {
                 largo: this.confCapas.largoLienzo
             })
             for (const actual of capasDivididas.posteriores) {
-                actual.renderizar(this.lienzoPosterior)
+                actual.renderizar({ lienzoReceptor: this.lienzoPosterior })
             }
+            this.modoFusionPosterior = capasDivididas.posteriores[0].modoFusion
         } else {
             if (this.lienzoPosterior) this.lienzoPosterior.limpiar()
-
         }
         if (!this.lienzoCapaActual)
             this.lienzoCapaActual = lienzos.obtener({ largo: this.confCapas.largoLienzo, alto: this.confCapas.altoLienzo, tipo: 'temporal' })
         this.lienzoCapaActual.limpiar()
-        this.capaActiva.renderizar(this.lienzoCapaActual)
+        this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual })
     },
     clonarCapa(carpeta, capa) { //id carpeta es el padre, capa es la carpeta a clonar
         if (carpeta.tipoCapa === 'grupo') {
@@ -2457,7 +2486,7 @@ const mesaTrabajo = {
         this.capaActiva.recuperarTrazo()
     },
     renderizar(lienzo) {
-        this.capas.renderizar(lienzo)
+        this.capas.renderizar({ lienzoReceptor: lienzo })
         this.trazoGuardar = undefined
         this.trazoTemporal = undefined
     },
