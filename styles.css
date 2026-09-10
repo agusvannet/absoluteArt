@@ -96,6 +96,7 @@ body {
     top: 50%;
     right: 50%;
     transform: translateY(-50%) translateX(50%);
+    touch-action: none;
 }
 
 #agregarCapas {
