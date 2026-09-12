@@ -106,7 +106,6 @@
                         oninput="document.getElementById('rangeGrosor').value = this.value, grosor = Number(this.value)"
                         value="10" id="numberGrosor" min="1" max="300" step="1">
                 </div>
-
                 <div class="tolerancia verde  ">
                     <p>opprin</p>
                     <input type="range" name=""
@@ -116,7 +115,6 @@
                         oninput="document.getElementById('rangeOpacidadPrincipal').value = this.value, opacidadPrincipal = Number(this.value)"
                         value="1" id="numberOpacidadPrincipal" min="0" max="1" step="0.01">
                 </div>
-
                 <div class="tolerancia verde  ">
                     <p>opsecu</p>
                     <input type="range" name=""
@@ -135,23 +133,40 @@
                         oninput="document.getElementById('rangueSeparacionSello').value = this.value, separacion = Number(this.value)"
                         value="1" id="numberSeparacionSello" min="0" max="5" step="0.01">
                 </div>
-                <div class="inputsLapizFigura inputsBalde">
-                    <div class="opcion">
-                        <p>continuidad</p>
-                        <input type="checkbox" name="" oninput="continuidad = this.checked">
-                    </div>
-                    <div class="opcion">
-                        <p>respSigX</p>
-                        <input type="checkbox" checked name=""
-                            oninput="respetarSignoX = this.checked ; console.log(this.checked)">
-                    </div>
-                    <div class="opcion">
-                        <p>respSigY</p>
-                        <input type="checkbox" checked name=""
-                            oninput="respetarSignoY = this.checked ; console.log(this.checked)">
-                    </div>
+                <div class="tolerancia verde  ">
+                    <p>suaviz</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbersuavizado').value = this.value, suavizado = Number(this.value)"
+                        value="1" id="ranguesuavizado" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguesuavizado').value = this.value, suavizado = Number(this.value)"
+                        value="1" id="numbersuavizado" min="0" max="1" step="0.01">
                 </div>
-
+                <div class="tolerancia verde  ">
+                    <p>puntSuav</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberpuntsuavizado').value = this.value, puntosSuavizado = Number(this.value)"
+                        value="2" id="ranguepuntsuavizado" min="2" max="100" step="1">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguepuntsuavizado').value = this.value, puntosSuavizado = Number(this.value)"
+                        value="2" id="numberpuntsuavizado" min="2" max="100" step="1">
+                </div>
+            </div>
+            <div class="inputsLapizFigura inputsBalde">
+                <div class="opcion">
+                    <p>continuidad</p>
+                    <input type="checkbox" name="" oninput="continuidad = this.checked">
+                </div>
+                <div class="opcion">
+                    <p>respSigX</p>
+                    <input type="checkbox" checked name=""
+                        oninput="respetarSignoX = this.checked ; console.log(this.checked)">
+                </div>
+                <div class="opcion">
+                    <p>respSigY</p>
+                    <input type="checkbox" checked name=""
+                        oninput="respetarSignoY = this.checked ; console.log(this.checked)">
+                </div>
             </div>
 
             <div class="configuracionBalde">

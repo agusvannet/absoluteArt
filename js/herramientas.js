@@ -1,7 +1,3 @@
-
-
-
-
 class herramientaDibujo extends herramienta {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
@@ -382,9 +378,13 @@ class pincelSellosSimple extends pincel {
         const sello = pintor.obtenerHerramienta(trazo.sello)
         if (!trazo.continuidad) {
             for (let i = 0; i < trazo.trayectos.length; i++) {
-                const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayectoSeparar: i })
-                if (trazo.sobrante !== undefined) trazo.sobrante = infoSeparacion.sobrante
-                const cordenadas = infoSeparacion.trayectoSeccionado
+                let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado(trazo.trayectos[i],  trazo.puntosSuavizado) : trazo.trayectos[i]
+                if (trazo.separar) {
+                    const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
+                    trayectoSuavizado = infoSeparacion.trayectoSeccionado
+                    if (trazo.sobrante !== undefined) trazo.sobrante = infoSeparacion.sobrante
+                }
+                const cordenadas = trayectoSuavizado
                 for (const cord of cordenadas) {
                     sello.usar({
                         x: cord.x + trazo.puntoInicial.x,
@@ -399,7 +399,7 @@ class pincelSellosSimple extends pincel {
                 }
             }
         } else {
-            const cordenadasAbsolutas = trazo.obtenerTrayectosCordsAbsolutas();
+            const cordenadasAbsolutas = trazo.obtenerTrayectoSuavizado(trazo.obtenerTrayectosCordsAbsolutas());
             for (let i = 0; i < trazo.trayectos.length; i++) {
                 for (const cord of trazo.trayectos[i]) {
                     sello.usar({
@@ -509,8 +509,9 @@ class figuraSellos extends lineaSimple {
         const clonTrazo = trazo.clonar();
         clonTrazo.herramienta = 'pincelSellosSimple'
         clonTrazo.modoDibujo = 'normal'
+        clonTrazo.separar = false;
+        clonTrazo.suavizado = 0;
         const puntosVertices = this.transformarVerticesPuntos(trazo)
-
         clonTrazo.trayectos = puntosVertices;
         pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, clonTrazo)
 
@@ -523,6 +524,8 @@ class figuraSellos extends lineaSimple {
 
         const restarX = (caja.x < 0 && trazo.respetarSignoX) ? true : false
         const restarY = (caja.y < 0 && trazo.respetarSignoY) ? true : false
+
+        let sobrante = 0
         for (const vertices of this.verticesFigura) {
             const puntos = []
             for (const vertice of vertices) {
@@ -534,7 +537,9 @@ class figuraSellos extends lineaSimple {
                     y: verticeY * caja.alto + caja.y
                 })
             }
-            secciones.push(puntos)
+            const seccionado = trazo.ajustarSeparacionTrayecto({ sobrante, trayecto: puntos })
+            sobrante = seccionado.sobrante
+            secciones.push(seccionado.trayectoSeccionado)
         }
         return secciones;
     }

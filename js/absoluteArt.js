@@ -425,12 +425,13 @@ class historial {
             historialCapturas: this.clonarCapturas()
         }
     }
-    clonar(){
-        
+    clonar() {
+
     }
 }
 class trazo {
-    constructor({ trayectos,
+    constructor({
+        trayectos,
         puntoInicial,
         rgba,
         grosor,
@@ -447,6 +448,8 @@ class trazo {
         colorCompararBalde,
         respetarSignoX,
         respetarSignoY,
+        suavizado,
+        puntosSuavizado,
     }) { // le puedo agregar cosas pero por ahora va este 
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -489,10 +492,13 @@ class trazo {
         this.colorCompararBalde = colorCompararBalde;
         this.respetarSignoX = respetarSignoX;
         this.respetarSignoY = respetarSignoY;
+        this.suavizado = suavizado;
+        this.puntosSuavizado = puntosSuavizado;
     }
+    separar = true
     minimoSeparacion = 0.01
-    velPxsMin = 300
-    velPxsMax = 3000
+    maxPxMs = 20
+    minPxMs = 3000
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
         let y1 = 0;
@@ -627,6 +633,8 @@ class trazo {
             },
             respetarSignoX: this.respetarSignoX,
             respetarSignoY: this.respetarSignoY,
+            suavizado,
+            puntosSuavizado,
         })
     }
     agregarTrazo(cordenada) {
@@ -669,14 +677,14 @@ class trazo {
         }
         return cordenadas;
     }
-    ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayectoSeparar = 0 } = {}) {
+    ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto } = {}) {
         let trayectoSeccionado = [];
-        if (sobrante === 0) trayectoSeccionado = [{ x: this.trayectos[trayectoSeparar][0].x, y: this.trayectos[trayectoSeparar][0].y }];
-        if (!separacion) separacion = this.grosor * Math.max(this.separacion, this.minimoSeparacion);
+        if (sobrante === 0) trayectoSeccionado = [{ x: trayecto[0].x, y: trayecto[0].y }];
+        if (!separacion) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, this.minimoSeparacion)));
 
-        for (let i = 0; i < this.trayectos[trayectoSeparar].length - 1; i++) {
-            const origenTramo = this.trayectos[trayectoSeparar][i];
-            const finTramo = this.trayectos[trayectoSeparar][i + 1];
+        for (let i = 0; i < trayecto.length - 1; i++) {
+            const origenTramo = trayecto[i];
+            const finTramo = trayecto[i + 1];
 
             const largo = finTramo.x - origenTramo.x;
             const alto = finTramo.y - origenTramo.y;
@@ -708,6 +716,38 @@ class trazo {
         }
 
         return { trayectoSeccionado, sobrante };
+    }
+    obtenerTrayectoSuavizado(puntos, puntosSuavizado) {
+        if (puntos.length < 3) return puntos;
+
+        const trayectoSuavizado = [{ x: puntos[0].x, y: puntos[0].y }];
+        const radio = Math.floor(puntosSuavizado / 2);
+
+        for (let i = 1; i < puntos.length - 1; i++) {
+            let sumaX = 0, sumaY = 0, puntosValidos = 0;
+
+            const minimo = Math.max(0, i - radio);
+            const maximo = Math.min(puntos.length - 1, i + radio);
+
+            for (let n = minimo; n <= maximo; n++) {
+                sumaX += puntos[n].x;
+                sumaY += puntos[n].y;
+                puntosValidos++;
+            }
+
+            const puntoPromedio = {
+                x: sumaX / puntosValidos,
+                y: sumaY / puntosValidos
+            };
+
+            trayectoSuavizado.push({
+                x: puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
+                y: puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
+            });
+        }
+
+        trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
+        return trayectoSuavizado;
     }
 }
 
@@ -754,6 +794,7 @@ const mesaTrabajo = {
             })
         this.prepararLienzosSanduich()
         this.trazoGuardar.agregarTrazo(cordenada)
+        console.log(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
 
@@ -771,10 +812,12 @@ const mesaTrabajo = {
 
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             this.trazoGuardar.agregarCordenada(cordenada)
-
-            this.trazoTemporal.trayectos[0][0] = this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - 2]
-            this.trazoTemporal.trayectos[0][1] = this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - 1]
-
+            let cordenadasManetener = Math.min(this.trazoGuardar.trayectos[0].length, this.trazoGuardar.puntosSuavizado)
+            console.log(cordenadasManetener)
+            for (let i = cordenadasManetener; i > 0; i--) {
+                if (this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - i] - i === undefined) continue
+                this.trazoTemporal.trayectos[0][cordenadasManetener - i] = this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - i]
+            }
         } else {
             if (this.trazoTemporal.trayectos[this.trazoTemporal.trayectos.length - 1].length > 1) {
 
@@ -1043,13 +1086,14 @@ const mesaTrabajo = {
 const pintor = {
     lienzosIntermediarios: {
         lienzoPreVisualizacion: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoPreVisualizacionSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' })
     },
     categorias: new categoria('herramientas'),
     listaHerramientas: [],
-    listaCategorias: [],
+    listaCategorias: { herramientas: this.categorias, undefined: this.categorias },
     bufferSeccionado: undefined,
     herramientaUltimoDibujo: undefined,
     ultimoLienzoId: undefined,
@@ -1105,7 +1149,7 @@ const pintor = {
     },
     cargarCategorias(categorias) { // orden ordenado por dios
         const agregarCategoria = ({ nombreCategoria, categoriaPadre }) => {
-            this.listaCategorias.push(this.agregarCategoria(new categoria(nombreCategoria, this.obtenerCategoria(categoriaPadre))))
+            this.listaCategorias[nombreCategoria] = (this.agregarCategoria(new categoria(nombreCategoria, this.obtenerCategoria(categoriaPadre))))
         };
         for (const categoria of categorias) {
             agregarCategoria(categoria);
@@ -1132,12 +1176,8 @@ const pintor = {
         }
     },
     obtenerCategoria(nombre) {
-        for (const categoria of this.listaCategorias) {
-            if (categoria.nombre === nombre) {
-                return categoria
-            }
-        }
-        return this.categorias;
+        if (!this.listaCategorias[nombre]) return this.categorias
+        return this.listaCategorias[nombre];
     },
     acomLienzInterm({ alto, largo }) {
         const nombreLienzo = Object.keys(this.lienzosIntermediarios)

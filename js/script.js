@@ -440,10 +440,11 @@ let reflejarCanal = {
 let setearBalde = true;
 let reflejarCanales = false;
 let modeloColorComparador = 'rgb'
-
 let compararColorDistinto = false;
 let respetarSignoX = true;
 let respetarSignoY = true;
+let suavizado = 1;
+let puntosSuavizado = 2;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -458,7 +459,6 @@ function obtenerColores() {
     }];
     return rgba;
 }
-
 function obtenerColorComparar(cordInicial) {
     if (compararColorDistinto) {
         return {
@@ -498,6 +498,9 @@ function obtenerTrazoActual(cordInicial) {
         colorCompararBalde: obtenerColorComparar(cordInicial),
         respetarSignoX,
         respetarSignoY,
+
+        suavizado,
+        puntosSuavizado,
     })
     return trazoGuardar;
 }
@@ -601,10 +604,14 @@ canvasDom.addEventListener('pointerdown', (e) => {
 
 let ultimoMovimiento = 0;
 let ultimoCord = { x: 0, y: 0 };
+let maximoPxMs = 0
+let minimoPxMs = 10
 canvasDom.addEventListener('pointermove', (e) => {
     let tiempMovimiento = performance.now() - ultimoMovimiento;
-    if (ultimoMovimiento = 0) tiempMovimiento = 0
-    //   console.log(tiempMovimiento)
+    let pxMs = Math.hypot(Math.abs(ultimoCord.x) - Math.abs(e.clientX), Math.abs(ultimoCord.y) - Math.abs(e.clientY)) / tiempMovimiento
+    maximoPxMs = Math.max(maximoPxMs, pxMs)
+    minimoPxMs = Math.min(minimoPxMs, pxMs)
+    //console.log('actual : ', pxMs, 'maximoPxMs : ', maximoPxMs, 'minimoPxMs : ', minimoPxMs,)
     if (clickeando) {
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
         mesaTrabajo.arrastreClick({
@@ -613,6 +620,7 @@ canvasDom.addEventListener('pointermove', (e) => {
             lienzoReal: canvas
         })
     }
+    ultimoCord = { x: e.clientX, y: e.clientY };
     ultimoMovimiento = performance.now()
 });
 
@@ -626,3 +634,59 @@ canvasDom.addEventListener('pointerup', (e) => {
     })
 
 });
+
+
+/*
+
+let prevX = null;
+let prevY = null;
+let prevTime = null;
+let velMax = 0;
+
+function registrarVelocidadPuntero(e) {
+    // Extrae todos los sub-eventos nativos acumulados por el hardware
+    const eventos = typeof e.getCoalescedEvents === 'function'
+        ? e.getCoalescedEvents()
+        : [e];
+
+    for (const ev of eventos) {
+        const x = ev.clientX;
+        const y = ev.clientY;
+        const t = ev.timeStamp; // Milisegundos de alta resolución del sistema
+
+        if (prevTime !== null) {
+            const dt = t - prevTime;
+
+            // Filtra deltas nulos o imperceptibles para evitar Infinity
+            if (dt > 0.05) {
+                const dx = x - prevX;
+                const dy = y - prevY;
+                const dist = Math.hypot(dx, dy);
+                const velActual = dist / dt; // px/ms
+
+                if (velActual > velMax) {
+                    velMax = velActual;
+                    console.log(`[RÉCORD] velMax: ${velMax.toFixed(3)} px/ms | dt: ${dt.toFixed(2)} ms | dist: ${dist.toFixed(2)} px`);
+                } else {
+                    console.log(`vel: ${velActual.toFixed(3)} px/ms | dt: ${dt.toFixed(2)} ms`);
+                }
+            }
+        }
+
+        prevX = x;
+        prevY = y;
+        prevTime = t;
+    }
+}
+
+function resetearPuntero() {
+    prevX = null;
+    prevY = null;
+    prevTime = null;
+}
+
+// Escuchas globales sobre la ventana
+window.addEventListener('pointermove', registrarVelocidadPuntero);
+window.addEventListener('pointerup', resetearPuntero);
+window.addEventListener('pointerleave', resetearPuntero);
+*/
