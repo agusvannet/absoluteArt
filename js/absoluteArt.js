@@ -485,8 +485,8 @@ class trazo {
                 s: reflejarCanal.hsv.s,
                 v: reflejarCanal.hsv.v
             }
-        },
-            this.setearBalde = setearBalde;
+        }
+        this.setearBalde = setearBalde;
         this.modeloColorComparador = modeloColorComparador;
         this.reflejarCanales = reflejarCanales;
         this.colorCompararBalde = colorCompararBalde;
@@ -1105,6 +1105,7 @@ const pintor = {
         circuloSimple: (parametros) => { return new circuloSimple(parametros) },
         poligonoSimple: (parametros) => { return new poligonoSimple(parametros) },
         selloCuadrado: (parametros) => { return new selloCuadrado(parametros) },
+        cuadradoDobleColor: (parametros) => { return new cuadradoDobleColor(parametros) },
         selloCaligrafia: (parametros) => { return new selloCaligrafia(parametros) },
         selloCircular: (parametros) => { return new selloCircular(parametros) },// nombre, cateogoria ( basicos )
         pincelSellosSimple: (parametros) => { return new pincelSellosSimple(parametros) },// nombre, cateogoria ( basicos )
