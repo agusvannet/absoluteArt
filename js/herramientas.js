@@ -556,7 +556,6 @@ class figuraSellos extends lineaSimple {
         pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, clonTrazo)
 
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
-
     }
     transformarVerticesPuntos(trazo) {
         const caja = trazo.cajaDelimitadora()
@@ -840,23 +839,6 @@ const herramientas = [
                 [{ x: 0, y: 0.64 }, { x: 1, y: 0.64 }], [{ x: 0, y: 0.68 }, { x: 1, y: 0.68 }], [{ x: 0, y: 0.72 }, { x: 1, y: 0.72 }], [{ x: 0, y: 0.76 }, { x: 1, y: 0.76 }],
                 [{ x: 0, y: 0.80 }, { x: 1, y: 0.80 }], [{ x: 0, y: 0.84 }, { x: 1, y: 0.84 }], [{ x: 0, y: 0.88 }, { x: 1, y: 0.88 }], [{ x: 0, y: 0.92 }, { x: 1, y: 0.92 }],
                 [{ x: 0, y: 0.96 }, { x: 1, y: 0.96 }], [{ x: 0, y: 1.00 }, { x: 1, y: 1.00 }]]
-        }
-    },
-    {
-        clase: 'figuraSellos', parametros: {
-            nombre: 'prueba', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
-                [[{ x: 0, y: 0 }, { x: 1, y: 0 }],
-                [{ x: 0, y: 0.1 }, { x: 1, y: 0.1 }],
-                [{ x: 0, y: 0.2 }, { x: 1, y: 0.2 }],
-                [{ x: 0, y: 0.3 }, { x: 1, y: 0.3 }],
-                [{ x: 0, y: 0.4 }, { x: 1, y: 0.4 }],
-                [{ x: 0, y: 0.5 }, { x: 1, y: 0.5 }],
-                [{ x: 0, y: 0.6 }, { x: 1, y: 0.6 }],
-                [{ x: 0, y: 0.7 }, { x: 1, y: 0.7 }],
-                [{ x: 0, y: 0.8 }, { x: 1, y: 0.8 }],
-                [{ x: 0, y: 0.9 }, { x: 1, y: 0.9 }],
-                [{ x: 0, y: 1 }, { x: 1, y: 1 }],
-                ]
         }
     },
 ]
