@@ -718,7 +718,7 @@ class trazo {
     obtenerTrayectoSuavizado({ puntos, puntosSuavizado, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
         if (puntos.length < 3) return puntos;
         let trayectoSuavizado = [];
-        if (inicioCalcular === 0) trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y })
+        if (inicioCalcular === 0) { console.log('a'), trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y }) }
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
@@ -801,9 +801,10 @@ const mesaTrabajo = {
         this.trazoGuardar.agregarTrazo(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
+        this.trazoTemporal.suavizado = 0;
         this.trazoTemporalSecundario = this.trazoTemporal.clonar()
         if (this.herramientaActiva.preRenderizable) {
-            lienzoReal.limpiar()
+
             this.renderizarTrazo({
                 lienzoReal,
                 trazoTemporalSecundario: this.trazoTemporalSecundario,
@@ -813,59 +814,25 @@ const mesaTrabajo = {
         }
     },
     arrastreClick({ cordenada, lienzoReal }) {
-        if (this.capasIndividualesVivas.length === 0) return;
-
+        if (this.capasIndividualesVivas.length === 0) return
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
-            this.trazoGuardar.agregarCordenada(cordenada);
-            const trayecto = this.trazoGuardar.trayectos[0];
-            const totalPuntos = trayecto.length;
-            
-            const puntosSuavizado = this.trazoGuardar.puntosSuavizado || 0;
-            const margen = Math.floor(puntosSuavizado / 2);
-
-            // El último punto que tiene suficientes vecinos por delante para no deformarse más
-            const puntoConfirmado = totalPuntos - 1 - margen;
-
-            // --- 1. GOTERO (Tramo fijo) ---
-            if (puntoConfirmado > this.indiceGotero) {
-                // Le pasamos el tramo con el margen atrás y adelante para la matemática del suavizado
-                const inicioTramo = Math.max(0, this.indiceGotero - margen);
-                const finTramo = Math.min(totalPuntos - 1, puntoConfirmado + margen);
-
-                this.trazoTemporal.trayectos[0] = trayecto.slice(inicioTramo, finTramo + 1);
-
-                // Le indicamos los índices relativos para que dibuje solo la diferencia nueva
-                this.trazoTemporal.inicioDibujo = this.indiceGotero - inicioTramo;
-                this.trazoTemporal.finDibujo = puntoConfirmado - inicioTramo;
-
-                // Movemos la barrera del gotero
-                this.indiceGotero = puntoConfirmado;
-            } else {
-                this.trazoTemporal.trayectos[0] = []; // Nada para estampar en el gotero aún
-            }
-
-            // --- 2. PREVISUALIZACIÓN (Cabeza flotante) ---
-            // Toma desde lo último que pintó el gotero hasta donde esté el mouse hoy
-            this.trazoTemporalSecundario.trayectos[0] = trayecto.slice(this.indiceGotero);
-            this.trazoTemporalSecundario.inicioDibujo = 0;
-            this.trazoTemporalSecundario.finDibujo = this.trazoTemporalSecundario.trayectos[0].length - 1;
-
+            this.trazoGuardar.agregarCordenada(cordenada)
+            // no dejar esto asi , en cuanto se encuentre una buena
+            //  solucion OPTIMIZAR SINO EL RENDIMIENTO DEPENDE TOTALMENTE DE LA CANTIDAD DE PUNTOS , VER COMO USAR GOTERO
         } else {
             if (this.trazoTemporal.trayectos[this.trazoTemporal.trayectos.length - 1].length > 1) {
-                this.trazoTemporal.remplazarUltimaCordenada(cordenada);
+                this.trazoTemporal.remplazarUltimaCordenada(cordenada)
             } else {
-                this.trazoTemporal.agregarCordenada(cordenada);
+                this.trazoTemporal.agregarCordenada(cordenada)
             }
         }
-
         if (this.herramientaActiva.preRenderizable) {
-            lienzoReal.limpiar();
             this.renderizarTrazo({
                 lienzoReal,
                 trazoTemporal: this.trazoTemporal,
                 trazoTemporalSecundario: this.trazoTemporalSecundario,
                 trazoReal: this.trazoGuardar,
-            });
+            })
         }
     },
     finClick({ cordenada, lienzoReal }) {
@@ -875,7 +842,6 @@ const mesaTrabajo = {
         if (this.capasIndividualesVivas.length === 0) return
         if (!this.trazoGuardar) return
 
-        lienzoReal.limpiar()
         this.trazoGuardar.agregarCordenada(cordenada)
 
         if (!this.herramientaActiva.trazoEnProceso(this.trazoGuardar)) {
@@ -903,11 +869,19 @@ const mesaTrabajo = {
     },
     renderizarTrazo({ lienzoReal, trazoTemporalSecundario, trazoTemporal, trazoReal }) {
         if (!this.herramientaActiva.preRenderizable) return
-        if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
-            this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal })
-        } else {
+        lienzoReal.limpiar()
+        // esto no debe quedar asi , el pinceln debe ser optimizado para utilizar el gotero , cada movimiento debe ser de rendimiento constante no dependiente de las cnantidad
+        // de puntos , para poder seguir avanzando lo ignorare y lo tratere como una figura normal , quitar los // cuando encuentre una solucion
+
+        /*        if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles')))
+                    this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal })
+                else
+                    this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
+        */
+        if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles')))
+            this.renderizarFigura({ lienzoReal, trazo: trazoReal })
+        else
             this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
-        }
     },
     renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal }) {
         const lienzoPincelPrevi = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
@@ -919,31 +893,30 @@ const mesaTrabajo = {
 
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0, })
         trazoTemporalSecundario.rgba[0].a = 1
-        trazoTemporal.rgba[0].a = 0.5
+        trazoTemporal.rgba[0].a = 1
 
         this.lienzoCapaActual.limpiar()
         this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
 
-        if (trazoTemporal.trayectos[0].length) this.herramientaActiva.dibujo(lienzoPincelGotero, trazoTemporal)
-        if (trazoTemporal.trayectos[0].length) lienzoFusion.pegarLienzo({ lienzo: lienzoPincelGotero, x: 0, y: 0 })
+        this.herramientaActiva.dibujo(lienzoPincelGotero, trazoTemporal)
+        lienzoFusion.pegarLienzo({ lienzo: lienzoPincelGotero, x: 0, y: 0 })
+
         trazoTemporalSecundario.sobrante = trazoTemporal.sobrante
         this.herramientaActiva.dibujo(lienzoPincelPrevi, trazoTemporalSecundario)
         lienzoFusion.pegarLienzo({ lienzo: lienzoPincelPrevi, x: 0, y: 0 })
 
-
         this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoFusion, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
-
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
     renderizarFigura({ lienzoReal, trazo }) {
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
 
+        console.log(trazo)
 
         this.lienzoCapaActual.limpiar()
         this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
         pintor.dibujar(this.lienzoCapaActual, trazo)
-
 
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
@@ -1165,7 +1138,7 @@ const pintor = {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
 
-        herramienta.usar({
+        const returnar = herramienta.usar({
             lienzo: lienzoDibujar,
             trazo,
             lienzoIntermediario: this.lienzosIntermediarios,
@@ -1176,6 +1149,7 @@ const pintor = {
         if (lienzoDibujar.tipo !== 'temporal')
             this.ultimoLienzoId = lienzoDibujar.id
         this.lienzosIntermediarios.lienzoComun.limpiar()
+        return returnar
     },
     trazoComplejo(trazo) {
         return this.obtenerHerramienta(trazo.herramienta).trazoComplejo(trazo);

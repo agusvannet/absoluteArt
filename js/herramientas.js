@@ -483,15 +483,17 @@ class pincelSellosSimple extends pincel {
     dibujo(lienzo, trazo) {
         const sello = pintor.obtenerHerramienta(trazo.sello)
         if (!trazo.continuidad) {
+            let ultimoPunto;
             for (let i = 0; i < trazo.trayectos.length; i++) {
                 let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ inicioCalcular: trazo.inicioDibujo, finCalcular: trazo.finDibujo, puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
                 if (trazo.separar) {
                     const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
                     trayectoSuavizado = infoSeparacion.trayectoSeccionado
-                    trazo.sobrante = infoSeparacion.sobrante
+                    if(typeof(trazo.sobrante) === Number)trazo.sobrante = infoSeparacion.sobrante
                 }
                 const cordenadas = trayectoSuavizado
                 for (const cord of cordenadas) {
+                    ultimoPunto = cord
                     sello.usar({
                         x: cord.x + trazo.puntoInicial.x,
                         y: cord.y + trazo.puntoInicial.y,
@@ -502,57 +504,28 @@ class pincelSellosSimple extends pincel {
                     })
                 }
             }
+            return ultimoPunto
         } else {
-            if (sello.conectable) {
-                console.log()
-                for (let i = 0; i < trazo.trayectos.length; i++) {
-                    let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
-                    const obtenerTrayectoAsboluto = () => {
-                        const trayecto = []
-                        for (const cord of trayectoSuavizado) {
-                            trayecto.push({ x: cord.x + trazo.puntoInicial.x, y: cord.y + trazo.puntoInicial.y })
-                        }
-                        return trayecto
-                    }
-                    const cordAbsoluta = obtenerTrayectoAsboluto();
-                    for (const cord of cordAbsoluta) {
-                        sello.usar({
-                            x: cord.x,
-                            y: cord.y,
-                            grosor: trazo.grosor,
-                            rgb: trazo.rgba,
-                            a: 1,
-                            lienzo: lienzo
-                        })
-                    }
-                    sello.conectarSellos({
-                        trayecto: cordAbsoluta,
-                        grosor: trazo.grosor,
-                        rgb: trazo.rgba,
-                        a: 1,
-                        lienzo: lienzo
-                    })
-
-                }
-            } else {
-                const separacionActual = trazo.separacion
-                const separarActual = trazo.separar
-                trazo.separar = true
-                trazo.separacion = 0
-                trazo.continuidad = false
-                this.dibujo(lienzo, trazo)
-                trazo.separar = separarActual
-                trazo.separacion = separacionActual
-                trazo.continuidad = true
-            }
+            const separacionActual = trazo.separacion
+            const separarActual = trazo.separar
+            trazo.separar = true
+            trazo.separacion = 0
+            trazo.continuidad = false
+            const returnar = this.dibujo(lienzo, trazo)
+            trazo.separar = separarActual
+            trazo.separacion = separacionActual
+            trazo.continuidad = true
+            return returnar
         }
+
 
     }
 
     usar({ lienzo, lienzoIntermediario, trazo }) {
         if (trazo.rgba[0].a === 0) return
-        this.dibujo(lienzoIntermediario.lienzoComun, trazo)
+        const returnar = this.dibujo(lienzoIntermediario.lienzoComun, trazo)
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
+        return returnar
     }
 }
 class figuraSellos extends lineaSimple {
