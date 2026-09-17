@@ -13,7 +13,6 @@ class herramienta {
         this.categoria = categoria; // igual a carpeta padre
     }
     preRenderizable = true;
-    requiereSegmentacion = false;
     usar(lienzo, trazo) {
     }
 
@@ -32,7 +31,6 @@ class herramienta {
     }
 
 }
-
 class capaBase {
     constructor(capaPadre, idCapa, lienzo, modoFusion = 'normal') {
         this.lienzo = lienzo
@@ -717,21 +715,20 @@ class trazo {
 
         return { trayectoSeccionado, sobrante };
     }
-    obtenerTrayectoSuavizado(puntos, puntosSuavizado) {
+    obtenerTrayectoSuavizado({ puntos, puntosSuavizado, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
         if (puntos.length < 3) return puntos;
-
-        const trayectoSuavizado = [{ x: puntos[0].x, y: puntos[0].y }];
+        let trayectoSuavizado = [];
+        if (inicioCalcular === 0) trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y })
         const radio = Math.floor(puntosSuavizado / 2);
 
-        for (let i = 1; i < puntos.length - 1; i++) {
+        for (let i = inicioCalcular; i <= finCalcular; i++) {
             let sumaX = 0, sumaY = 0, puntosValidos = 0;
 
             const minimo = Math.max(0, i - radio);
             const maximo = Math.min(puntos.length - 1, i + radio);
-
             for (let n = minimo; n <= maximo; n++) {
-                sumaX += puntos[n].x;
-                sumaY += puntos[n].y;
+                sumaX += /*(trayectoSuavizado[n]) ? trayectoSuavizado[n].x :*/ puntos[n].x;
+                sumaY += /*(trayectoSuavizado[n]) ? trayectoSuavizado[n].y :*/ puntos[n].y;
                 puntosValidos++;
             }
 
@@ -746,7 +743,7 @@ class trazo {
             });
         }
 
-        trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
+        if (finCalcular === puntos.length - 1) trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
         return trayectoSuavizado;
     }
 }
@@ -766,7 +763,9 @@ const mesaTrabajo = {
     capasGrupoVivas: [],
     capaActiva: undefined,
     grupoCapasActiva: undefined,
+
     trazoTemporal: undefined,
+    trazoTemporalSecundario: undefined,
     trazoGuardar: undefined,
 
     lienzoPrevio: undefined,
@@ -786,22 +785,28 @@ const mesaTrabajo = {
 
         this.herramientaActiva = pintor.obtenerHerramienta(this.trazoGuardar.herramienta);
 
-        if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles')))
+        if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
             lienzos.acomodar({
                 lienzo: pintor.lienzosIntermediarios.lienzoPreVisualizacion,
                 alto: this.confCapas.altoLienzo,
                 largo: this.confCapas.largoLienzo
             })
+            lienzos.acomodar({
+                lienzo: pintor.lienzosIntermediarios.lienzoPreVisualizacionSecundario,
+                alto: this.confCapas.altoLienzo,
+                largo: this.confCapas.largoLienzo
+            })
+        }
         this.prepararLienzosSanduich()
         this.trazoGuardar.agregarTrazo(cordenada)
-        console.log(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
         this.trazoTemporal.sobrante = 0;
-
+        this.trazoTemporalSecundario = this.trazoTemporal.clonar()
         if (this.herramientaActiva.preRenderizable) {
             lienzoReal.limpiar()
             this.renderizarTrazo({
                 lienzoReal,
+                trazoTemporalSecundario: this.trazoTemporalSecundario,
                 trazoTemporal: this.trazoTemporal,
                 trazoReal: this.trazoGuardar,
             })
@@ -811,16 +816,24 @@ const mesaTrabajo = {
         if (this.capasIndividualesVivas.length === 0) return
 
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
+            const trayectoActual = this.trazoGuardar.trayectos[0]
             this.trazoGuardar.agregarCordenada(cordenada)
-            let cordenadasManetener = Math.min(this.trazoGuardar.trayectos[0].length, this.trazoGuardar.puntosSuavizado)
-            console.log(cordenadasManetener)
-            for (let i = cordenadasManetener; i > 0; i--) {
-                if (this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - i] - i === undefined) continue
-                this.trazoTemporal.trayectos[0][cordenadasManetener - i] = this.trazoGuardar.trayectos[0][this.trazoGuardar.trayectos[0].length - i]
+            let cordenadasManetener = Math.round(this.trazoGuardar.puntosSuavizado * 1.5)
+
+            this.trazoTemporalSecundario.trayectos[0].push(trayectoActual[trayectoActual.length - 1])
+            
+            if (this.trazoTemporalSecundario.trayectos[0].length > cordenadasManetener) {
+                this.trazoTemporal.trayectos[0].push(this.trazoTemporalSecundario.trayectos[0].shift())
+
+                if (this.trazoTemporal.trayectos[0].length > this.trazoGuardar.puntosSuavizado + 1)
+                    this.trazoTemporal.trayectos[0].shift()
+
+                this.trazoTemporal.inicioDibujo = Math.max(0, this.trazoTemporal.trayectos[0].length - (Math.floor(this.trazoGuardar.puntosSuavizado / 2) + 1)) // poner aca tamaño menos mitad tamañs
+                this.trazoTemporal.finDibujo = this.trazoTemporal.inicioDibujo + 1
             }
+
         } else {
             if (this.trazoTemporal.trayectos[this.trazoTemporal.trayectos.length - 1].length > 1) {
-
                 this.trazoTemporal.remplazarUltimaCordenada(cordenada)
             } else {
                 this.trazoTemporal.agregarCordenada(cordenada)
@@ -832,11 +845,15 @@ const mesaTrabajo = {
             this.renderizarTrazo({
                 lienzoReal,
                 trazoTemporal: this.trazoTemporal,
+                trazoTemporalSecundario: this.trazoTemporalSecundario,
                 trazoReal: this.trazoGuardar,
             })
         }
     },
     finClick({ cordenada, lienzoReal }) {
+        console.log(this.trazoTemporal)
+        console.log(this.trazoTemporalSecundario)
+        console.log(this.trazoGuardar)
         if (this.capasIndividualesVivas.length === 0) return
         if (!this.trazoGuardar) return
 
@@ -863,29 +880,40 @@ const mesaTrabajo = {
             })
         }
         else {
-            this.renderizarTrazo({ lienzoReal: lienzoReal, trazoTemporal: this.trazoTemporal, trazoReal: this.trazoGuardar })
+            this.renderizarTrazo({ lienzoReal: lienzoReal, trazoTemporal: this.trazoTemporal, trazoTemporalSecundario: this.trazoTemporalSecundario, trazoReal: this.trazoGuardar })
         }
     },
-    renderizarTrazo({ lienzoReal, trazoTemporal, trazoReal }) {
+    renderizarTrazo({ lienzoReal, trazoTemporalSecundario, trazoTemporal, trazoReal }) {
         if (!this.herramientaActiva.preRenderizable) return
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
-            this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal })
+            this.renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal })
         } else {
             this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
         }
     },
-    renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoReal }) {
-        const lienzoPincel = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
-        lienzos.acomodar({ lienzo: lienzoPincel, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: false })
+    renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal }) {
+        const lienzoPincelPrevi = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
+        const lienzoPincelGotero = pintor.lienzosIntermediarios.lienzoPreVisualizacionSecundario;
+        const lienzoFusion = pintor.lienzosIntermediarios.lienzoPreVisualizacionTerceario;
+        lienzos.acomodar({ lienzo: lienzoPincelPrevi, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: true })
+        lienzos.acomodar({ lienzo: lienzoPincelGotero, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: false })
+        lienzos.acomodar({ lienzo: lienzoFusion, alto: lienzoReal.alto, largo: lienzoReal.largo, limpiar: true })
 
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0, })
-        trazoTemporal.rgba[0].a = 1
+        trazoTemporalSecundario.rgba[0].a = 1
+        trazoTemporal.rgba[0].a = 0.5
 
         this.lienzoCapaActual.limpiar()
         this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
-        this.herramientaActiva.dibujo(lienzoPincel, trazoTemporal)
-        this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoPincel, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
+        if (trazoTemporal.trayectos[0].length) this.herramientaActiva.dibujo(lienzoPincelGotero, trazoTemporal)
+        if (trazoTemporal.trayectos[0].length) lienzoFusion.pegarLienzo({ lienzo: lienzoPincelGotero, x: 0, y: 0 })
+        trazoTemporalSecundario.sobrante = trazoTemporal.sobrante
+        this.herramientaActiva.dibujo(lienzoPincelPrevi, trazoTemporalSecundario)
+        lienzoFusion.pegarLienzo({ lienzo: lienzoPincelPrevi, x: 0, y: 0 })
+
+
+        this.lienzoCapaActual.pegarLienzo({ lienzo: lienzoFusion, x: 0, y: 0, alpha: this.trazoGuardar.rgba[0].a, modoPegado: trazoReal.modoDibujo })
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
@@ -1087,6 +1115,8 @@ const pintor = {
     lienzosIntermediarios: {
         lienzoPreVisualizacion: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoPreVisualizacionSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoPreVisualizacionTerceario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+
         lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' })
@@ -1094,17 +1124,17 @@ const pintor = {
     categorias: new categoria('herramientas'),
     listaHerramientas: [],
     listaCategorias: { herramientas: this.categorias, undefined: this.categorias },
-    bufferSeccionado: undefined,
     herramientaUltimoDibujo: undefined,
     ultimoLienzoId: undefined,
 
-    generadorHerramientas: { // uso generadorHerramientas['nombreClase'](parametros)
+    generadorHerramientas: {
         lineaSimple: (parametros) => { return new lineaSimple(parametros) },
         rectanguloSimple: (parametros) => { return new rectanguloSimple(parametros) },
         elipseSimple: (parametros) => { return new elipseSimple(parametros) },
         circuloSimple: (parametros) => { return new circuloSimple(parametros) },
         poligonoSimple: (parametros) => { return new poligonoSimple(parametros) },
         selloCuadrado: (parametros) => { return new selloCuadrado(parametros) },
+        selloRombo: (parametros) => { return new selloRombo(parametros) },
         cuadradoDobleColor: (parametros) => { return new cuadradoDobleColor(parametros) },
         selloCaligrafia: (parametros) => { return new selloCaligrafia(parametros) },
         selloCircular: (parametros) => { return new selloCircular(parametros) },// nombre, cateogoria ( basicos )
@@ -1117,26 +1147,10 @@ const pintor = {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
 
-        if (herramienta.requiereSegmentacion) {
-            if (this.herramientaUltimoDibujo === undefined || this.ultimoLienzoId === undefined) {
-                this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
-            }
-            else if (!this.herramientaUltimoDibujo.perteneceCategoria(this.obtenerCategoria("mutacionColor")) ||
-                lienzoDibujar.id !== this.ultimoLienzoId) {
-                utiles.calentarMotorGrafico()
-                const t0 = performance.now();
-                this.bufferSeccionado = lienzoDibujar.obtenerBufferSeccionado()
-                const t1 = performance.now();
-                console.log(`Tiempo de escaneo: ${(t1 - t0).toFixed(2)} ms`);
-            }
-
-        }
-
         herramienta.usar({
             lienzo: lienzoDibujar,
             trazo,
             lienzoIntermediario: this.lienzosIntermediarios,
-            bufferSeccionado: this.bufferSeccionado,
             comparadorPixel: this.obtenerGeneradorComparadorColor(trazo)
         })
 
@@ -1181,6 +1195,7 @@ const pintor = {
         return this.listaCategorias[nombre];
     },
     acomLienzInterm({ alto, largo }) {
+        console.log("sd")
         const nombreLienzo = Object.keys(this.lienzosIntermediarios)
         for (const actual of nombreLienzo) {
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios[actual], alto, largo })

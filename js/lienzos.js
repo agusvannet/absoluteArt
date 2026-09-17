@@ -224,7 +224,7 @@ class comparadorPixel {
     constructor({ toleranciaA = 0, nivelReflejoAlpha = 0 }) {
         this.toleranciaA = toleranciaA;
         this.nivelReflejoAlpha = nivelReflejoAlpha;
-
+        this.toleranciaTotal = toleranciaA;
     }
     obtenerComparador(pixelBase) {
     }
@@ -244,6 +244,7 @@ class comparadorPixelRGBA extends comparadorPixel {
         this.toleranciaR = toleranciaR;
         this.toleranciaG = toleranciaG;
         this.toleranciaB = toleranciaB;
+        this.toleranciaTotal = (toleranciaA + toleranciaB + toleranciaG + toleranciaR) / 4
         this.nivelReflejoR = nivelReflejoR;
         this.nivelReflejoG = nivelReflejoG;
         this.nivelReflejoB = nivelReflejoB;
@@ -290,6 +291,7 @@ class compararPixelHsv extends comparadorPixel {
         this.toleranciaH = toleranciaH;
         this.toleranciaS = toleranciaS;
         this.toleranciaV = toleranciaV;
+        this.toleranciaTotal = (toleranciaA + toleranciaH + toleranciaS + toleranciaV) / 4
         this.nivelReflejoH = nivelReflejoH;
         this.nivelReflejoS = nivelReflejoS;
         this.nivelReflejoV = nivelReflejoV;
@@ -826,6 +828,7 @@ const lienzos = {
         //   console.log('num lien crea : ', this.contadorLienzos)
         //  console.log(' max ram  : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')// es por 8 para no meter un * 2 * mas 
         this.contadorLienzos++;
+        console.log(this.contadorLienzos)
         return new lienzoHtml({
             largo,
             alto,
@@ -839,7 +842,6 @@ const lienzos = {
         if (lienzo.largo !== largo || lienzo.alto !== alto) {
             lienzo.redimenzionar(largo, alto)
         } else {
-            //console.trace((limpiar !== false))
             if (limpiar !== false) lienzo.limpiar();
         }
 

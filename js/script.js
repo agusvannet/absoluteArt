@@ -619,6 +619,8 @@ canvasDom.addEventListener('pointermove', (e) => {
             tiempoArrastre: tiempMovimiento,
             lienzoReal: canvas
         })
+
+        
     }
     ultimoCord = { x: e.clientX, y: e.clientY };
     ultimoMovimiento = performance.now()

@@ -293,6 +293,24 @@ class selloCuadrado extends sello {
         })
     }
 }
+class selloRombo extends sello {
+    constructor({ nombre, categoria }) {
+        super({ nombre, categoria })
+    }
+    usar({ x, y, grosor, rgb, a, lienzo }) { //pintarLinea({ x1, y1, x2, y2, grosor)
+        lienzo.pintarLinea({ // pintarRectangulo({ x, y, largo, alto, r, g, b, a })
+            x1: x - Math.floor(grosor / 4),
+            y1: y - Math.floor(grosor / 4),
+            x2: x + Math.floor(grosor / 4),
+            y2: y + Math.floor(grosor / 4),
+            grosor: grosor * 0.75,
+            r: rgb[0].r,
+            g: rgb[0].g,
+            b: rgb[0].b,
+            a
+        })
+    }
+}
 class cuadradoDobleColor extends sello {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
@@ -466,11 +484,11 @@ class pincelSellosSimple extends pincel {
         const sello = pintor.obtenerHerramienta(trazo.sello)
         if (!trazo.continuidad) {
             for (let i = 0; i < trazo.trayectos.length; i++) {
-                let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado(trazo.trayectos[i], trazo.puntosSuavizado) : trazo.trayectos[i]
+                let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ inicioCalcular: trazo.inicioDibujo, finCalcular: trazo.finDibujo, puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
                 if (trazo.separar) {
                     const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
                     trayectoSuavizado = infoSeparacion.trayectoSeccionado
-                    if (trazo.sobrante !== undefined) trazo.sobrante = infoSeparacion.sobrante
+                    trazo.sobrante = infoSeparacion.sobrante
                 }
                 const cordenadas = trayectoSuavizado
                 for (const cord of cordenadas) {
@@ -486,8 +504,9 @@ class pincelSellosSimple extends pincel {
             }
         } else {
             if (sello.conectable) {
+                console.log()
                 for (let i = 0; i < trazo.trayectos.length; i++) {
-                    let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado(trazo.trayectos[i], trazo.puntosSuavizado) : trazo.trayectos[i]
+                    let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
                     const obtenerTrayectoAsboluto = () => {
                         const trayecto = []
                         for (const cord of trayectoSuavizado) {
@@ -536,7 +555,6 @@ class pincelSellosSimple extends pincel {
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
     }
 }
-
 class figuraSellos extends lineaSimple {
     constructor({ nombre, categoria, verticesFigura }) {
         super({ nombre, categoria })
@@ -598,14 +616,12 @@ class baldeSimple extends herramienta {
             x: trazo.puntoInicial.x + trazo.trayectos[0][trazo.trayectos[0].length - 1].x,
             y: trazo.puntoInicial.y + trazo.trayectos[0][trazo.trayectos[0].length - 1].y
         };
-
         const colorComparar = {
             r: trazo.colorCompararBalde.r,
             g: trazo.colorCompararBalde.g,
             b: trazo.colorCompararBalde.b,
             a: trazo.colorCompararBalde.a * 255
         }
-
         const manchaClickeada = lienzo.obtenerManchaInundacion({
             cordenada: puntoBalde,
             comparadorPixel,
@@ -700,6 +716,7 @@ const herramientas = [
     { clase: 'selloCuadrado', parametros: { nombre: 'selloCuadrado', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'cuadradoDobleColor', parametros: { nombre: 'cuadradoDobleColor', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'selloCaligrafia', parametros: { nombre: 'selloCaligrafia', categoria: pintor.obtenerCategoria('sello') } },
+    { clase: 'selloRombo', parametros: { nombre: 'selloRombo', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'selloCircular', parametros: { nombre: 'selloCircular', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'pincelSellosSimple', parametros: { nombre: 'pincelSellosSimple', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
     { clase: 'baldeSimple', parametros: { nombre: 'baldeSimple', categoria: pintor.obtenerCategoria('mutacionColor') } },
