@@ -813,41 +813,59 @@ const mesaTrabajo = {
         }
     },
     arrastreClick({ cordenada, lienzoReal }) {
-        if (this.capasIndividualesVivas.length === 0) return
+        if (this.capasIndividualesVivas.length === 0) return;
 
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
-            const trayectoActual = this.trazoGuardar.trayectos[0]
-            this.trazoGuardar.agregarCordenada(cordenada)
-            let cordenadasManetener = Math.round(this.trazoGuardar.puntosSuavizado * 1.5)
-
-            this.trazoTemporalSecundario.trayectos[0].push(trayectoActual[trayectoActual.length - 1])
+            this.trazoGuardar.agregarCordenada(cordenada);
+            const trayecto = this.trazoGuardar.trayectos[0];
+            const totalPuntos = trayecto.length;
             
-            if (this.trazoTemporalSecundario.trayectos[0].length > cordenadasManetener) {
-                this.trazoTemporal.trayectos[0].push(this.trazoTemporalSecundario.trayectos[0].shift())
+            const puntosSuavizado = this.trazoGuardar.puntosSuavizado || 0;
+            const margen = Math.floor(puntosSuavizado / 2);
 
-                if (this.trazoTemporal.trayectos[0].length > this.trazoGuardar.puntosSuavizado + 1)
-                    this.trazoTemporal.trayectos[0].shift()
+            // El último punto que tiene suficientes vecinos por delante para no deformarse más
+            const puntoConfirmado = totalPuntos - 1 - margen;
 
-                this.trazoTemporal.inicioDibujo = Math.max(0, this.trazoTemporal.trayectos[0].length - (Math.floor(this.trazoGuardar.puntosSuavizado / 2) + 1)) // poner aca tamaño menos mitad tamañs
-                this.trazoTemporal.finDibujo = this.trazoTemporal.inicioDibujo + 1
+            // --- 1. GOTERO (Tramo fijo) ---
+            if (puntoConfirmado > this.indiceGotero) {
+                // Le pasamos el tramo con el margen atrás y adelante para la matemática del suavizado
+                const inicioTramo = Math.max(0, this.indiceGotero - margen);
+                const finTramo = Math.min(totalPuntos - 1, puntoConfirmado + margen);
+
+                this.trazoTemporal.trayectos[0] = trayecto.slice(inicioTramo, finTramo + 1);
+
+                // Le indicamos los índices relativos para que dibuje solo la diferencia nueva
+                this.trazoTemporal.inicioDibujo = this.indiceGotero - inicioTramo;
+                this.trazoTemporal.finDibujo = puntoConfirmado - inicioTramo;
+
+                // Movemos la barrera del gotero
+                this.indiceGotero = puntoConfirmado;
+            } else {
+                this.trazoTemporal.trayectos[0] = []; // Nada para estampar en el gotero aún
             }
+
+            // --- 2. PREVISUALIZACIÓN (Cabeza flotante) ---
+            // Toma desde lo último que pintó el gotero hasta donde esté el mouse hoy
+            this.trazoTemporalSecundario.trayectos[0] = trayecto.slice(this.indiceGotero);
+            this.trazoTemporalSecundario.inicioDibujo = 0;
+            this.trazoTemporalSecundario.finDibujo = this.trazoTemporalSecundario.trayectos[0].length - 1;
 
         } else {
             if (this.trazoTemporal.trayectos[this.trazoTemporal.trayectos.length - 1].length > 1) {
-                this.trazoTemporal.remplazarUltimaCordenada(cordenada)
+                this.trazoTemporal.remplazarUltimaCordenada(cordenada);
             } else {
-                this.trazoTemporal.agregarCordenada(cordenada)
+                this.trazoTemporal.agregarCordenada(cordenada);
             }
         }
 
         if (this.herramientaActiva.preRenderizable) {
-            lienzoReal.limpiar()
+            lienzoReal.limpiar();
             this.renderizarTrazo({
                 lienzoReal,
                 trazoTemporal: this.trazoTemporal,
                 trazoTemporalSecundario: this.trazoTemporalSecundario,
                 trazoReal: this.trazoGuardar,
-            })
+            });
         }
     },
     finClick({ cordenada, lienzoReal }) {
