@@ -627,7 +627,7 @@ class lienzoHtml extends lienzoBase {
         this.canvas.width = this.largo
         this.canvas.height = this.alto
     }
-    modosPegado = { // por nada del mundo agregar source-in
+    modosPegado = {
         normal: 'source-over',
         borrar: 'destination-out',
         multiplicar: 'multiply',
@@ -636,9 +636,10 @@ class lienzoHtml extends lienzoBase {
         aclarar: 'lighten',
         diferencia: 'difference',
         recortar: 'source-atop',
+        setear: 'sourece-in',
     }
 
-    pegarLienzo({ lienzo, x, y, alpha, modoPegado }) { // pegar en ESTE lienzo
+    pegarLienzo({ lienzo, x, y, largo = lienzo.largo, alto = lienzo.alto, alpha, modoPegado }) { // pegar en ESTE lienzo
         if (alpha !== undefined || modoPegado)
             if (alpha !== undefined || this.modosPegado[modoPegado])
                 this.ctx.save();
@@ -650,7 +651,7 @@ class lienzoHtml extends lienzoBase {
             if (this.modosPegado[modoPegado])
                 this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
 
-        this.ctx.drawImage(lienzo.canvas, x, y)
+        this.ctx.drawImage(lienzo.canvas, x, y, largo, alto)
 
         if (alpha !== undefined || modoPegado)
             if (alpha !== undefined || this.modosPegado[modoPegado])

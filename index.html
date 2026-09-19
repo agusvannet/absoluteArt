@@ -151,6 +151,24 @@
                         oninput="document.getElementById('ranguepuntsuavizado').value = this.value, puntosSuavizado = Number(this.value)"
                         value="2" id="numberpuntsuavizado" min="2" max="100" step="1">
                 </div>
+                <div class="tolerancia verde  ">
+                    <p>senGroPres</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbersensibilidadPresion').value = this.value, sensibilidadGrosorPresion = Number(this.value)"
+                        value="0" id="ranguesensibilidadPresion" min="-0.5" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguesensibilidadPresion').value = this.value, sensibilidadGrosorPresion = Number(this.value)"
+                        value="0" id="numbersensibilidadPresion" min="-0.5" max="1" step="0.01">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>senOpaPres</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbersensibilidadOpacidadPresion').value = this.value, sensibilidadOpacidadPresion = Number(this.value)"
+                        value="0" id="ranguesensibilidadOpacidadPresion" min="-0.5" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguesensibilidadOpacidadPresion').value = this.value, sensibilidadOpacidadPresion = Number(this.value)"
+                        value="0" id="numbersensibilidadOpacidadPresion" min="-0.5" max="1" step="0.01">
+                </div>
             </div>
             <div class="inputsLapizFigura inputsBalde">
                 <div class="opcion">
@@ -166,6 +184,10 @@
                     <p>respSigY</p>
                     <input type="checkbox" checked name=""
                         oninput="respetarSignoY = this.checked ; console.log(this.checked)">
+                </div>
+                <div class="opcion">
+                    <p>redFigu</p>
+                    <input type="checkbox" name="" oninput="redondearFigura = this.checked ; console.log(this.checked)">
                 </div>
             </div>
 

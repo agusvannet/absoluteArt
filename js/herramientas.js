@@ -382,7 +382,7 @@ class selloCaligrafia extends sello {
             y1: y - Math.floor(grosor / 2),
             x2: x + Math.floor(grosor / 2),
             y2: y + Math.floor(grosor / 2),
-            grosor: 1,
+            grosor: 2,
             r: rgb[0].r,
             g: rgb[0].g,
             b: rgb[0].b,
@@ -439,7 +439,10 @@ class poligonoSimple extends figura {
         trazoTransformado.trayectos = [trazoTransformado.obtenerTrayectoPlano()]
         trazoTransformado.herramienta = 'pincelSellosSimple'
         trazoTransformado.modoDibujo = 'normal'
-        trazoTransformado.suavizado = 0;
+        trazoTransformado.rebotarSuavizado = false;
+        trazoTransformado.sensibilidadGrosorPresion = 0;
+        trazoTransformado.sensibilidadOpacidadPresion = 0;
+        if (!trazo.redondearFigura) trazoTransformado.suavizado = 0;
         for (const rgba of trazoTransformado.rgba) {
             rgba.a = 1;
         }
@@ -480,50 +483,54 @@ class pincelSellosSimple extends pincel {
         super({ nombre, categoria, trayectoMuyLargo })
     }
 
-    dibujo(lienzo, trazo) {
-        const sello = pintor.obtenerHerramienta(trazo.sello)
+    dibujo(lienzo, trazo, sellos, lienzoIntermediario) {
         if (!trazo.continuidad) {
             let ultimoPunto;
             for (let i = 0; i < trazo.trayectos.length; i++) {
-                let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ inicioCalcular: trazo.inicioDibujo, finCalcular: trazo.finDibujo, puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
-                if (trazo.separar) {
-                    const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
-                    trayectoSuavizado = infoSeparacion.trayectoSeccionado
-                    if(typeof(trazo.sobrante) === Number)trazo.sobrante = infoSeparacion.sobrante
-                }
-                const cordenadas = trayectoSuavizado
-                for (const cord of cordenadas) {
-                    ultimoPunto = cord
-                    sello.usar({
-                        x: cord.x + trazo.puntoInicial.x,
-                        y: cord.y + trazo.puntoInicial.y,
-                        grosor: trazo.grosor,
-                        rgb: trazo.rgba,
-                        a: 1,
-                        lienzo: lienzo
-                    })
+                for (const sello of sellos) {
+                    let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ rebotar: trazo.rebotarSuavizado, inicioCalcular: trazo.inicioDibujo, finCalcular: trazo.finDibujo, puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
+                    if (trazo.separar) {
+                        const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
+                        trayectoSuavizado = infoSeparacion.trayectoSeccionado
+                        if (typeof (trazo.sobrante) === Number) trazo.sobrante = infoSeparacion.sobrante
+                    }
+                    const cordenadas = trayectoSuavizado
+                    for (const cord of cordenadas) {
+                        ultimoPunto = cord
+
+                        let alphaTrazo = Math.abs((1 - Math.abs(trazo.sensibilidadOpacidadPresion)) * 1 + trazo.sensibilidadOpacidadPresion * (1 * cord.presion))
+                        let anchoTrazo = Math.abs((1 - Math.abs(trazo.sensibilidadGrosorPresion)) * trazo.grosor + trazo.sensibilidadGrosorPresion * (trazo.grosor * cord.presion))
+
+                        lienzo.pegarLienzo({
+                            x: cord.x + trazo.puntoInicial.x - anchoTrazo / 2,
+                            y: cord.y + trazo.puntoInicial.y - anchoTrazo / 2,
+                            largo: anchoTrazo,
+                            alto: anchoTrazo,
+                            alpha: alphaTrazo,
+                            lienzo: sello
+                        })
+                    }
                 }
             }
             return ultimoPunto
+
         } else {
             const separacionActual = trazo.separacion
             const separarActual = trazo.separar
             trazo.separar = true
             trazo.separacion = 0
             trazo.continuidad = false
-            const returnar = this.dibujo(lienzo, trazo)
+            const returnar = this.dibujo(lienzo, trazo, sellos, lienzoIntermediario)
             trazo.separar = separarActual
             trazo.separacion = separacionActual
             trazo.continuidad = true
             return returnar
         }
-
-
     }
 
-    usar({ lienzo, lienzoIntermediario, trazo }) {
+    usar({ lienzo, lienzoIntermediario, trazo, sellos }) {
         if (trazo.rgba[0].a === 0) return
-        const returnar = this.dibujo(lienzoIntermediario.lienzoComun, trazo)
+        const returnar = this.dibujo(lienzoIntermediario.lienzoComun, trazo, sellos, lienzoIntermediario.lienzoComunSecundario)
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
         return returnar
     }
@@ -540,9 +547,13 @@ class figuraSellos extends lineaSimple {
         const clonTrazo = trazo.clonar();
         clonTrazo.herramienta = 'pincelSellosSimple'
         clonTrazo.modoDibujo = 'normal'
+        clonTrazo.rebotarSuavizado = true;
         clonTrazo.separar = false;
-        clonTrazo.suavizado = 0;
-        const puntosVertices = this.transformarVerticesPuntos(trazo)
+        clonTrazo.sensibilidadGrosorPresion = 0;
+        clonTrazo.sensibilidadOpacidadPresion = 0;
+        if (clonTrazo.continuidad) clonTrazo.separacion = 0
+        if (!trazo.redondearFigura) clonTrazo.suavizado = 0;
+        const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
         pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, clonTrazo)
 
@@ -564,17 +575,14 @@ class figuraSellos extends lineaSimple {
 
                 puntos.push({
                     x: verticeX * caja.largo + caja.x,
-                    y: verticeY * caja.alto + caja.y
+                    y: verticeY * caja.alto + caja.y,
+                    presion: 1,
                 })
             }
-            if (!trazo.continuidad) {
-                const seccionado = trazo.ajustarSeparacionTrayecto({ sobrante, trayecto: puntos })
-                sobrante = seccionado.sobrante
-                secciones.push(seccionado.trayectoSeccionado)
-            } else {
-                secciones.push(puntos)
-            }
-
+            console.log(trazo.separacion)
+            const seccionado = trazo.ajustarSeparacionTrayecto({ sobrante, trayecto: puntos })
+            sobrante = seccionado.sobrante
+            secciones.push(seccionado.trayectoSeccionado)
         }
         return secciones;
     }
@@ -744,19 +752,6 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'flechaHorizontal', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
-                [[{ x: 0, y: 0.25 },
-                { x: 0.5, y: 0.25 },
-                { x: 0.5, y: 0 },
-                { x: 1, y: 0.5 },
-                { x: 0.5, y: 1 },
-                { x: 0.5, y: 0.75 },
-                { x: 0, y: 0.75 },
-                { x: 0, y: 0.25 },]]
-        }
-    },
-    {
-        clase: 'figuraSellos', parametros: {
             nombre: 'estrellaSellos', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
                 [[{ x: 0.500, y: 0.000 },
                 { x: 0.618, y: 0.363 },
@@ -810,25 +805,6 @@ const herramientas = [
                 { x: 0.3, y: 0.5 },
                 { x: 0.4, y: 0.5 },
                 { x: 0.4, y: 0.4 }]]
-        }
-    },
-    {
-        clase: 'figuraSellos', parametros: {
-            nombre: 'estresadorGrilla', categoria: pintor.obtenerCategoria('figuras'), verticesFigura: [
-                [{ x: 0.00, y: 0 }, { x: 0.00, y: 1 }], [{ x: 0.04, y: 0 }, { x: 0.04, y: 1 }], [{ x: 0.08, y: 0 }, { x: 0.08, y: 1 }], [{ x: 0.12, y: 0 }, { x: 0.12, y: 1 }],
-                [{ x: 0.16, y: 0 }, { x: 0.16, y: 1 }], [{ x: 0.20, y: 0 }, { x: 0.20, y: 1 }], [{ x: 0.24, y: 0 }, { x: 0.24, y: 1 }], [{ x: 0.28, y: 0 }, { x: 0.28, y: 1 }],
-                [{ x: 0.32, y: 0 }, { x: 0.32, y: 1 }], [{ x: 0.36, y: 0 }, { x: 0.36, y: 1 }], [{ x: 0.40, y: 0 }, { x: 0.40, y: 1 }], [{ x: 0.44, y: 0 }, { x: 0.44, y: 1 }],
-                [{ x: 0.48, y: 0 }, { x: 0.48, y: 1 }], [{ x: 0.52, y: 0 }, { x: 0.52, y: 1 }], [{ x: 0.56, y: 0 }, { x: 0.56, y: 1 }], [{ x: 0.60, y: 0 }, { x: 0.60, y: 1 }],
-                [{ x: 0.64, y: 0 }, { x: 0.64, y: 1 }], [{ x: 0.68, y: 0 }, { x: 0.68, y: 1 }], [{ x: 0.72, y: 0 }, { x: 0.72, y: 1 }], [{ x: 0.76, y: 0 }, { x: 0.76, y: 1 }],
-                [{ x: 0.80, y: 0 }, { x: 0.80, y: 1 }], [{ x: 0.84, y: 0 }, { x: 0.84, y: 1 }], [{ x: 0.88, y: 0 }, { x: 0.88, y: 1 }], [{ x: 0.92, y: 0 }, { x: 0.92, y: 1 }],
-                [{ x: 0.96, y: 0 }, { x: 0.96, y: 1 }], [{ x: 1.00, y: 0 }, { x: 1.00, y: 1 }],
-                [{ x: 0, y: 0.00 }, { x: 1, y: 0.00 }], [{ x: 0, y: 0.04 }, { x: 1, y: 0.04 }], [{ x: 0, y: 0.08 }, { x: 1, y: 0.08 }], [{ x: 0, y: 0.12 }, { x: 1, y: 0.12 }],
-                [{ x: 0, y: 0.16 }, { x: 1, y: 0.16 }], [{ x: 0, y: 0.20 }, { x: 1, y: 0.20 }], [{ x: 0, y: 0.24 }, { x: 1, y: 0.24 }], [{ x: 0, y: 0.28 }, { x: 1, y: 0.28 }],
-                [{ x: 0, y: 0.32 }, { x: 1, y: 0.32 }], [{ x: 0, y: 0.36 }, { x: 1, y: 0.36 }], [{ x: 0, y: 0.40 }, { x: 1, y: 0.40 }], [{ x: 0, y: 0.44 }, { x: 1, y: 0.44 }],
-                [{ x: 0, y: 0.48 }, { x: 1, y: 0.48 }], [{ x: 0, y: 0.52 }, { x: 1, y: 0.52 }], [{ x: 0, y: 0.56 }, { x: 1, y: 0.56 }], [{ x: 0, y: 0.60 }, { x: 1, y: 0.60 }],
-                [{ x: 0, y: 0.64 }, { x: 1, y: 0.64 }], [{ x: 0, y: 0.68 }, { x: 1, y: 0.68 }], [{ x: 0, y: 0.72 }, { x: 1, y: 0.72 }], [{ x: 0, y: 0.76 }, { x: 1, y: 0.76 }],
-                [{ x: 0, y: 0.80 }, { x: 1, y: 0.80 }], [{ x: 0, y: 0.84 }, { x: 1, y: 0.84 }], [{ x: 0, y: 0.88 }, { x: 1, y: 0.88 }], [{ x: 0, y: 0.92 }, { x: 1, y: 0.92 }],
-                [{ x: 0, y: 0.96 }, { x: 1, y: 0.96 }], [{ x: 0, y: 1.00 }, { x: 1, y: 1.00 }]]
         }
     },
 ]

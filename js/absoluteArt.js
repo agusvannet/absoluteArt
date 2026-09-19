@@ -448,7 +448,10 @@ class trazo {
         respetarSignoY,
         suavizado,
         puntosSuavizado,
-    }) { // le puedo agregar cosas pero por ahora va este 
+        redondearFigura,
+        sensibilidadGrosorPresion,
+        sensibilidadOpacidadPresion
+    }) {
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
         this.rgba = rgba;
@@ -492,6 +495,10 @@ class trazo {
         this.respetarSignoY = respetarSignoY;
         this.suavizado = suavizado;
         this.puntosSuavizado = puntosSuavizado;
+        this.redondearFigura = redondearFigura;
+        this.sensibilidadGrosorPresion = sensibilidadGrosorPresion;
+        this.sensibilidadOpacidadPresion = sensibilidadOpacidadPresion;
+
     }
     separar = true
     minimoSeparacion = 0.01
@@ -575,6 +582,7 @@ class trazo {
                     clonTrayecto.push({
                         x: cords.x,
                         y: cords.y,
+                        presion: cords.presion,
                     })
                 }
             }
@@ -631,8 +639,11 @@ class trazo {
             },
             respetarSignoX: this.respetarSignoX,
             respetarSignoY: this.respetarSignoY,
-            suavizado,
-            puntosSuavizado,
+            suavizado: this.suavizado,
+            puntosSuavizado: this.puntosSuavizado,
+            redondearFigura: this.redondearFigura,
+            sensibilidadGrosorPresion: this.sensibilidadGrosorPresion,
+            sensibilidadOpacidadPresion: this.sensibilidadOpacidadPresion
         })
     }
     agregarTrazo(cordenada) {
@@ -650,7 +661,7 @@ class trazo {
         }
     }
     obtenerCordenadaRelativa(cordenada) {
-        return { x: cordenada.x - this.puntoInicial.x, y: cordenada.y - this.puntoInicial.y }
+        return { x: cordenada.x - this.puntoInicial.x, y: cordenada.y - this.puntoInicial.y, presion: cordenada.presion }
     }
     obtenerTrayectosCordsAbsolutas() {
         const trayectosCordAbsolutos = []
@@ -670,7 +681,7 @@ class trazo {
         let cordenadas = []
         for (const trayecto of this.trayectos) {
             for (const cord of trayecto) {
-                cordenadas.push({ x: cord.x, y: cord.y })
+                cordenadas.push({ x: cord.x, y: cord.y, presion: cord.presion })
             }
         }
         return cordenadas;
@@ -678,7 +689,7 @@ class trazo {
     ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto } = {}) {
         let trayectoSeccionado = [];
         if (sobrante === 0) trayectoSeccionado = [{ x: trayecto[0].x, y: trayecto[0].y }];
-        if (!separacion) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, this.minimoSeparacion)));
+        if (separacion === undefined) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, this.minimoSeparacion)));
 
         for (let i = 0; i < trayecto.length - 1; i++) {
             const origenTramo = trayecto[i];
@@ -688,24 +699,26 @@ class trazo {
             const alto = finTramo.y - origenTramo.y;
 
             let hyp = 0
-            if (largo === 0 || alto === 0)
+            if (largo === 0 || alto === 0) {
                 hyp = Math.max(Math.abs(largo), Math.abs(alto))
-            else
+            } else {
                 hyp = Math.hypot(largo, alto);
-
+            }
             if (hyp === 0) continue;
 
             const distanciaTotal = hyp + sobrante;
             const puntos = Math.floor(distanciaTotal / separacion);
-
+            const diferenciaPresionSeccionada = (finTramo.presion - origenTramo.presion) / puntos
             const dirX = largo / hyp;
             const dirY = alto / hyp;
 
             let d = separacion - sobrante;
+
             for (let n = 0; n < puntos; n++) {
                 trayectoSeccionado.push({
                     x: origenTramo.x + dirX * d,
-                    y: origenTramo.y + dirY * d
+                    y: origenTramo.y + dirY * d,
+                    presion: origenTramo.presion + diferenciaPresionSeccionada * n
                 });
                 d += separacion;
             }
@@ -715,20 +728,31 @@ class trazo {
 
         return { trayectoSeccionado, sobrante };
     }
-    obtenerTrayectoSuavizado({ puntos, puntosSuavizado, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
+    obtenerTrayectoSuavizado({ puntos, puntosSuavizado, rebotar = false, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
         if (puntos.length < 3) return puntos;
         let trayectoSuavizado = [];
-        if (inicioCalcular === 0) { console.log('a'), trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y }) }
+        if (inicioCalcular === 0 && !rebotar) trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y })
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
             let sumaX = 0, sumaY = 0, puntosValidos = 0;
 
-            const minimo = Math.max(0, i - radio);
-            const maximo = Math.min(puntos.length - 1, i + radio);
+            const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
+            const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
+
             for (let n = minimo; n <= maximo; n++) {
-                sumaX += /*(trayectoSuavizado[n]) ? trayectoSuavizado[n].x :*/ puntos[n].x;
-                sumaY += /*(trayectoSuavizado[n]) ? trayectoSuavizado[n].y :*/ puntos[n].y;
+                let indice = n;
+
+                if (n >= puntos.length) {
+                    indice = n - puntos.length; // Si n es 5 y largo es 5, 5 - 5 = 0 (Perfecto)
+                } else if (n < 0) {
+                    indice = n + puntos.length; // Si n es -1 y largo es 5, -1 + 5 = 4 (Perfecto)
+                }
+
+                // Como la matemática ahora es exacta, el ternario de seguridad acá es opcional 
+                // pero está perfecto dejarlo por las dudas.
+                sumaX += (puntos[indice]) ? puntos[indice].x : 0;
+                sumaY += (puntos[indice]) ? puntos[indice].y : 0;
                 puntosValidos++;
             }
 
@@ -740,10 +764,11 @@ class trazo {
             trayectoSuavizado.push({
                 x: puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
                 y: puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
+                presion: puntos[i].presion
             });
         }
 
-        if (finCalcular === puntos.length - 1) trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
+        if (finCalcular === puntos.length - 1 && !rebotar) trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
         return trayectoSuavizado;
     }
 }
@@ -800,8 +825,6 @@ const mesaTrabajo = {
         this.prepararLienzosSanduich()
         this.trazoGuardar.agregarTrazo(cordenada)
         this.trazoTemporal = this.trazoGuardar.clonar()
-        this.trazoTemporal.sobrante = 0;
-        this.trazoTemporal.suavizado = 0;
         this.trazoTemporalSecundario = this.trazoTemporal.clonar()
         if (this.herramientaActiva.preRenderizable) {
 
@@ -810,6 +833,7 @@ const mesaTrabajo = {
                 trazoTemporalSecundario: this.trazoTemporalSecundario,
                 trazoTemporal: this.trazoTemporal,
                 trazoReal: this.trazoGuardar,
+                primerRenderizado: true,
             })
         }
     },
@@ -853,7 +877,7 @@ const mesaTrabajo = {
             lienzoReal.limpiar();
             this.capas.renderizar({ lienzoReceptor: lienzoReal })
 
-            return;
+            return
         }
 
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles'))) {
@@ -867,7 +891,7 @@ const mesaTrabajo = {
             this.renderizarTrazo({ lienzoReal: lienzoReal, trazoTemporal: this.trazoTemporal, trazoTemporalSecundario: this.trazoTemporalSecundario, trazoReal: this.trazoGuardar })
         }
     },
-    renderizarTrazo({ lienzoReal, trazoTemporalSecundario, trazoTemporal, trazoReal }) {
+    renderizarTrazo({ lienzoReal, trazoTemporalSecundario, trazoTemporal, trazoReal, primerRenderizado }) {
         if (!this.herramientaActiva.preRenderizable) return
         lienzoReal.limpiar()
         // esto no debe quedar asi , el pinceln debe ser optimizado para utilizar el gotero , cada movimiento debe ser de rendimiento constante no dependiente de las cnantidad
@@ -879,11 +903,11 @@ const mesaTrabajo = {
                     this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
         */
         if (this.herramientaActiva.perteneceCategoria(pintor.obtenerCategoria('pinceles')))
-            this.renderizarFigura({ lienzoReal, trazo: trazoReal })
+            this.renderizarFigura({ lienzoReal, trazo: trazoReal, primerRenderizado })
         else
-            this.renderizarFigura({ lienzoReal, trazo: trazoTemporal })
+            this.renderizarFigura({ lienzoReal, trazo: trazoTemporal, primerRenderizado })
     },
-    renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal }) {
+    renderizarIntermedioPincel({ lienzoReal, trazoTemporal, trazoTemporalSecundario, trazoReal, primerRenderizado }) {
         const lienzoPincelPrevi = pintor.lienzosIntermediarios.lienzoPreVisualizacion;
         const lienzoPincelGotero = pintor.lienzosIntermediarios.lienzoPreVisualizacionSecundario;
         const lienzoFusion = pintor.lienzosIntermediarios.lienzoPreVisualizacionTerceario;
@@ -909,15 +933,12 @@ const mesaTrabajo = {
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
-    renderizarFigura({ lienzoReal, trazo }) {
+    renderizarFigura({ lienzoReal, trazo, primerRenderizado }) {
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
-
-        console.log(trazo)
 
         this.lienzoCapaActual.limpiar()
         this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
-        pintor.dibujar(this.lienzoCapaActual, trazo)
-
+        pintor.dibujar(this.lienzoCapaActual, trazo, primerRenderizado)
 
         lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
@@ -1103,6 +1124,11 @@ const mesaTrabajo = {
     }
 }
 const pintor = {
+    categorias: new categoria('herramientas'),
+    listaHerramientas: [],
+    listaCategorias: { herramientas: this.categorias, undefined: this.categorias },
+    herramientaUltimoDibujo: undefined,
+    ultimoLienzoId: undefined,
     lienzosIntermediarios: {
         lienzoPreVisualizacion: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoPreVisualizacionSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
@@ -1110,13 +1136,11 @@ const pintor = {
 
         lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
-        lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' })
+        lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
     },
-    categorias: new categoria('herramientas'),
-    listaHerramientas: [],
-    listaCategorias: { herramientas: this.categorias, undefined: this.categorias },
-    herramientaUltimoDibujo: undefined,
-    ultimoLienzoId: undefined,
+    lienzosSello: [
+        lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+    ],
 
     generadorHerramientas: {
         lineaSimple: (parametros) => { return new lineaSimple(parametros) },
@@ -1134,15 +1158,17 @@ const pintor = {
         baldeSimple: (parametros) => { return new baldeSimple(parametros) },
     },
 
-    dibujar(lienzoDibujar, trazo) {
+    dibujar(lienzoDibujar, trazo, prepararSello) {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
+        lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComunSecundario, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
-
+        if (prepararSello) this.prepararSello(trazo)
         const returnar = herramienta.usar({
             lienzo: lienzoDibujar,
             trazo,
             lienzoIntermediario: this.lienzosIntermediarios,
-            comparadorPixel: this.obtenerGeneradorComparadorColor(trazo)
+            comparadorPixel: this.obtenerGeneradorComparadorColor(trazo),
+            sellos: this.lienzosSello,
         })
 
         this.herramientaUltimoDibujo = herramienta
@@ -1150,6 +1176,20 @@ const pintor = {
             this.ultimoLienzoId = lienzoDibujar.id
         this.lienzosIntermediarios.lienzoComun.limpiar()
         return returnar
+    },
+    prepararSello(trazo) {
+        this.lienzosSello = [
+            lienzos.obtener({ muchaLectura: true, alto: trazo.grosor, largo: trazo.grosor, tipo: 'temporal' }),
+        ]
+        this.obtenerHerramienta(trazo.sello).usar({
+            x: this.lienzosSello[0].largo / 2,
+            y: this.lienzosSello[0].alto / 2,
+            grosor: trazo.grosor,
+            rgb: trazo.rgba,
+            a: 1,
+            lienzo: this.lienzosSello[0]
+        })
+
     },
     trazoComplejo(trazo) {
         return this.obtenerHerramienta(trazo.herramienta).trazoComplejo(trazo);
@@ -1187,7 +1227,6 @@ const pintor = {
         return this.listaCategorias[nombre];
     },
     acomLienzInterm({ alto, largo }) {
-        console.log("sd")
         const nombreLienzo = Object.keys(this.lienzosIntermediarios)
         for (const actual of nombreLienzo) {
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios[actual], alto, largo })
