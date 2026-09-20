@@ -246,14 +246,19 @@ class grupoCapas extends capaBase {
     }
 }
 class capa extends capaBase {
-    constructor({ capaPadre, idCapa, lienzo, modoFusion = 'normal', frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial, mascaras = [] }) {
+    constructor({ historialCapa, capaPadre, idCapa, lienzo, modoFusion = 'normal', frecuenciaCapturas, trayectoMuyLargo, limiteCapturasHistorial, mascaras = [] }) {
+
         super(capaPadre, idCapa, lienzo, modoFusion, mascaras)
-        this.historial = new historial(
-            frecuenciaCapturas,
-            trayectoMuyLargo,
-            limiteCapturasHistorial,
-            lienzo
-        );
+        if (!historialCapa) {
+            this.historial = new historial(
+                frecuenciaCapturas,
+                trayectoMuyLargo,
+                limiteCapturasHistorial,
+                lienzo
+            );
+        } else {
+            this.historial = historialCapa;
+        }
         this.nombre = 'capa ' + idCapa
     }
     tipoCapa = 'individual';
@@ -272,25 +277,19 @@ class capa extends capaBase {
         if (this.historial.recuperarTrazo()) this.capaPadre.preRenderizar()
     }
     clonar(capaPadre, idCopia) {
+        const lienzoClon = lienzos.obtener({
+            largo: this.lienzo.largo,
+            alto: this.lienzo.alto
+        })
         const clonCapa = new capa({
             capaPadre: capaPadre,
             idCapa: idCopia,
-            lienzo: lienzos.obtener({
-                largo: this.lienzo.largo,
-                alto: this.lienzo.alto
-            }),
+            lienzo: lienzoClon,
             frecuenciaCapturas: this.historial.frecuenciaTrazos,
             trayectoMuyLargo: this.historial.trayectoMuyLargo,
-            limiteCapturasHistorial: this.historial.limiteCapturasHistorial
+            limiteCapturasHistorial: this.historial.limiteCapturasHistorial,
+            historialCapa: this.historial.clonar(lienzoClon),
         })
-
-        const copiaArrays = this.historial.clonarArrays();
-
-        clonCapa.historial.trazosRevertidos = copiaArrays.trazosRevertidos
-        clonCapa.historial.historialTrazos = copiaArrays.historialTrazos
-        clonCapa.historial.historialCapturas = copiaArrays.historialCapturas
-        clonCapa.historial.lienzo = clonCapa.lienzo
-
         clonCapa.lienzo.pegarLienzo({ lienzo: this.lienzo, x: 0, y: 0 })
         clonCapa.x = this.x
         clonCapa.y = this.y
@@ -396,7 +395,7 @@ class historial {
             this.lienzo.pegarLienzo({ lienzo: captura, x: 0, y: 0 })
         }
     }
-    clonarArrayTrazos(historial) { // REVISADO
+    clonarArrayTrazos(historial) {
         const clonHistorial = []
         for (let i = 0; i < historial.length; i++) {
             const trazoCopiado = historial[i].clonar()
@@ -423,8 +422,31 @@ class historial {
             historialCapturas: this.clonarCapturas()
         }
     }
-    clonar() {
+    clonar(lienzo) {
+        const clon = new historial(
+            this.frecuenciaCapturas,
+            this.trayectoMuyLargo,
+            this.limiteCapturasHistorial,
+            lienzo
+        )
+        const copiaArrays = this.clonarArrays();
 
+        clon.trazosRevertidos = copiaArrays.trazosRevertidos
+        clon.historialTrazos = copiaArrays.historialTrazos
+        clon.historialCapturas = copiaArrays.historialCapturas
+        clon.lienzo = lienzo
+
+        return clon
+    }
+}
+class cordenada {
+    constructor({ x, y, presion = 1 }) {
+        this.x = x;
+        this.y = y;
+        this.presion = presion;
+    }
+    clonar({ x = this.x, y = this.y, presion = this.presion } = {}) {
+        return new cordenada({ x, y, presion })
     }
 }
 class trazo {
@@ -501,9 +523,9 @@ class trazo {
 
     }
     separar = true
-    minimoSeparacion = 0.01
-    maxPxMs = 20
-    minPxMs = 3000
+    minimoSeparacion = 0.01;
+    sensibilidadMinima = 0;
+    sensibilidadMaxima = 2;
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
         let y1 = 0;
@@ -579,11 +601,9 @@ class trazo {
             const clonTrayecto = [];
             if (trayecto[0]) {
                 for (const cords of trayecto) {
-                    clonTrayecto.push({
-                        x: cords.x,
-                        y: cords.y,
-                        presion: cords.presion,
-                    })
+                    clonTrayecto.push(
+                        cords.clonar()
+                    )
                 }
             }
             clonTrayectos.push(clonTrayecto)
@@ -660,18 +680,20 @@ class trazo {
             this.agregarCordenada(cordenada)
         }
     }
-    obtenerCordenadaRelativa(cordenada) {
-        return { x: cordenada.x - this.puntoInicial.x, y: cordenada.y - this.puntoInicial.y, presion: cordenada.presion }
+    obtenerCordenadaRelativa(punto) {
+        return new cordenada({ x: punto.x - this.puntoInicial.x, y: punto.y - this.puntoInicial.y, presion: punto.presion })
     }
     obtenerTrayectosCordsAbsolutas() {
         const trayectosCordAbsolutos = []
         for (const trayecto of this.trayectos) {
             let trayectosAbsoluto = []
             for (const cord of trayecto) {
-                trayectosAbsoluto.push({
-                    x: cord.x + this.puntoInicial.x,
-                    y: cord.y + this.puntoInicial.y
-                })
+                trayectosAbsoluto.push(
+                    cord.clonar({
+                        x: cord.x + this.puntoInicial.x,
+                        y: cord.y + this.puntoInicial.y,
+                    })
+                )
             }
             trayectosCordAbsolutos.push(trayectosAbsoluto);
         }
@@ -681,14 +703,16 @@ class trazo {
         let cordenadas = []
         for (const trayecto of this.trayectos) {
             for (const cord of trayecto) {
-                cordenadas.push({ x: cord.x, y: cord.y, presion: cord.presion })
+                cordenadas.push(
+                    cord.clonar()
+                )
             }
         }
         return cordenadas;
     }
-    ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto } = {}) {
-        let trayectoSeccionado = [];
-        if (sobrante === 0) trayectoSeccionado = [{ x: trayecto[0].x, y: trayecto[0].y }];
+    ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto, trayectoSeccionado = [] } = {}) {
+        if (sobrante === 0)
+            trayectoSeccionado.push(new cordenada({ x: trayecto[0].x, y: trayecto[0].y, presion: trayecto[0].presion }));
         if (separacion === undefined) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, this.minimoSeparacion)));
 
         for (let i = 0; i < trayecto.length - 1; i++) {
@@ -712,15 +736,17 @@ class trazo {
             const dirX = largo / hyp;
             const dirY = alto / hyp;
 
-            let d = separacion - sobrante;
+            let distancia = separacion - sobrante;
 
             for (let n = 0; n < puntos; n++) {
-                trayectoSeccionado.push({
-                    x: origenTramo.x + dirX * d,
-                    y: origenTramo.y + dirY * d,
-                    presion: origenTramo.presion + diferenciaPresionSeccionada * n
-                });
-                d += separacion;
+                trayectoSeccionado.push(
+                    new cordenada({
+                        x: origenTramo.x + dirX * distancia,
+                        y: origenTramo.y + dirY * distancia,
+                        presion: origenTramo.presion + diferenciaPresionSeccionada * n
+                    })
+                );
+                distancia += separacion;
             }
 
             sobrante = distanciaTotal % separacion;
@@ -731,7 +757,8 @@ class trazo {
     obtenerTrayectoSuavizado({ puntos, puntosSuavizado, rebotar = false, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
         if (puntos.length < 3) return puntos;
         let trayectoSuavizado = [];
-        if (inicioCalcular === 0 && !rebotar) trayectoSuavizado.push({ x: puntos[0].x, y: puntos[0].y })
+        if (inicioCalcular === 0 && !rebotar)
+            trayectoSuavizado.push(puntos[0].clonar())
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
@@ -761,15 +788,58 @@ class trazo {
                 y: sumaY / puntosValidos
             };
 
-            trayectoSuavizado.push({
-                x: puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
-                y: puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
-                presion: puntos[i].presion
-            });
+            trayectoSuavizado.push(
+                new cordenada({
+                    x: puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
+                    y: puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
+                    presion: puntos[i].presion
+                })
+            );
         }
 
-        if (finCalcular === puntos.length - 1 && !rebotar) trayectoSuavizado.push({ x: puntos[puntos.length - 1].x, y: puntos[puntos.length - 1].y });
+        if (finCalcular === puntos.length - 1 && !rebotar)
+            trayectoSuavizado.push(puntos[puntos.length - 1].clonar());
         return trayectoSuavizado;
+    }
+    obtenerValoresFinales(cord) {
+        const alpha = []
+        for (const actual of this.rgba) {
+            alpha.push(this.obtenerAlphaFinal(cord, actual.a))
+        }
+
+        const cordFinal = this.obtenerCordFinal(cord)
+        return {
+            grosor: this.obtenerGrosorFinal(cord),
+            alpha,
+            x: cordFinal.x,
+            y: cordFinal.y
+        }
+    }
+    obtenerAlphaFinal(cord, alpha) {
+        let alphaFinal = alpha;
+        if (this.sensibilidadOpacidadPresion) {
+            const presion = (this.sensibilidadOpacidadPresion > 0) ? cord.presion : 1 - cord.presion
+            const alphaSens = (1 - Math.abs(this.sensibilidadOpacidadPresion)) * alpha + Math.abs(this.sensibilidadOpacidadPresion) * (alpha * presion)
+            alphaFinal = alphaSens
+        }
+        return alphaFinal
+    }
+
+    obtenerGrosorFinal(cord, grosor = this.grosor) {
+        let grosorFinal = grosor;
+        if (this.sensibilidadGrosorPresion) {
+            const presion = (this.sensibilidadGrosorPresion > 0) ? cord.presion : 1 - cord.presion
+            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorPresion)) * grosor + Math.abs(this.sensibilidadGrosorPresion) * (grosor * presion)
+            grosorFinal = grosorSens
+        }
+        return grosorFinal
+    }
+
+    obtenerCordFinal(cord) {
+        return {
+            x: cord.x + this.puntoInicial.x,
+            y: cord.y + this.puntoInicial.y
+        }
     }
 }
 
@@ -860,9 +930,6 @@ const mesaTrabajo = {
         }
     },
     finClick({ cordenada, lienzoReal }) {
-        console.log(this.trazoTemporal)
-        console.log(this.trazoTemporalSecundario)
-        console.log(this.trazoGuardar)
         if (this.capasIndividualesVivas.length === 0) return
         if (!this.trazoGuardar) return
 

@@ -444,7 +444,7 @@ let compararColorDistinto = false;
 let respetarSignoX = true;
 let respetarSignoY = true;
 let redondearFigura = false;
-let suavizado = 1;
+let suavizado = 0;
 let puntosSuavizado = 2;
 let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
@@ -604,40 +604,43 @@ canvasDom.addEventListener('pointerdown', (e) => {
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
     cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
     mesaTrabajo.inicioClick({
-        cordenada: cordenadaActual,
+        cordenada: new cordenada({
+            x: cordenadaActual.x,
+            y: cordenadaActual.y,
+            presion: (e.pointerType === 'pen') ? e.pressure : 1
+        }),
         lienzoReal: canvas,
         parametrosTrazo: obtenerTrazoActual(cordenadaActual)
     })
 });
 
-let ultimoMovimiento = 0;
-let ultimoCord = { x: 0, y: 0 };
-let maximoPxMs = 0
-let minimoPxMs = 10
 canvasDom.addEventListener('pointermove', (e) => {
-    let tiempMovimiento = performance.now()
     if (clickeando) {
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
-        cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
 
         mesaTrabajo.arrastreClick({
-            cordenada: cordenadaActual,
-            tiempoArrastre: tiempMovimiento,
+            cordenada: new cordenada({
+                x: cordenadaActual.x,
+                y: cordenadaActual.y,
+                presion: (e.pointerType === 'pen') ? e.pressure : 1
+            }),
             lienzoReal: canvas
         })
 
 
     }
-    ultimoCord = { x: e.clientX, y: e.clientY };
 });
 
 canvasDom.addEventListener('pointerup', (e) => {
     clickeando = false;
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
-    cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
 
     mesaTrabajo.finClick({
-        cordenada: cordenadaActual,
+        cordenada: new cordenada({
+            x: cordenadaActual.x,
+            y: cordenadaActual.y,
+            presion: (e.pointerType === 'pen') ? e.pressure : 1
+        }),
         lienzoReal: canvas
     })
 

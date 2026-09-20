@@ -488,7 +488,14 @@ class pincelSellosSimple extends pincel {
             let ultimoPunto;
             for (let i = 0; i < trazo.trayectos.length; i++) {
                 for (const sello of sellos) {
-                    let trayectoSuavizado = (trazo.suavizado) ? trazo.obtenerTrayectoSuavizado({ rebotar: trazo.rebotarSuavizado, inicioCalcular: trazo.inicioDibujo, finCalcular: trazo.finDibujo, puntos: trazo.trayectos[i], puntosSuavizado: trazo.puntosSuavizado }) : trazo.trayectos[i]
+                    let trayectoSuavizado = (trazo.suavizado) ?
+                        trazo.obtenerTrayectoSuavizado({
+                            rebotar: trazo.rebotarSuavizado,
+                            inicioCalcular: trazo.inicioDibujo,
+                            finCalcular: trazo.finDibujo,
+                            puntos: trazo.trayectos[i],
+                            puntosSuavizado: trazo.puntosSuavizado
+                        }) : trazo.trayectos[i]
                     if (trazo.separar) {
                         const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
                         trayectoSuavizado = infoSeparacion.trayectoSeccionado
@@ -497,16 +504,14 @@ class pincelSellosSimple extends pincel {
                     const cordenadas = trayectoSuavizado
                     for (const cord of cordenadas) {
                         ultimoPunto = cord
-
-                        let alphaTrazo = Math.abs((1 - Math.abs(trazo.sensibilidadOpacidadPresion)) * 1 + trazo.sensibilidadOpacidadPresion * (1 * cord.presion))
-                        let anchoTrazo = Math.abs((1 - Math.abs(trazo.sensibilidadGrosorPresion)) * trazo.grosor + trazo.sensibilidadGrosorPresion * (trazo.grosor * cord.presion))
-
+                        const grosor = trazo.obtenerGrosorFinal(cord)
+                        const cordFinal = trazo.obtenerCordFinal(cord)
                         lienzo.pegarLienzo({
-                            x: cord.x + trazo.puntoInicial.x - anchoTrazo / 2,
-                            y: cord.y + trazo.puntoInicial.y - anchoTrazo / 2,
-                            largo: anchoTrazo,
-                            alto: anchoTrazo,
-                            alpha: alphaTrazo,
+                            x: cordFinal.x - grosor / 2,
+                            y: cordFinal.y - grosor / 2,
+                            largo: grosor,
+                            alto: grosor,
+                            alpha: trazo.obtenerAlphaFinal(cord, 1),
                             lienzo: sello
                         })
                     }
