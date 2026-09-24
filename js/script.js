@@ -408,7 +408,6 @@ let alphaCompararBalde = 1;
 let grosor = 10;
 let nombreHerramienta = 'lineaSimple';
 let nombreSello = 'selloCuadrado'
-let continuidad = false;
 let modoDibujo = 'normal';
 let separacion = 1
 let toleranciaCanal = {
@@ -448,6 +447,8 @@ let suavizado = 0;
 let puntosSuavizado = 2;
 let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
+let sensibilidadGrosorVelocidad = 0;
+let sensibilidadOpacidadVelocidad = 0;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -488,7 +489,6 @@ function obtenerTrazoActual(cordInicial) {
         grosor: Number(grosor),
         herramienta: nombreHerramienta,
         sello: nombreSello,
-        continuidad,
         modoDibujo,
         separacion,
 
@@ -508,7 +508,10 @@ function obtenerTrazoActual(cordInicial) {
         redondearFigura,
 
         sensibilidadGrosorPresion,
-        sensibilidadOpacidadPresion
+        sensibilidadOpacidadPresion,
+
+        sensibilidadGrosorVelocidad,
+        sensibilidadOpacidadVelocidad
     })
     return trazoGuardar;
 }
@@ -600,6 +603,8 @@ let clickeando = false;
 canvasDom.addEventListener('pointerdown', (e) => {
     if (clickeando) return
     clickeando = true;
+    let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
 
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
     cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
@@ -607,39 +612,53 @@ canvasDom.addEventListener('pointerdown', (e) => {
         cordenada: new cordenada({
             x: cordenadaActual.x,
             y: cordenadaActual.y,
-            presion: (e.pointerType === 'pen') ? e.pressure : 1
+            presion: (e.pointerType === 'pen') ? e.pressure : 1,
+            msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
         }),
         lienzoReal: canvas,
         parametrosTrazo: obtenerTrazoActual(cordenadaActual)
     })
 });
-
+let tiempoUltimoMovimiento = 111;
+let ultMov = { x: 0, y: 0 }
 canvasDom.addEventListener('pointermove', (e) => {
+    let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
     if (clickeando) {
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
-
         mesaTrabajo.arrastreClick({
             cordenada: new cordenada({
                 x: cordenadaActual.x,
                 y: cordenadaActual.y,
-                presion: (e.pointerType === 'pen') ? e.pressure : 1
+                presion: (e.pointerType === 'pen') ? e.pressure : 1,
+                msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
             }),
             lienzoReal: canvas
         })
-
-
     }
-});
 
+
+});
+const cuerpo = document.querySelector('body')
+cuerpo.addEventListener('pointermove', (e) => {
+    ultMov = { x: e.clientX, y: e.clientY }
+    tiempoUltimoMovimiento = performance.now()
+});
 canvasDom.addEventListener('pointerup', (e) => {
     clickeando = false;
+
+    let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
+
+
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
 
     mesaTrabajo.finClick({
         cordenada: new cordenada({
             x: cordenadaActual.x,
             y: cordenadaActual.y,
-            presion: (e.pointerType === 'pen') ? e.pressure : 1
+            presion: (e.pointerType === 'pen') ? e.pressure : 1,
+            msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
         }),
         lienzoReal: canvas
     })

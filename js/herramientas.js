@@ -2,8 +2,6 @@ class herramientaDibujo extends herramienta {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
     }
-
-    borra = false;
     usar({ lienzo, lienzoIntermediario, trazo }) {
     }
     trazoComplejo() {
@@ -274,7 +272,6 @@ class sello extends herramientaDibujo {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
     }
-    conectable = false;
 }
 class selloCuadrado extends sello {
     constructor({ nombre, categoria }) {
@@ -342,7 +339,6 @@ class selloCircular extends sello {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
     }
-    conectable = true;
 
     usar({ x, y, grosor, rgb, a, lienzo }) {
         lienzo.pintarCirculo({
@@ -359,22 +355,11 @@ class selloCircular extends sello {
         })
     }
 
-    conectarSellos({ trayecto, grosor, rgb, a, lienzo }) {
-        lienzo.pintarTrayectoLineas({
-            trayecto,
-            grosor,
-            r: rgb[0].r,
-            g: rgb[0].g,
-            b: rgb[0].b,
-            a
-        })
-    }
 }
 class selloCaligrafia extends sello {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
     }
-    conectable = true;
 
     usar({ x, y, grosor, rgb, a, lienzo }) {
         lienzo.pintarLinea({
@@ -388,29 +373,6 @@ class selloCaligrafia extends sello {
             b: rgb[0].b,
             a
         })
-    }
-
-    conectarSellos({ trayecto, grosor, rgb, a, lienzo }) {
-        let pixelActual = Math.floor(grosor / 2)
-        for (let t = 0; t < trayecto.length; t++) {
-            trayecto[t].x -= pixelActual;
-            trayecto[t].y -= pixelActual;
-        }
-        for (let i = 0; i < grosor; i++) {
-            for (let t = 0; t < trayecto.length; t++) {
-                trayecto[t].x++;
-                trayecto[t].y++;
-
-            }
-            lienzo.pintarTrayectoLineas({
-                trayecto,
-                grosor: 2,
-                r: rgb[0].r,
-                g: rgb[0].g,
-                b: rgb[0].b,
-                a
-            })
-        }
     }
 }
 class poligonoSimple extends figura {
@@ -483,59 +445,56 @@ class pincelSellosSimple extends pincel {
         super({ nombre, categoria, trayectoMuyLargo })
     }
 
-    dibujo(lienzo, trazo, sellos, lienzoIntermediario) {
-        if (!trazo.continuidad) {
-            let ultimoPunto;
-            for (let i = 0; i < trazo.trayectos.length; i++) {
-                for (const sello of sellos) {
-                    let trayectoSuavizado = (trazo.suavizado) ?
-                        trazo.obtenerTrayectoSuavizado({
-                            rebotar: trazo.rebotarSuavizado,
-                            inicioCalcular: trazo.inicioDibujo,
-                            finCalcular: trazo.finDibujo,
-                            puntos: trazo.trayectos[i],
-                            puntosSuavizado: trazo.puntosSuavizado
-                        }) : trazo.trayectos[i]
-                    if (trazo.separar) {
-                        const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
-                        trayectoSuavizado = infoSeparacion.trayectoSeccionado
-                        if (typeof (trazo.sobrante) === Number) trazo.sobrante = infoSeparacion.sobrante
-                    }
-                    const cordenadas = trayectoSuavizado
-                    for (const cord of cordenadas) {
-                        ultimoPunto = cord
-                        const grosor = trazo.obtenerGrosorFinal(cord)
-                        const cordFinal = trazo.obtenerCordFinal(cord)
-                        lienzo.pegarLienzo({
-                            x: cordFinal.x - grosor / 2,
-                            y: cordFinal.y - grosor / 2,
-                            largo: grosor,
-                            alto: grosor,
-                            alpha: trazo.obtenerAlphaFinal(cord, 1),
-                            lienzo: sello
-                        })
-                    }
-                }
-            }
-            return ultimoPunto
-
-        } else {
-            const separacionActual = trazo.separacion
-            const separarActual = trazo.separar
-            trazo.separar = true
-            trazo.separacion = 0
-            trazo.continuidad = false
-            const returnar = this.dibujo(lienzo, trazo, sellos, lienzoIntermediario)
-            trazo.separar = separarActual
-            trazo.separacion = separacionActual
-            trazo.continuidad = true
-            return returnar
-        }
+    obtenerPuntosMoviles(trazo) {
+        return (trazo.puntosSuavizado % 2 === 1) ? Math.round(trazo.puntosSuavizado * 1.5) : trazo.puntosSuavizado * 1.5 + 1
     }
 
-    usar({ lienzo, lienzoIntermediario, trazo, sellos }) {
+    dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
+        let ultimoPunto;
+        for (let i = inicioTrayectos; i <= finTrayectos; i++) {
+            for (const sello of sellos) {
+                let trayectoSuavizado = trazo.obtenerTrayectoSuavizado({
+                    rebotar: trazo.rebotarSuavizado,
+                    inicioCalcular: (inicioTrayecto) ? inicioTrayecto : 0,
+                    finCalcular: (finTrayecto) ? finTrayecto : trazo.trayectos[i].length - 1,
+                    puntos: trazo.trayectos[i],
+                    puntosSuavizado: trazo.puntosSuavizado
+                })
+                if (trazo.separar) {
+                    const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
+                    trayectoSuavizado = infoSeparacion.trayectoSeccionado
+                    if (typeof (trazo.sobrante) === "number") trazo.sobrante = infoSeparacion.sobrante
+                }
+                const cordenadas = trayectoSuavizado
+                for (const cord of cordenadas) {
+                    ultimoPunto = cord
+                    const grosor = trazo.obtenerGrosorFinal(cord)
+                    const cordFinal = trazo.obtenerCordFinal(cord)
+                    lienzo.pegarLienzo({
+                        x: cordFinal.x - grosor / 2,
+                        y: cordFinal.y - grosor / 2,
+                        largo: grosor,
+                        alto: grosor,
+                        alpha: trazo.obtenerAlphaFinal(cord, 1),
+                        lienzo: sello
+                    })
+                }
+            }
+        }
+        return ultimoPunto
+    }
+
+    usar({ lienzo, lienzoIntermediario, trazo, sellos, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto }) {
         if (trazo.rgba[0].a === 0) return
-        const returnar = this.dibujo(lienzoIntermediario.lienzoComun, trazo, sellos, lienzoIntermediario.lienzoComunSecundario)
+        const returnar = this.dibujo({
+            lienzo: lienzoIntermediario.lienzoComun,
+            trazo,
+            sellos,
+            inicioTrayectos,
+            finTrayectos,
+            inicioTrayecto,
+            finTrayecto
+        })
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
         return returnar
     }
@@ -556,7 +515,6 @@ class figuraSellos extends lineaSimple {
         clonTrazo.separar = false;
         clonTrazo.sensibilidadGrosorPresion = 0;
         clonTrazo.sensibilidadOpacidadPresion = 0;
-        if (clonTrazo.continuidad) clonTrazo.separacion = 0
         if (!trazo.redondearFigura) clonTrazo.suavizado = 0;
         const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
@@ -584,7 +542,6 @@ class figuraSellos extends lineaSimple {
                     presion: 1,
                 })
             }
-            console.log(trazo.separacion)
             const seccionado = trazo.ajustarSeparacionTrayecto({ sobrante, trayecto: puntos })
             sobrante = seccionado.sobrante
             secciones.push(seccionado.trayectoSeccionado)

@@ -169,12 +169,26 @@
                         oninput="document.getElementById('ranguesensibilidadOpacidadPresion').value = this.value, sensibilidadOpacidadPresion = Number(this.value)"
                         value="0" id="numbersensibilidadOpacidadPresion" min="-1" max="1" step="0.01">
                 </div>
+                <div class="tolerancia verde  ">
+                    <p>senGroVelo</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbersensibilidadVelocidad').value = this.value, sensibilidadGrosorVelocidad = Number(this.value)"
+                        value="0" id="ranguesensibilidadVelocidad" min="-1" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguesensibilidadVelocidad').value = this.value, sensibilidadGrosorVelocidad = Number(this.value)"
+                        value="0" id="numbersensibilidadVelocidad" min="-1" max="1" step="0.01">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>senOpaVelo</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbersensibilidadOpacidadVelocidad').value = this.value, sensibilidadOpacidadVelocidad = Number(this.value)"
+                        value="0" id="ranguesensibilidadOpacidadVelocidad" min="-1" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranguesensibilidadOpacidadVelocidad').value = this.value, sensibilidadOpacidadVelocidad = Number(this.value)"
+                        value="0" id="numbersensibilidadOpacidadVelocidad" min="-1" max="1" step="0.01">
+                </div>
             </div>
             <div class="inputsLapizFigura inputsBalde">
-                <div class="opcion">
-                    <p>continuidad</p>
-                    <input type="checkbox" name="" oninput="continuidad = this.checked">
-                </div>
                 <div class="opcion">
                     <p>respSigX</p>
                     <input type="checkbox" checked name=""
