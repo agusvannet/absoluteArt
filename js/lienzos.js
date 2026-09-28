@@ -20,206 +20,6 @@ class tramo { // aun sirve para comprimir una imagen , siempre y cuando
         return new tramo({ y: this.y, x0: Math.min(tramo.x0, this.x0), x1: Math.max(tramo.x1, this.x1) })
     }
 }
-class manchaLienzo { // eliminar o  adaptar para otra cosa, muy pesado para uso original
-    constructor(tramos, color) {
-        this.tramos = {}
-        this.color = color
-
-        this.x0 = undefined;
-        this.x1 = undefined;
-        this.y0 = undefined;
-        this.y1 = undefined;
-
-        this.agregarTramos(tramos)
-    }
-    agregarTramos(tramos) {
-        for (const tramo of tramos) {
-            this.agregarTramo(tramo)
-        }
-    }
-    agregarTramo(tramo) {
-        if (!this.tramos[tramo.y]) this.tramos[tramo.y] = []
-        this.tramos[tramo.y].push(tramo)
-        if (this.x0 !== undefined &&
-            this.y0 !== undefined &&
-            this.x1 !== undefined &&
-            this.y1 !== undefined) {
-
-            this.x0 = Math.min(tramo.x0, this.x0)
-            this.y0 = Math.min(tramo.y, this.y0)
-            this.x1 = Math.max(tramo.x1, this.x1)
-            this.y1 = Math.max(tramo.y, this.y1)
-        } else {
-            this.x0 = tramo.x0
-            this.y0 = tramo.y
-            this.x1 = tramo.x1
-            this.y1 = tramo.y
-        }
-    }
-    actualizarDelimitadores() {
-        if (this.tramos.length < 1) return
-        const listaTramos = Object.keys(this.tramos)
-        this.x0 = this.tramos[listaTramos.length - 1].x0
-        this.y0 = this.tramos[listaTramos.length - 1].y
-        this.x1 = this.tramos[listaTramos.length - 1].x1
-        this.y1 = this.tramos[listaTramos.length - 1].y
-
-        for (const actual of listaTramos) {
-            this.x0 = Math.min(this.x0, this.tramos[actual].x0)
-            this.x1 = Math.max(this.x1, this.tramos[actual].x1)
-            this.y0 = Math.min(this.y0, this.tramos[actual].y)
-            this.y1 = Math.max(this.y1, this.tramos[actual].y)
-        }
-
-    }
-    manchaEnArea(mancha) {
-        if (mancha.y0 > this.y1 + 1 || this.y0 > mancha.y1 + 1) return false
-
-        if (mancha.x0 > this.x1 + 1 || this.x0 > mancha.x1 + 1) return false
-
-        return true
-    }
-    manchaFronteriza(mancha) {
-        if (!this.manchaEnArea(mancha)) return false
-        const y0 = Math.max(mancha.y0 - 1, this.y0 - 1);
-        const y1 = Math.min(mancha.y1 + 1, this.y1 + 1);
-
-        for (let i = y0; i <= y1; i++) {
-            const fila = this.tramos[i]
-            if (!fila) continue
-            for (const tramo of fila) {
-                for (let n = y0; n <= y1; n++) {
-                    const fila = this.tramos[n]
-                    if (!fila) continue
-                    for (const tramoComparar of fila) {
-                        if (tramo.tramoFronterizo(tramoComparar)) return true;
-                    }
-                }
-
-            }
-        }
-    }
-    tramoPerteneciente(tramo) {
-        for (const tramoComprabar of this.tramos) {
-            if (tramo.tramoFronterizo(tramoComprabar)) return true
-        }
-        return false
-    }
-    agregarTramosMancha(mancha) {
-        for (let i = mancha.y0; i <= mancha.y1; i++) {
-            const linea = mancha.tramos[i];
-            if (!linea) continue
-            for (const tramo of linea) {
-                this.agregarTramo(tramo)
-            }
-        }
-    }
-    tramoEnArea(tramo) {
-        if (tramo.y < this.y0 - 1 || tramo.y > this.y1 + 1) return false;
-        if (tramo.x1 < this.x0 - 1 || tramo.x0 > this.x1 + 1) return false;
-
-        return true;
-    }
-    tramoFronterizo(tramoComprobar) {
-        if (!this.tramoEnArea(tramoComprobar)) return false
-        for (let i = tramoComprobar.y - 1; i <= tramoComprobar.y + 1; i++) {
-            const fila = this.tramos[i]
-            if (!fila) continue
-            for (const tramo of fila) {
-                if (tramoComprobar.tramoFronterizo(tramo)) return true
-            }
-        }
-    }
-    recorrerTramos(inicio = this.y0, fin = this.y1, accion) {
-
-        for (let i = inicio; i <= fin; i++) {
-            const fila = this.tramos[i]
-            if (!fila) continue
-            for (const tramo of fila) {
-                if (accion(tramo)) return true
-            }
-        }
-        return false
-    }
-    obtenerTramosPlano() {
-        const tramosPlano = []
-        for (let i = this.y0; i <= this.y1; i++) {
-            for (const tramo of this.tramos[i]) {
-                tramosPlano.push(tramo)
-            }
-        }
-        return tramosPlano
-    }
-}
-class grupoManchas {
-    constructor() {
-        this.manchas = []
-    }
-    agregarMancha(tramos, color) {
-        const nuevaMancha = new manchaLienzo(tramos, color)
-        this.manchas.push(nuevaMancha)
-        return nuevaMancha
-    }
-    agregarTramo(tramo, color, manchasComparar) {
-        const manchasCompatibles = []
-        for (const mancha of manchasComparar) {
-            if (mancha.color !== color) continue
-            if (!mancha.tramoEnArea(tramo)) continue
-            if (mancha.tramoFronterizo(tramo)) {
-                if (!manchasCompatibles.includes(mancha))
-                    manchasCompatibles.push(mancha)
-            }
-        }
-        if (manchasCompatibles.length === 1) {
-            manchasCompatibles[0].agregarTramo(tramo)
-            return manchasCompatibles[0]
-        }
-
-        if (manchasCompatibles.length > 1) {
-            const manchaPrincipal = manchasCompatibles[0]
-            manchaPrincipal.agregarTramo(tramo)
-
-            for (let i = 1; i < manchasCompatibles.length; i++) {
-                const manchaSecundaria = manchasCompatibles[i]
-                manchaPrincipal.agregarTramosMancha(manchaSecundaria)
-
-                const indiceBorrar = this.manchas.indexOf(manchaSecundaria)
-                if (indiceBorrar !== -1)
-                    this.manchas.splice(indiceBorrar, 1)
-
-                for (let j = 0; j < manchasComparar.length; j++) {
-                    if (manchasComparar[j] === manchaSecundaria) manchasComparar[j] = manchaPrincipal
-                }
-            }
-
-            return manchaPrincipal
-        }
-
-        return this.agregarMancha([tramo], color)
-    }
-    obtenerManchaClick(cord) {
-        for (const mancha of this.manchas) {
-            if (mancha.x0 <= cord.x && cord.x <= mancha.x1 &&
-                mancha.y0 <= cord.y && cord.y <= mancha.y1) {
-
-                const fila = mancha.tramos[cord.y]
-                if (!fila) continue
-                for (const tramo of fila) {
-                    if (cord.x >= tramo.x0 && cord.x <= tramo.x1) return mancha
-                }
-            }
-        }
-    }
-    obtenerManchasFronterizas(mancha) {
-        const manchasFronterizas = []
-        for (const manchaActual of this.manchas) {
-            if (manchaActual === mancha) continue
-            if (mancha.manchaFronteriza(manchaActual))
-                manchasFronterizas.push(manchaActual);
-        }
-        return manchasFronterizas
-    }
-}
 class comparadorPixel {
     constructor({ toleranciaA = 0, nivelReflejoAlpha = 0 }) {
         this.toleranciaA = toleranciaA;
@@ -451,46 +251,52 @@ class lienzoBase {
     }
 
     obtenerBufferSeccionado() {
-        let manchasLineaAnterior = []
-        let manchasLineaActual = []
+        const buffer = new Uint32Array(this.obtenerBuffer().buffer);
+        const manchaTemporal = {}; // Usamos números crudos para ir a máxima velocidad
 
-        const buffer = this.obtenerBuffer();
-        const buffer32 = new Uint32Array(buffer.buffer);
-        let pixelActual = 0;
-        const lienzoSeccionado = new grupoManchas();
+        let x0 = 0;
+        let y = 0;
+        let colorAnterior = buffer[0];
 
-        for (let y = 0; y < this.alto; y++) {
-            let colorActual = buffer32[pixelActual]
-            let x0 = 0;
+        for (let n = 1; n <= buffer.length; n++) {
+            const x = n % this.largo;
+            const colorActual = buffer[n];
+            const finDeLinea = (x === 0);
 
-            for (let x = 0; x < this.largo; x++) {
-                const px = buffer32[pixelActual]
+            if (colorActual !== colorAnterior || finDeLinea || n === buffer.length) {
 
-                if (px !== colorActual) {
-                    manchasLineaActual.push(
-                        lienzoSeccionado.agregarTramo(
-                            new tramo(x0, x - 1, y),
-                            colorActual,
-                            manchasLineaAnterior
-                        ))
+                const x1 = finDeLinea && n !== buffer.length ? this.largo - 1 : x - 1;
 
-                    colorActual = px;
-                    x0 = x;
+                if (!manchaTemporal[colorAnterior]) manchaTemporal[colorAnterior] = [];
+                manchaTemporal[colorAnterior].push(new tramo(x0, x1, y));
+
+                if (n < buffer.length) {
+                    x0 = finDeLinea ? 0 : x;
+                    if (finDeLinea) y++;
+                    colorAnterior = colorActual;
                 }
-                pixelActual += 1;
             }
-            manchasLineaActual.push(
-                lienzoSeccionado.agregarTramo(
-                    new tramo(x0, this.largo - 1, y),
-                    colorActual,
-                    manchasLineaAnterior
-                ));
-
-            manchasLineaAnterior = manchasLineaActual;
-            manchasLineaActual = []
         }
 
-        return lienzoSeccionado;
+        const mancha = {};
+        const uint32ToHex = (p32) => {
+            const r = p32 & 0xFF;
+            const g = (p32 >> 8) & 0xFF;
+            const b = (p32 >> 16) & 0xFF;
+            const a = (p32 >>> 24) & 0xFF;
+            return r.toString(16).padStart(2, '0') +
+                g.toString(16).padStart(2, '0') +
+                b.toString(16).padStart(2, '0') +
+                a.toString(16).padStart(2, '0');
+        };
+
+        for (const colo32 in manchaTemporal) {
+            const hexa = uint32ToHex(Number(colo32));
+            mancha[hexa] = manchaTemporal[colo32];
+        }
+
+        console.log(mancha);
+        return { mancha };
     }
 
     obtenerManchaInundacion({ cordenada, comparadorPixel, colorComparar }) {
@@ -605,6 +411,7 @@ class lienzoBase {
             listaTramos = nuevosTramos;
         }
 
+        console.log(mancha)
         return {
             mancha,
             colorBase: utiles.colorRgbaHexa(baseObj)
@@ -639,23 +446,30 @@ class lienzoHtml extends lienzoBase {
         setear: 'sourece-in',
     }
 
-    pegarLienzo({ lienzo, x, y, largo = lienzo.largo, alto = lienzo.alto, alpha, modoPegado }) { // pegar en ESTE lienzo
-        if (alpha !== undefined || modoPegado)
-            if (alpha !== undefined || this.modosPegado[modoPegado])
-                this.ctx.save();
+    pegarLienzo({ lienzo, x, y, rotacion = 0, xPivote = 0, yPivote = 0, largo = lienzo.largo, alto = lienzo.alto, alpha = 1, modoPegado = 'normal' }) { // pegar en ESTE lienzo}
+        if (alpha === 0) return
+        let guardar = modoPegado !== 'normal' ? this.modosPegado[modoPegado] : false
+        guardar = guardar || alpha !== 1 || rotacion !== 0 || xPivote !== 0 || yPivote !== 0;
 
-        if (alpha !== undefined)
-            this.ctx.globalAlpha = alpha;
-
-        if (modoPegado)
-            if (this.modosPegado[modoPegado])
-                this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
-
-        this.ctx.drawImage(lienzo.canvas, x, y, largo, alto)
-
-        if (alpha !== undefined || modoPegado)
-            if (alpha !== undefined || this.modosPegado[modoPegado])
-                this.ctx.restore()
+        if (guardar) {
+            this.ctx.save();
+            if (alpha !== 1) this.ctx.globalAlpha = alpha;
+            if (modoPegado) this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
+            if (rotacion !== 0) {
+                if (xPivote !== 0 || yPivote !== 0)
+                    this.ctx.translate(x + xPivote, y + yPivote)
+                this.ctx.rotate(rotacion);
+            }
+        }
+        this.ctx.drawImage(
+            lienzo.canvas,
+            rotacion === 0 ? x : - xPivote,
+            rotacion === 0 ? y : - yPivote,
+            largo,
+            alto
+        );
+        if (guardar)
+            this.ctx.restore()
     }
     redimMantImg({ u, r, d, l }) {
         const canvasProvisional = document.createElement('canvas')
@@ -680,18 +494,6 @@ class lienzoHtml extends lienzoBase {
         this.ctx.moveTo(x1, y1)
         this.ctx.lineTo(x2, y2)
         this.ctx.stroke();
-    }
-    pintarTrayectoLineas({ trayecto, grosor, r, g, b, a }) {
-        if (trayecto.length > 1) {
-            this.ctx.lineWidth = grosor;
-            this.ctx.strokeStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
-            this.ctx.beginPath();
-            for (let i = 0; i < trayecto.length - 1; i++) {
-                this.ctx.moveTo(trayecto[i].x, trayecto[i].y)
-                this.ctx.lineTo(trayecto[i + 1].x, trayecto[i + 1].y)
-            }
-            this.ctx.stroke();
-        }
     }
     limpiarRectangulo({ x, y, largo, alto }) {
         this.ctx.clearRect(x, y, largo, alto);
@@ -740,6 +542,37 @@ class lienzoHtml extends lienzoBase {
         );
         this.ctx.fill();
         this.ctx.globalCompositeOperation = "source-over";
+    }
+    pintarTrayectoLineas({ puntoInicialX = 0, puntoInicialY = 0, trayecto, grosor, r, g, b, a, inicioTrayecto, finTrayecto }) {
+        if (trayecto.length > 1) {
+            this.ctx.lineWidth = grosor;
+            this.ctx.strokeStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
+            this.ctx.beginPath();
+            for (let i = inicioTrayecto; i < finTrayecto; i++) {
+                this.ctx.moveTo(trayecto[i].x + puntoInicialX, trayecto[i].y + puntoInicialY)
+                this.ctx.lineTo(trayecto[i + 1].x + puntoInicialX, trayecto[i + 1].y + puntoInicialY)
+            }
+            this.ctx.stroke();
+        }
+    }
+    pintarTrayectoCirculo({ puntoInicialX = 0, puntoInicialY = 0, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto, finTrayecto }) {
+        if (trayecto.length > 0) {
+            this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
+            this.ctx.beginPath();
+            for (let i = inicioTrayecto; i <= finTrayecto; i++) {
+                this.ctx.moveTo(trayecto[i].x + puntoInicialX, trayecto[i].y + puntoInicialY)
+                this.ctx.ellipse(
+                    trayecto[i].x + puntoInicialX,
+                    trayecto[i].y + puntoInicialY,
+                    radio,
+                    radio,
+                    rotacion,
+                    inicio,
+                    fin
+                );
+            }
+            this.ctx.fill();
+        }
     }
     pintarCirculo({ x, y, radio, r, g, b, a, rotacion, inicio, fin }) {
         this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';

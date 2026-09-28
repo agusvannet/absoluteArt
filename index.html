@@ -134,6 +134,24 @@
                         value="1" id="numberSeparacionSello" min="0" max="5" step="0.01">
                 </div>
                 <div class="tolerancia verde  ">
+                    <p>flujo</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numberFlujo').value = this.value, flujo = Number(this.value)"
+                        value="1" id="rangueFlujo" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangueFlujo').value = this.value, flujo = Number(this.value)"
+                        value="1" id="numberFlujo" min="0" max="1" step="0.01">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>rotInic</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbRotInc').value = this.value, rotacionInicial = Number(this.value)"
+                        value="0" id="rangueRotInc" min="0" max="360" step="1">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangueRotInc').value = this.value, rotacionInicial = Number(this.value)"
+                        value="0" id="numbRotInc" min="0" max="360" step="1">
+                </div>
+                <div class="tolerancia verde  ">
                     <p>suaviz</p>
                     <input type="range" name=""
                         oninput="document.getElementById('numbersuavizado').value = this.value, suavizado = Number(this.value)"
@@ -187,6 +205,17 @@
                         oninput="document.getElementById('ranguesensibilidadOpacidadVelocidad').value = this.value, sensibilidadOpacidadVelocidad = Number(this.value)"
                         value="0" id="numbersensibilidadOpacidadVelocidad" min="-1" max="1" step="0.01">
                 </div>
+                <div class="tolerancia verde  ">
+                    <p>segRotTra</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numbRotTray').value = this.value, seguirRotacionTrayecto = Number(this.value)"
+                        value="0" id="rangRotTray" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('rangRotTray').value = this.value, seguirRotacionTrayecto = Number(this.value)"
+                        value="0" id="numbRotTray" min="0" max="1" step="0.01">
+                </div>
+
+
             </div>
             <div class="inputsLapizFigura inputsBalde">
                 <div class="opcion">
@@ -354,7 +383,7 @@
                         <input type="checkbox" checked name="" id="setearBalde" oninput="setearBalde = this.checked">
                     </div>
                     <div class="opcion">
-                        <p>reflejarCanales</p>
+                        <p>refCan</p>
                         <input type="checkbox" name="" oninput="reflejarCanales = this.checked">
                     </div>
                     <div class="opcion">

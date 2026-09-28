@@ -244,29 +244,6 @@ class pincel extends herramientaDibujo {
     trazoEnProceso(trazo) {
         return false
     }
-
-    acomodarAlphaTrazo({ lienzo, trazo }) { // no lo use xd , revienta la ram
-        const seccionCambiar = trazo.cajaDelimitadora();
-        seccionCambiar.x += trazo.puntoInicial.x - trazo.grosor
-        seccionCambiar.y += trazo.puntoInicial.y - trazo.grosor
-        seccionCambiar.largo += trazo.grosor * 2
-        seccionCambiar.alto += trazo.grosor * 2
-
-        lienzo.cambiarCanalSeccion({
-            seccion: seccionCambiar,
-            condicion: ({ r, g, b, a }) => a !== 0,
-            cambios: ({ r, g, b, a }) => {
-                a = trazo.rgba[0].a * 255;
-                return { r, g, b, a }
-            },
-        })
-        lienzo.pegarLienzo({ lienzo: lienzo, x: 0, y: 0 })
-    }
-
-    utilizarLienzoIntermediario(trazo) {
-        if (trazo.trayectos[0].length === 1 || trazo.rgba[0].a === 1) return false
-        return true
-    }
 }
 class sello extends herramientaDibujo {
     constructor({ nombre, categoria }) {
@@ -290,23 +267,34 @@ class selloCuadrado extends sello {
         })
     }
 }
-class selloRombo extends sello {
+class selloTest extends sello {
     constructor({ nombre, categoria }) {
         super({ nombre, categoria })
     }
     usar({ x, y, grosor, rgb, a, lienzo }) { //pintarLinea({ x1, y1, x2, y2, grosor)
-        lienzo.pintarLinea({ // pintarRectangulo({ x, y, largo, alto, r, g, b, a })
-            x1: x - Math.floor(grosor / 4),
-            y1: y - Math.floor(grosor / 4),
-            x2: x + Math.floor(grosor / 4),
-            y2: y + Math.floor(grosor / 4),
-            grosor: grosor * 0.75,
+        lienzo.pintarRectangulo({ // pintarRectangulo({ x, y, largo, alto, r, g, b, a })
+            x: x - Math.floor(grosor / 2),
+            y: y - Math.floor(grosor / 2),
+            largo: grosor / 4,
+            alto: grosor / 4,
+            r: rgb[0].r,
+            g: rgb[0].g,
+            b: rgb[0].b,
+            a
+        })
+
+        lienzo.pintarRectangulo({ // pintarRectangulo({ x, y, largo, alto, r, g, b, a })
+            x: x - (Math.floor(grosor / 2) - grosor / 3),
+            y: y - (Math.floor(grosor / 2) - grosor / 3),
+            largo: grosor / 4,
+            alto: grosor / 4,
             r: rgb[0].r,
             g: rgb[0].g,
             b: rgb[0].b,
             a
         })
     }
+
 }
 class cuadradoDobleColor extends sello {
     constructor({ nombre, categoria }) {
@@ -387,7 +375,8 @@ class poligonoSimple extends figura {
     usar({ lienzo, trazo, lienzoIntermediario }) { // ({ x1, y1, x2, y2, grosor, r, g, b, a })
         if (!this.trazoValido(trazo)) return
         lienzos.acomodar({ lienzo: lienzoIntermediario.lienzoComunSecundario, alto: lienzo.alto, largo: lienzo.largo })
-        pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, this.transformarTrazoEnPincel(trazo))
+        pintor.dibujar({ lienzoDibujar: lienzoIntermediario.lienzoComunSecundario, trazo: this.transformarTrazoEnPincel(trazo) })
+
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
 
     }
@@ -404,10 +393,13 @@ class poligonoSimple extends figura {
         trazoTransformado.rebotarSuavizado = false;
         trazoTransformado.sensibilidadGrosorPresion = 0;
         trazoTransformado.sensibilidadOpacidadPresion = 0;
+        trazoTransformado.sensibilidadOpacidadVelocidad = 0;
+        trazoTransformado.sensibilidadGrosorVelocidad = 0;
         if (!trazo.redondearFigura) trazoTransformado.suavizado = 0;
         for (const rgba of trazoTransformado.rgba) {
             rgba.a = 1;
         }
+        console.log(trazoTransformado)
         return trazoTransformado
     }
 
@@ -446,11 +438,12 @@ class pincelSellosSimple extends pincel {
     }
 
     obtenerPuntosMoviles(trazo) {
+        if (!trazo.puntosSuavizado) return 1
         return (trazo.puntosSuavizado % 2 === 1) ? Math.round(trazo.puntosSuavizado * 1.5) : trazo.puntosSuavizado * 1.5 + 1
     }
 
     dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
-        let ultimoPunto;
+
         for (let i = inicioTrayectos; i <= finTrayectos; i++) {
             for (const sello of sellos) {
                 let trayectoSuavizado = trazo.obtenerTrayectoSuavizado({
@@ -465,23 +458,30 @@ class pincelSellosSimple extends pincel {
                     trayectoSuavizado = infoSeparacion.trayectoSeccionado
                     if (typeof (trazo.sobrante) === "number") trazo.sobrante = infoSeparacion.sobrante
                 }
+                if (!trazo.flujo) return
                 const cordenadas = trayectoSuavizado
-                for (const cord of cordenadas) {
-                    ultimoPunto = cord
-                    const grosor = trazo.obtenerGrosorFinal(cord)
-                    const cordFinal = trazo.obtenerCordFinal(cord)
+                let rotacionTrayecto = 0
+                for (let n = 0; n < cordenadas.length; n++) {
+                    if (cordenadas[n + 1])
+                        rotacionTrayecto = Math.atan2(cordenadas[n + 1].y - cordenadas[n].y, cordenadas[n + 1].x - cordenadas[n].x);
+                    const rotacionFinal = trazo.seguirRotacionTrayecto ? rotacionTrayecto * trazo.seguirRotacionTrayecto : 0
+                    const grosor = trazo.obtenerGrosorFinal(cordenadas[n])
+                    const cordFinal = trazo.obtenerCordFinal(cordenadas[n])
+
                     lienzo.pegarLienzo({
                         x: cordFinal.x - grosor / 2,
                         y: cordFinal.y - grosor / 2,
                         largo: grosor,
                         alto: grosor,
-                        alpha: trazo.obtenerAlphaFinal(cord, 1),
-                        lienzo: sello
+                        alpha: trazo.obtenerAlphaFinal(cordenadas[n], 1) * trazo.flujo,
+                        lienzo: sello,
+                        xPivote: grosor / 2,
+                        yPivote: grosor / 2,
+                        rotacion: trazo.rotacionInicial + rotacionFinal
                     })
                 }
             }
         }
-        return ultimoPunto
     }
 
     usar({ lienzo, lienzoIntermediario, trazo, sellos, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto }) {
@@ -493,7 +493,7 @@ class pincelSellosSimple extends pincel {
             inicioTrayectos,
             finTrayectos,
             inicioTrayecto,
-            finTrayecto
+            finTrayecto,
         })
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
         return returnar
@@ -506,7 +506,6 @@ class figuraSellos extends lineaSimple {
     }
     usar({ lienzo, trazo, lienzoIntermediario }) {
         if (!this.trazoValido(trazo)) return
-        lienzos.acomodar({ lienzo: lienzoIntermediario.lienzoComunSecundario, alto: lienzo.alto, largo: lienzo.largo })
 
         const clonTrazo = trazo.clonar();
         clonTrazo.herramienta = 'pincelSellosSimple'
@@ -515,10 +514,13 @@ class figuraSellos extends lineaSimple {
         clonTrazo.separar = false;
         clonTrazo.sensibilidadGrosorPresion = 0;
         clonTrazo.sensibilidadOpacidadPresion = 0;
+        clonTrazo.sensibilidadOpacidadVelocidad = 0;
+        clonTrazo.sensibilidadGrosorVelocidad = 0;
+
         if (!trazo.redondearFigura) clonTrazo.suavizado = 0;
         const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
-        pintor.dibujar(lienzoIntermediario.lienzoComunSecundario, clonTrazo)
+        pintor.dibujar({ lienzoDibujar: lienzoIntermediario.lienzoComunSecundario, trazo: clonTrazo })
 
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
     }
@@ -565,11 +567,13 @@ class baldeSimple extends herramienta {
             b: trazo.colorCompararBalde.b,
             a: trazo.colorCompararBalde.a * 255
         }
-        const manchaClickeada = lienzo.obtenerManchaInundacion({
+
+        const manchaClickeada = comparadorPixel.toleranciaTotal !== 1 ? lienzo.obtenerManchaInundacion({
             cordenada: puntoBalde,
             comparadorPixel,
             colorComparar
-        });
+        }) : lienzo.obtenerBufferSeccionado();
+
         const rgba = trazo.rgba[0];
         const obtenerEquivalentes = comparadorPixel.obtenerEquivalenciaCanales({
             r: rgba.r,
@@ -639,6 +643,48 @@ class baldeSimple extends herramienta {
         return true;
     }
 }
+class pincelBarato extends pincel {
+    obtenerPuntosMoviles() {
+        return 2
+    }
+
+    usar({ lienzo, lienzoIntermediario, trazo, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
+        if (trazo.rgba[0].a === 0) return
+        for (let n = inicioTrayectos; n <= finTrayectos; n++) {
+            inicioTrayecto = inicioTrayecto !== undefined ? inicioTrayecto : 0
+            finTrayecto = finTrayecto !== undefined ? finTrayecto : trazo.trayectos[n].length - 1
+            lienzoIntermediario.lienzoComun.pintarTrayectoLineas({
+                puntoInicialX: trazo.puntoInicial.x,
+                puntoInicialY: trazo.puntoInicial.y,
+                trayecto: trazo.trayectos[n],
+                grosor: trazo.grosor,
+                r: trazo.rgba[0].r,
+                g: trazo.rgba[0].g,
+                b: trazo.rgba[0].b,
+                a: 1,
+                inicioTrayecto,
+                finTrayecto
+            })
+
+            lienzoIntermediario.lienzoComun.pintarTrayectoCirculo({
+                puntoInicialX: trazo.puntoInicial.x,
+                puntoInicialY: trazo.puntoInicial.y,
+                trayecto: trazo.trayectos[n],
+                radio: trazo.grosor / 2,
+                r: trazo.rgba[0].r,
+                g: trazo.rgba[0].g,
+                b: trazo.rgba[0].b,
+                a: 1,
+                rotacion: 0,
+                inicio: 0,
+                fin: Math.PI * 2,
+                inicioTrayecto,
+                finTrayecto
+            })
+        }
+        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
+    }
+}
 
 pintor.cargarCategorias([
     { nombreCategoria: 'herramienta' },
@@ -659,8 +705,9 @@ const herramientas = [
     { clase: 'selloCuadrado', parametros: { nombre: 'selloCuadrado', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'cuadradoDobleColor', parametros: { nombre: 'cuadradoDobleColor', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'selloCaligrafia', parametros: { nombre: 'selloCaligrafia', categoria: pintor.obtenerCategoria('sello') } },
-    { clase: 'selloRombo', parametros: { nombre: 'selloRombo', categoria: pintor.obtenerCategoria('sello') } },
+    { clase: 'selloTest', parametros: { nombre: 'selloTest', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'selloCircular', parametros: { nombre: 'selloCircular', categoria: pintor.obtenerCategoria('sello') } },
+    { clase: 'pincelBarato', parametros: { nombre: 'pincelBarato', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
     { clase: 'pincelSellosSimple', parametros: { nombre: 'pincelSellosSimple', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
     { clase: 'baldeSimple', parametros: { nombre: 'baldeSimple', categoria: pintor.obtenerCategoria('mutacionColor') } },
     {

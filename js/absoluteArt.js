@@ -331,13 +331,18 @@ class historial {
         this.trazosRevertidos.pop();
         pintor.dibujar({
             lienzoDibujar: this.lienzo,
-            trazo: this.historialTrazos[this.historialTrazos.length - 1]
+            trazo: this.historialTrazos[this.historialTrazos.length - 1],
+            prepararSello: true
         })
         return true
     }
     guardarHistorial(trazo) {
         this.guardarTrazo(trazo);
-        pintor.dibujar({ lienzoDibujar: this.lienzo, trazo })
+        pintor.dibujar({
+            lienzoDibujar: this.lienzo,
+            trazo,
+            prepararSello: true
+        })
         if (this.debeGuardarCaptura(trazo)) {
             this.guardarCaptura(trazo);
         }
@@ -357,7 +362,11 @@ class historial {
                 const indiceTrazo = trazos.length - cantTrazos + i;
                 const trazoActual = trazos[indiceTrazo];
 
-                pintor.dibujar({ lienzoDibujar: this.lienzo, trazo: trazoActual })
+                pintor.dibujar({
+                    lienzoDibujar: this.lienzo,
+                    trazo: trazoActual,
+                    prepararSello: true,
+                })
             }
         }
     }
@@ -442,14 +451,21 @@ class historial {
     }
 }
 class cordenada {
-    constructor({ x, y, presion = 1, msPx = 1 }) {
+    constructor({ x, y, presion = 1, msPx = 1, alpha = 1, inclinacionX = 0, inclinacionY = 0 } = {}) {
         this.x = x;
         this.y = y;
         this.presion = presion;
         this.msPx = msPx;
+        this.alpha = alpha;
+        this.inclinacionY = inclinacionY;
+        this.inclinacionX = inclinacionX;
     }
-    clonar({ x = this.x, y = this.y, presion = this.presion, msPx = this.msPx } = {}) {
-        return new cordenada({ x, y, presion, msPx })
+    static maxMsPx = 0.4;
+    static minMsPx = 0.004;
+    static maxInclinacion = 90;
+    static minInclinacion = -90;
+    clonar({ x = this.x, y = this.y, presion = this.presion, msPx = this.msPx, alpha = this.alpha, inclinacionX = 0, inclinacionY = 0 } = {}) {
+        return new cordenada({ x, y, presion, msPx, alpha, inclinacionX, inclinacionY })
     }
 }
 class trazo {
@@ -458,6 +474,7 @@ class trazo {
         puntoInicial,
         rgba = [{ r: 0, g: 0, b: 0, a: 0, }],
         grosor = 10,
+        flujo,
         herramienta,
         sello,
         separacion = 1,
@@ -501,11 +518,15 @@ class trazo {
         sensibilidadOpacidadPresion = 0,
         sensibilidadGrosorVelocidad = 0,
         sensibilidadOpacidadVelocidad = 0,
+        semilla = 1,
+        rotacionInicial = 0,
+        seguirRotacionTrayecto = 0,
     }) {
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
         this.rgba = rgba;
         this.grosor = grosor;
+        this.flujo = flujo;
         this.herramienta = herramienta; // es un string, simplemente el nombre de la herramienta
         this.sello = sello;
         this.separacion = separacion;
@@ -549,12 +570,13 @@ class trazo {
         this.sensibilidadOpacidadPresion = sensibilidadOpacidadPresion;
         this.sensibilidadGrosorVelocidad = sensibilidadGrosorVelocidad;
         this.sensibilidadOpacidadVelocidad = sensibilidadOpacidadVelocidad;
-
+        this.semilla = semilla;
+        this.rotacionInicial = rotacionInicial;
+        this.seguirRotacionTrayecto = seguirRotacionTrayecto;
     }
     separar = true
     static minimoSeparacion = 0.01;
-    static maxMsPx = 0.3;
-    static minMsPx = 0.004;
+
 
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
@@ -645,6 +667,7 @@ class trazo {
             puntoInicial: { x: this.puntoInicial.x, y: this.puntoInicial.y },
             grosor: this.grosor,
             rgba: this.clonarRGBA(),
+            flujo: this.flujo,
             trayectos: this.clonarTrayectos(),
             herramienta: this.herramienta,
             sello: this.sello,
@@ -695,6 +718,9 @@ class trazo {
             sensibilidadOpacidadPresion: this.sensibilidadOpacidadPresion,
             sensibilidadGrosorVelocidad: this.sensibilidadGrosorVelocidad,
             sensibilidadOpacidadVelocidad: this.sensibilidadOpacidadVelocidad,
+            semilla: this.semilla,
+            rotacionInicial: this.rotacionInicial,
+            seguirRotacionTrayecto: this.seguirRotacionTrayecto,
         })
     }
     agregarTrazo(cordenada) {
@@ -718,22 +744,6 @@ class trazo {
             presion: punto.presion,
             msPx: punto.msPx
         })
-    }
-    obtenerTrayectosCordsAbsolutas() {
-        const trayectosCordAbsolutos = []
-        for (const trayecto of this.trayectos) {
-            let trayectosAbsoluto = []
-            for (const cord of trayecto) {
-                trayectosAbsoluto.push(
-                    cord.clonar({
-                        x: cord.x + this.puntoInicial.x,
-                        y: cord.y + this.puntoInicial.y,
-                    })
-                )
-            }
-            trayectosCordAbsolutos.push(trayectosAbsoluto);
-        }
-        return trayectosCordAbsolutos
     }
     obtenerTrayectoPlano() {
         let cordenadas = []
@@ -775,6 +785,7 @@ class trazo {
             const puntos = Math.floor(distanciaTotal / separacion);
             const diferenciaPresionSeccionada = (finTramo.presion - origenTramo.presion) / puntos
             const diferenciaVelocidadSeccionada = (finTramo.msPx - origenTramo.msPx) / puntos
+            const diferenciaAlphaSeccionada = (finTramo.alpha - origenTramo.alpha) / puntos
             const dirX = largo / hyp;
             const dirY = alto / hyp;
 
@@ -786,7 +797,8 @@ class trazo {
                         x: origenTramo.x + dirX * distancia,
                         y: origenTramo.y + dirY * distancia,
                         presion: origenTramo.presion + diferenciaPresionSeccionada * n,
-                        msPx: origenTramo.msPx + diferenciaVelocidadSeccionada * n
+                        msPx: origenTramo.msPx + diferenciaVelocidadSeccionada * n,
+                        alpha: origenTramo.alpha + diferenciaAlphaSeccionada * n,
                     })
                 );
                 distancia += separacion;
@@ -809,7 +821,6 @@ class trazo {
 
             const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
             const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
-
             for (let n = minimo; n <= maximo; n++) {
                 let indice = n;
 
@@ -831,7 +842,7 @@ class trazo {
                     x: sumaX / puntosValidos,
                     y: sumaY / puntosValidos,
                     presion: sumaPresion / puntosValidos,
-                    pxMs: sumaVelocidad / puntosValidos
+                    msPx: sumaVelocidad / puntosValidos
                 });
 
             trayectoSuavizado.push(
@@ -871,9 +882,9 @@ class trazo {
         }
 
         if (this.sensibilidadOpacidadVelocidad) {
-            const pxNormalizada = cord.msPx / trazo.maxMsPx
-            const pxMs = (this.sensibilidadOpacidadVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
-            const alphaSens = (1 - Math.abs(this.sensibilidadOpacidadVelocidad)) * alpha + Math.abs(this.sensibilidadOpacidadVelocidad) * (alpha * pxMs)
+            const pxNormalizada = cord.msPx / cordenada.maxMsPx
+            const msPx = (this.sensibilidadOpacidadVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
+            const alphaSens = (1 - Math.abs(this.sensibilidadOpacidadVelocidad)) * alpha + Math.abs(this.sensibilidadOpacidadVelocidad) * (alpha * msPx)
             alphaFinal = alphaSens
         }
 
@@ -881,19 +892,19 @@ class trazo {
     }
     obtenerGrosorFinal(cord, grosor = this.grosor) {
         let grosorFinal = grosor;
-        if (this.sensibilidadGrosorPresion) {
-            const presion = (this.sensibilidadGrosorPresion > 0) ? cord.presion : 1 - cord.presion
-            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorPresion)) * grosor + Math.abs(this.sensibilidadGrosorPresion) * (grosor * presion)
-            grosorFinal = grosorSens
-        }
 
         if (this.sensibilidadGrosorVelocidad) {
-            const pxNormalizada = cord.msPx / trazo.maxMsPx
-            const pxMs = (this.sensibilidadGrosorVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
-            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorVelocidad)) * grosor + Math.abs(this.sensibilidadGrosorVelocidad) * (grosor * pxMs)
+            const pxNormalizada = cord.msPx / cordenada.maxMsPx
+            const msPx = (this.sensibilidadGrosorVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
+            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorVelocidad)) * grosorFinal + Math.abs(this.sensibilidadGrosorVelocidad) * (grosorFinal * msPx)
             grosorFinal = grosorSens
         }
 
+        if (this.sensibilidadGrosorPresion) {
+            const presion = (this.sensibilidadGrosorPresion > 0) ? cord.presion : 1 - cord.presion
+            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorPresion)) * grosorFinal + Math.abs(this.sensibilidadGrosorPresion) * (grosorFinal * presion)
+            grosorFinal = grosorSens
+        }
         return grosorFinal
     }
     obtenerCordFinal(cord) {
@@ -901,6 +912,19 @@ class trazo {
             x: cord.x + this.puntoInicial.x,
             y: cord.y + this.puntoInicial.y
         }
+    }
+}
+
+
+const piscinaCordenadas = {
+    cordenadas: [],
+    indiceUltimaCordenadaObtenida: 0,
+
+    agregarCordenada() {
+        this.cordenadas.push({
+            cordenada: new cordenada(),
+            enUso: false
+        })
     }
 }
 
@@ -998,9 +1022,9 @@ const mesaTrabajo = {
 
         if (this.lienzoPrevio) lienzoReal.pegarLienzo({ lienzo: this.lienzoPrevio, x: 0, y: 0 })
 
-        this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal' })
+        this.capaActiva.renderizar({ lienzoReceptor: this.lienzoCapaActual, modoFusion: 'normal', alpha: 1 })
         pintor.preRenderizarHerramienta({ lienzo: this.lienzoCapaActual, trazoReal, trazoTemporal, primerRenderizado });
-        lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion })
+        lienzoReal.pegarLienzo({ lienzo: this.lienzoCapaActual, y: 0, x: 0, modoPegado: this.capaActiva.modoFusion, alpha: this.capaActiva.opacidad })
 
         if (this.lienzoPosterior) lienzoReal.pegarLienzo({ lienzo: this.lienzoPosterior, y: 0, x: 0, modoPegado: this.modoFusionPosterior })
     },
@@ -1191,7 +1215,6 @@ const pintor = {
     herramientaUltimoDibujo: undefined,
     ultimoLienzoId: undefined,
     ultimoTrazo: undefined,
-
     lienzosIntermediarios: {
         lienzoGotero: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoPreVisualizacion: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
@@ -1212,11 +1235,12 @@ const pintor = {
         circuloSimple: (parametros) => { return new circuloSimple(parametros) },
         poligonoSimple: (parametros) => { return new poligonoSimple(parametros) },
         selloCuadrado: (parametros) => { return new selloCuadrado(parametros) },
-        selloRombo: (parametros) => { return new selloRombo(parametros) },
+        selloTest: (parametros) => { return new selloTest(parametros) },
         cuadradoDobleColor: (parametros) => { return new cuadradoDobleColor(parametros) },
         selloCaligrafia: (parametros) => { return new selloCaligrafia(parametros) },
         selloCircular: (parametros) => { return new selloCircular(parametros) },// nombre, cateogoria ( basicos )
         pincelSellosSimple: (parametros) => { return new pincelSellosSimple(parametros) },// nombre, cateogoria ( basicos )
+        pincelBarato: (parametros) => { return new pincelBarato(parametros) },// nombre, cateogoria ( basicos )
         figuraSellos: (parametros) => { return new figuraSellos(parametros) },// nombre, cateogoria ( basicos )
         baldeSimple: (parametros) => { return new baldeSimple(parametros) },
     },
@@ -1253,8 +1277,10 @@ const pintor = {
             trazoTemporal.sobrante = 0
             trazoReal.sobrante = 0
         }
+
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion, alto: lienzo.alto, largo: lienzo.largo })
-        if (herrDibujar.perteneceCategoria(this.obtenerCategoria("pinceles"))) {
+
+        if (herrDibujar.perteneceCategoria(this.obtenerCategoria("pinceles")) ) {
 
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacionSecundario, alto: lienzo.alto, largo: lienzo.largo })
             const puntosMantener = herrDibujar.obtenerPuntosMoviles(trazoReal)
@@ -1271,7 +1297,7 @@ const pintor = {
                     inTrayectos: 0,
                     finTrayectos: 0,
                     inTrayecto: indicePintar - 1,
-                    finTrayecto: indicePintar
+                    finTrayecto: indicePintar,
                 })
                 trazoTemporal.sobrante = trazoReal.sobrante;
             }
@@ -1283,8 +1309,6 @@ const pintor = {
                 inTrayecto: Math.max(0, trazoReal.trayectos[0].length - 1 - puntosMantener),
                 finTrayecto: trazoReal.trayectos[0].length - 1
             })
-            trazoReal.modoDibujo = trazoTemporal.modoDibujo
-            trazoReal.rgba[0].a = trazoTemporal.rgba[0].a
 
             this.lienzosIntermediarios.lienzoPreVisualizacion.pegarLienzo({
                 lienzo: this.lienzosIntermediarios.lienzoGotero,
@@ -1296,6 +1320,9 @@ const pintor = {
                 x: 0, y: 0,
                 modoPegado: trazoReal.modoDibujo,
             })
+
+            trazoReal.modoDibujo = trazoTemporal.modoDibujo
+            trazoReal.rgba[0].a = trazoTemporal.rgba[0].a
             lienzo.pegarLienzo({
                 lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion,
                 x: 0, y: 0,
@@ -1303,6 +1330,8 @@ const pintor = {
                 alpha: trazoReal.rgba[0].a
             })
         } else {
+            trazoTemporal.modoDibujo = 'normal'
+
             this.dibujar({
                 lienzoDibujar: this.lienzosIntermediarios.lienzoPreVisualizacion,
                 trazo: trazoTemporal,
@@ -1313,6 +1342,8 @@ const pintor = {
                 x: 0, y: 0,
                 modoPegado: trazoReal.modoDibujo
             })
+
+            trazoTemporal.modoDibujo = trazoReal.modoDibujo
         }
     },
     prepararSello(trazo) {

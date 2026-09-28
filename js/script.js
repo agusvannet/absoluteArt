@@ -449,6 +449,9 @@ let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
 let sensibilidadGrosorVelocidad = 0;
 let sensibilidadOpacidadVelocidad = 0;
+let flujo = 1;
+let rotacionInicial = 0;
+let seguirRotacionTrayecto = 0;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -487,6 +490,7 @@ function obtenerTrazoActual(cordInicial) {
         puntoInicial: cordInicial,
         rgba: obtenerColores(),
         grosor: Number(grosor),
+        flujo,
         herramienta: nombreHerramienta,
         sello: nombreSello,
         modoDibujo,
@@ -511,7 +515,12 @@ function obtenerTrazoActual(cordInicial) {
         sensibilidadOpacidadPresion,
 
         sensibilidadGrosorVelocidad,
-        sensibilidadOpacidadVelocidad
+        sensibilidadOpacidadVelocidad,
+
+        semilla: Date.now(),
+
+        rotacionInicial: rotacionInicial * (Math.PI / 180),
+        seguirRotacionTrayecto
     })
     return trazoGuardar;
 }
@@ -601,10 +610,11 @@ document.getElementById('cerrarConfCapa').click()
 let clickeando = false;
 
 canvasDom.addEventListener('pointerdown', (e) => {
+
     if (clickeando) return
     clickeando = true;
     let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
 
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
     cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
@@ -613,17 +623,19 @@ canvasDom.addEventListener('pointerdown', (e) => {
             x: cordenadaActual.x,
             y: cordenadaActual.y,
             presion: (e.pointerType === 'pen') ? e.pressure : 1,
-            msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
+            msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
         }),
         lienzoReal: canvas,
         parametrosTrazo: obtenerTrazoActual(cordenadaActual)
     })
 });
+const cuerpo = document.querySelector('body')
 let tiempoUltimoMovimiento = 111;
 let ultMov = { x: 0, y: 0 }
-canvasDom.addEventListener('pointermove', (e) => {
+cuerpo.addEventListener('pointermove', (e) => {
+    //console.log(Math.atan2(e.tiltY, e.tiltX),)
     let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
     if (clickeando) {
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
         mesaTrabajo.arrastreClick({
@@ -631,24 +643,20 @@ canvasDom.addEventListener('pointermove', (e) => {
                 x: cordenadaActual.x,
                 y: cordenadaActual.y,
                 presion: (e.pointerType === 'pen') ? e.pressure : 1,
-                msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
+                msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
             }),
             lienzoReal: canvas
         })
     }
-
-
-});
-const cuerpo = document.querySelector('body')
-cuerpo.addEventListener('pointermove', (e) => {
     ultMov = { x: e.clientX, y: e.clientY }
     tiempoUltimoMovimiento = performance.now()
 });
+
 canvasDom.addEventListener('pointerup', (e) => {
     clickeando = false;
 
     let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = trazo.minMsPx
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
 
 
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
@@ -658,7 +666,7 @@ canvasDom.addEventListener('pointerup', (e) => {
             x: cordenadaActual.x,
             y: cordenadaActual.y,
             presion: (e.pointerType === 'pen') ? e.pressure : 1,
-            msPx: Math.max(Math.min(movimientoActual, trazo.maxMsPx), trazo.minMsPx)
+            msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
         }),
         lienzoReal: canvas
     })
