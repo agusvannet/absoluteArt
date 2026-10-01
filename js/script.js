@@ -619,12 +619,12 @@ canvasDom.addEventListener('pointerdown', (e) => {
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
     cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
     mesaTrabajo.inicioClick({
-        cordenada: new cordenada({
-            x: cordenadaActual.x,
-            y: cordenadaActual.y,
-            presion: (e.pointerType === 'pen') ? e.pressure : 1,
-            msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
-        }),
+        cordenada: new cordenada(
+            cordenadaActual.x,
+            cordenadaActual.y,
+            (e.pointerType === 'pen') ? e.pressure : 1,
+            Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+        ),
         lienzoReal: canvas,
         parametrosTrazo: obtenerTrazoActual(cordenadaActual)
     })
@@ -639,12 +639,12 @@ cuerpo.addEventListener('pointermove', (e) => {
     if (clickeando) {
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
         mesaTrabajo.arrastreClick({
-            cordenada: new cordenada({
-                x: cordenadaActual.x,
-                y: cordenadaActual.y,
-                presion: (e.pointerType === 'pen') ? e.pressure : 1,
-                msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
-            }),
+            cordenada: new cordenada(
+                cordenadaActual.x,
+                cordenadaActual.y,
+                (e.pointerType === 'pen') ? e.pressure : 1,
+                Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+            ),
             lienzoReal: canvas
         })
     }
@@ -662,12 +662,12 @@ canvasDom.addEventListener('pointerup', (e) => {
     const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
 
     mesaTrabajo.finClick({
-        cordenada: new cordenada({
-            x: cordenadaActual.x,
-            y: cordenadaActual.y,
-            presion: (e.pointerType === 'pen') ? e.pressure : 1,
-            msPx: Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
-        }),
+        cordenada: new cordenada(
+            cordenadaActual.x,
+            cordenadaActual.y,
+            (e.pointerType === 'pen') ? e.pressure : 1,
+            Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+        ),
         lienzoReal: canvas
     })
 

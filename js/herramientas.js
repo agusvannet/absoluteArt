@@ -442,28 +442,41 @@ class pincelSellosSimple extends pincel {
         return (trazo.puntosSuavizado % 2 === 1) ? Math.round(trazo.puntosSuavizado * 1.5) : trazo.puntosSuavizado * 1.5 + 1
     }
 
-    dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
-
+    dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto, renderizadoGoteo }) {
         for (let i = inicioTrayectos; i <= finTrayectos; i++) {
             for (const sello of sellos) {
+                let finTrayectoSuavizado = trazo.trayectos[i].length - 1
+                if (finTrayecto) {
+                    finTrayectoSuavizado = finTrayecto
+                    if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
+                        finTrayectoSuavizado++;
+                }
                 let trayectoSuavizado = trazo.obtenerTrayectoSuavizado({
                     rebotar: trazo.rebotarSuavizado,
                     inicioCalcular: (inicioTrayecto) ? inicioTrayecto : 0,
-                    finCalcular: (finTrayecto) ? finTrayecto : trazo.trayectos[i].length - 1,
+                    finCalcular: finTrayectoSuavizado,
                     puntos: trazo.trayectos[i],
                     puntosSuavizado: trazo.puntosSuavizado
                 })
+                let puntoFinalTrayectoria = undefined;
+                if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
+                    puntoFinalTrayectoria = trayectoSuavizado.pop()
                 if (trazo.separar) {
                     const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
                     trayectoSuavizado = infoSeparacion.trayectoSeccionado
                     if (typeof (trazo.sobrante) === "number") trazo.sobrante = infoSeparacion.sobrante
+
                 }
                 if (!trazo.flujo) return
                 const cordenadas = trayectoSuavizado
                 let rotacionTrayecto = 0
                 for (let n = 0; n < cordenadas.length; n++) {
-                    if (cordenadas[n + 1])
-                        rotacionTrayecto = Math.atan2(cordenadas[n + 1].y - cordenadas[n].y, cordenadas[n + 1].x - cordenadas[n].x);
+
+                    if (cordenadas[n + 1] || puntoFinalTrayectoria) {
+                        const cord1 = cordenadas[n]
+                        const cord2 = cordenadas[n + 1] ? cordenadas[n + 1] : puntoFinalTrayectoria
+                        rotacionTrayecto = Math.atan2(cord2.y - cord1.y, cord2.x - cord1.x);
+                    }
                     const rotacionFinal = trazo.seguirRotacionTrayecto ? rotacionTrayecto * trazo.seguirRotacionTrayecto : 0
                     const grosor = trazo.obtenerGrosorFinal(cordenadas[n])
                     const cordFinal = trazo.obtenerCordFinal(cordenadas[n])
@@ -484,7 +497,7 @@ class pincelSellosSimple extends pincel {
         }
     }
 
-    usar({ lienzo, lienzoIntermediario, trazo, sellos, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto }) {
+    usar({ lienzo, lienzoIntermediario, trazo, sellos, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto, renderizadoGoteo }) {
         if (trazo.rgba[0].a === 0) return
         const returnar = this.dibujo({
             lienzo: lienzoIntermediario.lienzoComun,
@@ -494,8 +507,9 @@ class pincelSellosSimple extends pincel {
             finTrayectos,
             inicioTrayecto,
             finTrayecto,
+            renderizadoGoteo,
         })
-        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
+        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo, renderizadoGoteo })
         return returnar
     }
 }

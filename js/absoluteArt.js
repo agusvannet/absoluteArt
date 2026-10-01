@@ -450,24 +450,6 @@ class historial {
         return clon
     }
 }
-class cordenada {
-    constructor({ x, y, presion = 1, msPx = 1, alpha = 1, inclinacionX = 0, inclinacionY = 0 } = {}) {
-        this.x = x;
-        this.y = y;
-        this.presion = presion;
-        this.msPx = msPx;
-        this.alpha = alpha;
-        this.inclinacionY = inclinacionY;
-        this.inclinacionX = inclinacionX;
-    }
-    static maxMsPx = 0.4;
-    static minMsPx = 0.004;
-    static maxInclinacion = 90;
-    static minInclinacion = -90;
-    clonar({ x = this.x, y = this.y, presion = this.presion, msPx = this.msPx, alpha = this.alpha, inclinacionX = 0, inclinacionY = 0 } = {}) {
-        return new cordenada({ x, y, presion, msPx, alpha, inclinacionX, inclinacionY })
-    }
-}
 class trazo {
     constructor({
         trayectos = [],
@@ -738,12 +720,15 @@ class trazo {
         }
     }
     obtenerCordenadaRelativa(punto) {
-        return new cordenada({
-            x: punto.x - this.puntoInicial.x,
-            y: punto.y - this.puntoInicial.y,
-            presion: punto.presion,
-            msPx: punto.msPx
-        })
+        return new cordenada(
+            punto.x - this.puntoInicial.x,
+            punto.y - this.puntoInicial.y,
+            punto.presion,
+            punto.msPx,
+            punto.inclinacionX,
+            punto.inclinacionY,
+            punto.alpha
+        )
     }
     obtenerTrayectoPlano() {
         let cordenadas = []
@@ -758,12 +743,16 @@ class trazo {
     }
     ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto, trayectoSeccionado = [] } = {}) {
         if (sobrante === 0)
-            trayectoSeccionado.push(new cordenada({
-                x: trayecto[0].x,
-                y: trayecto[0].y,
-                presion: trayecto[0].presion,
-                msPx: trayecto[0].msPx
-            }));
+            trayectoSeccionado.push(
+                new cordenada(
+                    trayecto[0].x,
+                    trayecto[0].y,
+                    trayecto[0].presion,
+                    trayecto[0].msPx,
+                    trayecto[0].inclinacionX,
+                    trayecto[0].inclinacionY,
+                    trayecto[0].alpha
+                ));
         if (separacion === undefined) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, trazo.minimoSeparacion)));
 
         for (let i = 0; i < trayecto.length - 1; i++) {
@@ -785,6 +774,8 @@ class trazo {
             const puntos = Math.floor(distanciaTotal / separacion);
             const diferenciaPresionSeccionada = (finTramo.presion - origenTramo.presion) / puntos
             const diferenciaVelocidadSeccionada = (finTramo.msPx - origenTramo.msPx) / puntos
+            const diferenciaInclinacionXSeccionada = (finTramo.inclinacionX - origenTramo.inclinacionX) / puntos
+            const diferenciaInclinacionYSeccionada = (finTramo.inclinacionY - origenTramo.inclinacionY) / puntos
             const diferenciaAlphaSeccionada = (finTramo.alpha - origenTramo.alpha) / puntos
             const dirX = largo / hyp;
             const dirY = alto / hyp;
@@ -793,13 +784,15 @@ class trazo {
 
             for (let n = 0; n < puntos; n++) {
                 trayectoSeccionado.push(
-                    new cordenada({
-                        x: origenTramo.x + dirX * distancia,
-                        y: origenTramo.y + dirY * distancia,
-                        presion: origenTramo.presion + diferenciaPresionSeccionada * n,
-                        msPx: origenTramo.msPx + diferenciaVelocidadSeccionada * n,
-                        alpha: origenTramo.alpha + diferenciaAlphaSeccionada * n,
-                    })
+                    new cordenada(
+                        origenTramo.x + dirX * distancia,
+                        origenTramo.y + dirY * distancia,
+                        origenTramo.presion + diferenciaPresionSeccionada * n,
+                        origenTramo.msPx + diferenciaVelocidadSeccionada * n,
+                        origenTramo.inclinacionX + diferenciaInclinacionXSeccionada * n,
+                        origenTramo.inclinacionY + diferenciaInclinacionYSeccionada * n,
+                        origenTramo.alpha + diferenciaAlphaSeccionada * n,
+                    )
                 );
                 distancia += separacion;
             }
@@ -817,7 +810,7 @@ class trazo {
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
-            let sumaX = 0, sumaY = 0, puntosValidos = 0, sumaPresion = 0, sumaVelocidad = 0;
+            let sumaX = 0, sumaY = 0, puntosValidos = 0, sumaPresion = 0, sumaVelocidad = 0, sumaInclinacionX = 0, sumaInclinacionY = 0, sumaAlpha = 0;
 
             const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
             const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
@@ -834,24 +827,33 @@ class trazo {
                 sumaY += (puntos[indice]) ? puntos[indice].y : 0;
                 sumaPresion += (puntos[indice]) ? puntos[indice].presion : 0;
                 sumaVelocidad += (puntos[indice]) ? puntos[indice].msPx : 0;
+                sumaInclinacionX += (puntos[indice]) ? puntos[indice].inclinacionX : 0;
+                sumaInclinacionY += (puntos[indice]) ? puntos[indice].inclinacionY : 0;
+                sumaAlpha += (puntos[indice]) ? puntos[indice].alpha : 0;
                 puntosValidos++;
             }
 
             const puntoPromedio =
-                new cordenada({
-                    x: sumaX / puntosValidos,
-                    y: sumaY / puntosValidos,
-                    presion: sumaPresion / puntosValidos,
-                    msPx: sumaVelocidad / puntosValidos
-                });
+                new cordenada( //x, y, presion, msPx, inclinacionX, inclinacionY, alpha
+                    sumaX / puntosValidos,
+                    sumaY / puntosValidos,
+                    sumaPresion / puntosValidos,
+                    sumaVelocidad / puntosValidos,
+                    sumaInclinacionX / puntosValidos,
+                    sumaInclinacionY / puntosValidos,
+                    sumaAlpha / puntosValidos,
+                );
 
             trayectoSuavizado.push(
-                new cordenada({
-                    x: puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
-                    y: puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
-                    presion: puntos[i].presion,
-                    msPx: puntos[i].msPx,
-                })
+                new cordenada(
+                    puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
+                    puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
+                    puntoPromedio.presion * this.suavizado + puntos[i].presion * (1 - this.suavizado),
+                    puntoPromedio.msPx * this.suavizado + puntos[i].msPx * (1 - this.suavizado),
+                    puntoPromedio.inclinacionX * this.suavizado + puntos[i].inclinacionX * (1 - this.suavizado),
+                    puntoPromedio.inclinacionY * this.suavizado + puntos[i].inclinacionY * (1 - this.suavizado),
+                    puntoPromedio.alpha * this.suavizado + puntos[i].alpha * (1 - this.suavizado),
+                )
             );
         }
 
@@ -914,17 +916,40 @@ class trazo {
         }
     }
 }
+class cordenada {
+    constructor(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1) {
+        this.x = x;
+        this.y = y;
+        this.presion = presion;
+        this.msPx = msPx;
+        this.alpha = alpha;
+        this.inclinacionY = inclinacionY;
+        this.inclinacionX = inclinacionX;
+    }
+    static maxMsPx = 1;
+    static minMsPx = 0.004;
+    static maxInclinacion = 90;
+    static minInclinacion = -90;
+    clonar(x = this.x, y = this.y, presion = this.presion, msPx = this.msPx, inclinacionX = 0, inclinacionY = 0, alpha = this.alpha) {
+        return new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha)
+    }
+}
 
+class grupoCordenada {
+    constructor() {
+    }
+
+}
 
 const piscinaCordenadas = {
     cordenadas: [],
     indiceUltimaCordenadaObtenida: 0,
 
-    agregarCordenada() {
-        this.cordenadas.push({
-            cordenada: new cordenada(),
-            enUso: false
-        })
+    agregarCordenada(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1) {
+        const cord = new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha)
+        this.cordenadas.push(
+
+        )
     }
 }
 
@@ -1245,7 +1270,7 @@ const pintor = {
         baldeSimple: (parametros) => { return new baldeSimple(parametros) },
     },
 
-    dibujar({ lienzoDibujar, trazo, prepararSello, inTrayectos, inTrayecto, finTrayectos, finTrayecto }) {
+    dibujar({ lienzoDibujar, trazo, prepararSello, inTrayectos, inTrayecto, finTrayectos, finTrayecto, renderizadoGoteo }) {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComunSecundario, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
@@ -1260,6 +1285,7 @@ const pintor = {
             finTrayectos: finTrayectos,
             inicioTrayecto: inTrayecto,
             finTrayecto: finTrayecto,
+            renderizadoGoteo
         })
 
         this.herramientaUltimoDibujo = herramienta
@@ -1280,7 +1306,7 @@ const pintor = {
 
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion, alto: lienzo.alto, largo: lienzo.largo })
 
-        if (herrDibujar.perteneceCategoria(this.obtenerCategoria("pinceles")) ) {
+        if (herrDibujar.perteneceCategoria(this.obtenerCategoria("pinceles"))) {
 
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacionSecundario, alto: lienzo.alto, largo: lienzo.largo })
             const puntosMantener = herrDibujar.obtenerPuntosMoviles(trazoReal)
@@ -1298,6 +1324,7 @@ const pintor = {
                     finTrayectos: 0,
                     inTrayecto: indicePintar - 1,
                     finTrayecto: indicePintar,
+                    renderizadoGoteo: true
                 })
                 trazoTemporal.sobrante = trazoReal.sobrante;
             }
