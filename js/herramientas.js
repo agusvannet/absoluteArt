@@ -399,7 +399,6 @@ class poligonoSimple extends figura {
         for (const rgba of trazoTransformado.rgba) {
             rgba.a = 1;
         }
-        console.log(trazoTransformado)
         return trazoTransformado
     }
 
@@ -480,7 +479,6 @@ class pincelSellosSimple extends pincel {
                     const rotacionFinal = trazo.seguirRotacionTrayecto ? rotacionTrayecto * trazo.seguirRotacionTrayecto : 0
                     const grosor = trazo.obtenerGrosorFinal(cordenadas[n])
                     const cordFinal = trazo.obtenerCordFinal(cordenadas[n])
-
                     lienzo.pegarLienzo({
                         x: cordFinal.x - grosor / 2,
                         y: cordFinal.y - grosor / 2,

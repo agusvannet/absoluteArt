@@ -559,7 +559,6 @@ class trazo {
     separar = true
     static minimoSeparacion = 0.01;
 
-
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
         let y1 = 0;
@@ -916,42 +915,6 @@ class trazo {
         }
     }
 }
-class cordenada {
-    constructor(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1) {
-        this.x = x;
-        this.y = y;
-        this.presion = presion;
-        this.msPx = msPx;
-        this.alpha = alpha;
-        this.inclinacionY = inclinacionY;
-        this.inclinacionX = inclinacionX;
-    }
-    static maxMsPx = 1;
-    static minMsPx = 0.004;
-    static maxInclinacion = 90;
-    static minInclinacion = -90;
-    clonar(x = this.x, y = this.y, presion = this.presion, msPx = this.msPx, inclinacionX = 0, inclinacionY = 0, alpha = this.alpha) {
-        return new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha)
-    }
-}
-
-class grupoCordenada {
-    constructor() {
-    }
-
-}
-
-const piscinaCordenadas = {
-    cordenadas: [],
-    indiceUltimaCordenadaObtenida: 0,
-
-    agregarCordenada(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1) {
-        const cord = new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha)
-        this.cordenadas.push(
-
-        )
-    }
-}
 
 const mesaTrabajo = {
     confCapas: {
@@ -1037,8 +1000,11 @@ const mesaTrabajo = {
             return
         }
 
-        this.renderizarTrazo({ lienzoReal: lienzoReal, trazoTemporal: this.trazoTemporal, trazoReal: this.trazoGuardar })
-
+        this.preRenderizarTrazo({
+            lienzoReal,
+            trazoTemporal: this.trazoTemporal,
+            trazoReal: this.trazoGuardar,
+        })
     },
     preRenderizarTrazo({ lienzoReal, trazoTemporal, trazoReal, primerRenderizado }) {
         if (!this.herramientaActiva.preRenderizable) return
@@ -1311,6 +1277,7 @@ const pintor = {
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacionSecundario, alto: lienzo.alto, largo: lienzo.largo })
             const puntosMantener = herrDibujar.obtenerPuntosMoviles(trazoReal)
 
+            const alphaOriginal = trazoReal.rgba[0].a
             trazoReal.rgba[0].a = 1;
             trazoReal.modoDibujo = 'normal'
 
@@ -1349,13 +1316,14 @@ const pintor = {
             })
 
             trazoReal.modoDibujo = trazoTemporal.modoDibujo
-            trazoReal.rgba[0].a = trazoTemporal.rgba[0].a
+            trazoReal.rgba[0].a = alphaOriginal
             lienzo.pegarLienzo({
                 lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion,
                 x: 0, y: 0,
                 modoPegado: trazoReal.modoDibujo,
                 alpha: trazoReal.rgba[0].a
             })
+
         } else {
             trazoTemporal.modoDibujo = 'normal'
 
