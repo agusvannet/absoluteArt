@@ -205,17 +205,63 @@
                         oninput="document.getElementById('ranguesensibilidadOpacidadVelocidad').value = this.value, sensibilidadOpacidadVelocidad = Number(this.value)"
                         value="0" id="numbersensibilidadOpacidadVelocidad" min="-1" max="1" step="0.01">
                 </div>
+
                 <div class="tolerancia verde  ">
-                    <p>segRotTra</p>
+                    <p>durIni</p>
                     <input type="range" name=""
-                        oninput="document.getElementById('numbRotTray').value = this.value, seguirRotacionTrayecto = Number(this.value)"
-                        value="0" id="rangRotTray" min="0" max="1" step="0.01">
+                        oninput="document.getElementById('numPuntosInicio').value = this.value, cantPuntosInicio = Number(this.value)"
+                        value="1" id="rangPuntosInicio" min="1" max="40" step="1">
                     <input type="number" name=""
-                        oninput="document.getElementById('rangRotTray').value = this.value, seguirRotacionTrayecto = Number(this.value)"
-                        value="0" id="numbRotTray" min="0" max="1" step="0.01">
+                        oninput="document.getElementById('rangPuntosInicio').value = this.value, cantPuntosInicio = Number(this.value)"
+                        value="1" id="numPuntosInicio" min="1" max="40" step="1">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>durFin</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numPunntosFin').value = this.value, cantPuntosFin = Number(this.value)"
+                        value="1" id="ranPuntosFin" min="1" max="40" step="1">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranPuntosFin').value = this.value, cantPuntosFin = Number(this.value)"
+                        value="1" id="numPunntosFin" min="1" max="40" step="1">
                 </div>
 
+                <div class="tolerancia verde  ">
+                    <p>grosInic</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numgrosini').value = this.value, grosorInicio = Number(this.value)"
+                        value="1" id="ranggrosinic" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranggrosinic').value = this.value, grosorInicio = Number(this.value)"
+                        value="1" id="numgrosini" min="0" max="1" step="0.01">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>grosFin</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('rangGrosFin').value = this.value, grosorFin = Number(this.value)"
+                        value="1" id="numGrosFin" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('numGrosFin').value = this.value, grosorFin = Number(this.value)"
+                        value="1" id="rangGrosFin" min="0" max="1" step="0.01">
+                </div>
 
+                <div class="tolerancia verde  ">
+                    <p>alphInic</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('numAlpInc').value = this.value, alphaInicio = Number(this.value)"
+                        value="1" id="ranAlpIni" min="-1" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('ranAlpIni').value = this.value, alphaInicio = Number(this.value)"
+                        value="1" id="numAlpInc" min="-1" max="1" step="0.01">
+                </div>
+                <div class="tolerancia verde  ">
+                    <p>alphFin</p>
+                    <input type="range" name=""
+                        oninput="document.getElementById('ranAlpFin').value = this.value, alphaFin = Number(this.value)"
+                        value="1" id="numAlpFin" min="0" max="1" step="0.01">
+                    <input type="number" name=""
+                        oninput="document.getElementById('numAlpFin').value = this.value, alphaFin = Number(this.value)"
+                        value="1" id="ranAlpFin" min="0" max="1" step="0.01">
+                </div>
             </div>
             <div class="inputsLapizFigura inputsBalde">
                 <div class="opcion">

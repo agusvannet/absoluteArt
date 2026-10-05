@@ -121,8 +121,6 @@ function seleccionarCapa(id, tipo) {
         if (capaActual.id !== 0) {
             abrirCapasPadre(capaActual)
         }
-    } else {
-        console.log("errorsito bro")
     }
 }
 
@@ -452,6 +450,15 @@ let sensibilidadOpacidadVelocidad = 0;
 let flujo = 1;
 let rotacionInicial = 0;
 let seguirRotacionTrayecto = 0;
+
+let cantPuntosInicio = 1;
+let cantPuntosFin = 1;
+
+let grosorInicio = 1;
+let grosorFin = 1;
+
+let alphaInicio = 1;
+let alphaFin = 1;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -520,7 +527,16 @@ function obtenerTrazoActual(cordInicial) {
         semilla: Date.now(),
 
         rotacionInicial: rotacionInicial * (Math.PI / 180),
-        seguirRotacionTrayecto
+        seguirRotacionTrayecto,
+
+        cantPuntosInicio,
+        cantPuntosFin,
+
+        grosorInicio,
+        grosorFin,
+
+        alphaInicio,
+        alphaFin,
     })
     return trazoGuardar;
 }
@@ -599,51 +615,60 @@ function llenarElCanvasHSVcompleto(idCapa) {
     if (typeof mesaTrabajo.render === 'function') mesaTrabajo.render();
     else if (typeof mesaTrabajo.dibujar === 'function') mesaTrabajo.dibujar();
     mesaTrabajo.capas.preRenderizar()
-    console.log(canvas)
     mesaTrabajo.capas.renderizar(canvasLienzo)
 
-    console.log(`✓ Grid de prueba inyectado (${ANCHO}x${ALTO}): Hue doble en X, Saturación en mitad superior y Brillo en mitad inferior.`);
 
 }
 document.getElementById('cerrarConfCapa').click()
 
 let clickeando = false;
-
-canvasDom.addEventListener('pointerdown', (e) => {
-
-    if (clickeando) return
-    clickeando = true;
-    let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
-
-    const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
-    cordenadaActual.presion = (e.pointerType === 'pen') ? e.pressure : 1
-    mesaTrabajo.inicioClick({
-        cordenada: new cordenada(
-            cordenadaActual.x,
-            cordenadaActual.y,
-            (e.pointerType === 'pen') ? e.pressure : 1,
-            Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
-        ),
-        lienzoReal: canvas,
-        parametrosTrazo: obtenerTrazoActual(cordenadaActual)
-    })
-});
 const cuerpo = document.querySelector('body')
 let tiempoUltimoMovimiento = 111;
 let ultMov = { x: 0, y: 0 }
+let clickInicial = false;
+let cordenadaInicial = undefined;
+canvasDom.addEventListener('pointerdown', (e) => {
+    if (clickeando) return
+    clickeando = true;
+    clickInicial = true;
+    cordenadaInicial = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
+    cordenadaInicial.presion = (e.pointerType === 'pen') ? e.pressure : 1
+
+});
+
 cuerpo.addEventListener('pointermove', (e) => {
-    //console.log(Math.atan2(e.tiltY, e.tiltX),)
     let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
+    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.maxMsPx;
+    movimientoActual = Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
     if (clickeando) {
+
+        if (clickInicial) {
+            clickInicial = false;
+            let velocidadInicial = movimientoActual;
+            if (Math.abs(velocidadInicial - cordenada.maxMsPx) > Math.abs(velocidadInicial - cordenada.minMsPx)) {
+                velocidadInicial = (velocidadInicial + cordenada.minMsPx) / 2
+            } else {
+                velocidadInicial = (velocidadInicial + cordenada.maxMsPx) / 2
+            }
+            mesaTrabajo.inicioClick({
+                cordenada: new cordenada(
+                    cordenadaInicial.x,
+                    cordenadaInicial.y,
+                    cordenadaInicial.presion,
+                    velocidadInicial
+                ),
+                lienzoReal: canvas,
+                parametrosTrazo: obtenerTrazoActual(cordenadaInicial)
+            })
+        }
+
         const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
         mesaTrabajo.arrastreClick({
             cordenada: new cordenada(
                 cordenadaActual.x,
                 cordenadaActual.y,
                 (e.pointerType === 'pen') ? e.pressure : 1,
-                Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+                movimientoActual
             ),
             lienzoReal: canvas
         })
@@ -652,79 +677,46 @@ cuerpo.addEventListener('pointermove', (e) => {
     tiempoUltimoMovimiento = performance.now()
 });
 
-canvasDom.addEventListener('pointerup', (e) => {
+cuerpo.addEventListener('pointerup', (e) => {
+    if (clickeando) {
+        let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
+        if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.maxMsPx
+
+        if (clickInicial) {
+            clickInicial = false;
+            let velocidadInicial = movimientoActual;
+            if (Math.abs(velocidadInicial - cordenada.maxMsPx) > Math.abs(velocidadInicial - cordenada.minMsPx)) {
+                velocidadInicial = (velocidadInicial + cordenada.minMsPx) / 2
+            } else {
+                velocidadInicial = (velocidadInicial + cordenada.maxMsPx) / 2
+            }
+            mesaTrabajo.inicioClick({
+                cordenada: new cordenada(
+                    cordenadaInicial.x,
+                    cordenadaInicial.y,
+                    cordenadaInicial.presion,
+                    velocidadInicial
+                ),
+                lienzoReal: canvas,
+                parametrosTrazo: obtenerTrazoActual(cordenadaInicial)
+            })
+            mesaTrabajo.finClick({
+                lienzoReal: canvas
+            })
+        } else {
+            const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
+            mesaTrabajo.finClick({
+                cordenada: new cordenada(
+                    cordenadaActual.x,
+                    cordenadaActual.y,
+                    (e.pointerType === 'pen') ? e.pressure : 1,
+                    Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+                ),
+                lienzoReal: canvas
+            })
+        }
+    }
+
     clickeando = false;
 
-    let movimientoActual = (performance.now() - tiempoUltimoMovimiento) / Math.hypot(e.clientX - ultMov.x, e.clientY - ultMov.y)
-    if (movimientoActual === Infinity || Number.isNaN(movimientoActual)) movimientoActual = cordenada.minMsPx
-
-
-    const cordenadaActual = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
-
-    mesaTrabajo.finClick({
-        cordenada: new cordenada(
-            cordenadaActual.x,
-            cordenadaActual.y,
-            (e.pointerType === 'pen') ? e.pressure : 1,
-            Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
-        ),
-        lienzoReal: canvas
-    })
-
 });
-
-
-/*
-
-let prevX = null;
-let prevY = null;
-let prevTime = null;
-let velMax = 0;
-
-function registrarVelocidadPuntero(e) {
-    // Extrae todos los sub-eventos nativos acumulados por el hardware
-    const eventos = typeof e.getCoalescedEvents === 'function'
-        ? e.getCoalescedEvents()
-        : [e];
-
-    for (const ev of eventos) {
-        const x = ev.clientX;
-        const y = ev.clientY;
-        const t = ev.timeStamp; // Milisegundos de alta resolución del sistema
-
-        if (prevTime !== null) {
-            const dt = t - prevTime;
-
-            // Filtra deltas nulos o imperceptibles para evitar Infinity
-            if (dt > 0.05) {
-                const dx = x - prevX;
-                const dy = y - prevY;
-                const dist = Math.hypot(dx, dy);
-                const velActual = dist / dt; // px/ms
-
-                if (velActual > velMax) {
-                    velMax = velActual;
-                    console.log(`[RÉCORD] velMax: ${velMax.toFixed(3)} px/ms | dt: ${dt.toFixed(2)} ms | dist: ${dist.toFixed(2)} px`);
-                } else {
-                    console.log(`vel: ${velActual.toFixed(3)} px/ms | dt: ${dt.toFixed(2)} ms`);
-                }
-            }
-        }
-
-        prevX = x;
-        prevY = y;
-        prevTime = t;
-    }
-}
-
-function resetearPuntero() {
-    prevX = null;
-    prevY = null;
-    prevTime = null;
-}
-
-// Escuchas globales sobre la ventana
-window.addEventListener('pointermove', registrarVelocidadPuntero);
-window.addEventListener('pointerup', resetearPuntero);
-window.addEventListener('pointerleave', resetearPuntero);
-*/

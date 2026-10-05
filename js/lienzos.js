@@ -411,7 +411,6 @@ class lienzoBase {
             listaTramos = nuevosTramos;
         }
 
-        console.log(mancha)
         return {
             mancha,
             colorBase: utiles.colorRgbaHexa(baseObj)
@@ -662,7 +661,6 @@ const lienzos = {
         //   console.log('num lien crea : ', this.contadorLienzos)
         //  console.log(' max ram  : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')// es por 8 para no meter un * 2 * mas 
         this.contadorLienzos++;
-        console.log(this.contadorLienzos)
         return new lienzoHtml({
             largo,
             alto,

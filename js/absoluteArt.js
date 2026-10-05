@@ -503,6 +503,13 @@ class trazo {
         semilla = 1,
         rotacionInicial = 0,
         seguirRotacionTrayecto = 0,
+
+        cantPuntosInicio,
+        cantPuntosFin,
+        grosorInicio,
+        grosorFin,
+        alphaInicio,
+        alphaFin,
     }) {
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -555,6 +562,13 @@ class trazo {
         this.semilla = semilla;
         this.rotacionInicial = rotacionInicial;
         this.seguirRotacionTrayecto = seguirRotacionTrayecto;
+
+        this.cantPuntosInicio = cantPuntosInicio;
+        this.cantPuntosFin = cantPuntosFin;
+        this.grosorInicio = grosorInicio;
+        this.grosorFin = grosorFin;
+        this.alphaInicio = alphaInicio;
+        this.alphaFin = alphaFin;
     }
     separar = true
     static minimoSeparacion = 0.01;
@@ -702,6 +716,13 @@ class trazo {
             semilla: this.semilla,
             rotacionInicial: this.rotacionInicial,
             seguirRotacionTrayecto: this.seguirRotacionTrayecto,
+
+            cantPuntosInicio: this.cantPuntosInicio,
+            cantPuntosFin: this.cantPuntosFin,
+            grosorInicio: this.grosorInicio,
+            grosorFin: this.grosorFin,
+            alphaInicio: this.alphaInicio,
+            alphaFin: this.alphaFin,
         })
     }
     agregarTrazo(cordenada) {
@@ -743,15 +764,9 @@ class trazo {
     ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto, trayectoSeccionado = [] } = {}) {
         if (sobrante === 0)
             trayectoSeccionado.push(
-                new cordenada(
-                    trayecto[0].x,
-                    trayecto[0].y,
-                    trayecto[0].presion,
-                    trayecto[0].msPx,
-                    trayecto[0].inclinacionX,
-                    trayecto[0].inclinacionY,
-                    trayecto[0].alpha
-                ));
+                trayecto[0].clonar()
+            );
+
         if (separacion === undefined) separacion = Math.max(1, (this.grosor * Math.max(this.separacion, trazo.minimoSeparacion)));
 
         for (let i = 0; i < trayecto.length - 1; i++) {
@@ -776,6 +791,7 @@ class trazo {
             const diferenciaInclinacionXSeccionada = (finTramo.inclinacionX - origenTramo.inclinacionX) / puntos
             const diferenciaInclinacionYSeccionada = (finTramo.inclinacionY - origenTramo.inclinacionY) / puntos
             const diferenciaAlphaSeccionada = (finTramo.alpha - origenTramo.alpha) / puntos
+            const diferenciaGrosorSeccionada = (finTramo.grosor - origenTramo.grosor) / puntos
             const dirX = largo / hyp;
             const dirY = alto / hyp;
 
@@ -791,6 +807,7 @@ class trazo {
                         origenTramo.inclinacionX + diferenciaInclinacionXSeccionada * n,
                         origenTramo.inclinacionY + diferenciaInclinacionYSeccionada * n,
                         origenTramo.alpha + diferenciaAlphaSeccionada * n,
+                        origenTramo.grosor + diferenciaGrosorSeccionada * n,
                     )
                 );
                 distancia += separacion;
@@ -809,7 +826,7 @@ class trazo {
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
-            let sumaX = 0, sumaY = 0, puntosValidos = 0, sumaPresion = 0, sumaVelocidad = 0, sumaInclinacionX = 0, sumaInclinacionY = 0, sumaAlpha = 0;
+            let sumaX = 0, sumaY = 0, puntosValidos = 0, sumaPresion = 0, sumaVelocidad = 0, sumaInclinacionX = 0, sumaInclinacionY = 0, sumaAlpha = 0, sumaGrosor = 0;
 
             const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
             const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
@@ -829,11 +846,12 @@ class trazo {
                 sumaInclinacionX += (puntos[indice]) ? puntos[indice].inclinacionX : 0;
                 sumaInclinacionY += (puntos[indice]) ? puntos[indice].inclinacionY : 0;
                 sumaAlpha += (puntos[indice]) ? puntos[indice].alpha : 0;
+                sumaGrosor += (puntos[indice]) ? puntos[indice].grosor : 0;
                 puntosValidos++;
             }
 
             const puntoPromedio =
-                new cordenada( //x, y, presion, msPx, inclinacionX, inclinacionY, alpha
+                new cordenada(
                     sumaX / puntosValidos,
                     sumaY / puntosValidos,
                     sumaPresion / puntosValidos,
@@ -841,6 +859,7 @@ class trazo {
                     sumaInclinacionX / puntosValidos,
                     sumaInclinacionY / puntosValidos,
                     sumaAlpha / puntosValidos,
+                    sumaGrosor / puntosValidos,
                 );
 
             trayectoSuavizado.push(
@@ -852,6 +871,7 @@ class trazo {
                     puntoPromedio.inclinacionX * this.suavizado + puntos[i].inclinacionX * (1 - this.suavizado),
                     puntoPromedio.inclinacionY * this.suavizado + puntos[i].inclinacionY * (1 - this.suavizado),
                     puntoPromedio.alpha * this.suavizado + puntos[i].alpha * (1 - this.suavizado),
+                    puntoPromedio.grosor * this.suavizado + puntos[i].grosor * (1 - this.suavizado),
                 )
             );
         }
@@ -913,6 +933,19 @@ class trazo {
             x: cord.x + this.puntoInicial.x,
             y: cord.y + this.puntoInicial.y
         }
+    }
+
+    calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
+        if (puntos.length < 3) return puntos
+        const puntosProcesados = []
+        let puntosInicio = this.cantPuntosInicio;
+        let puntosFin = this.cantPuntosFin;
+
+        const rangoTotal = this.cantPuntosFin + this.cantPuntosInicio;
+        const porcentajeInicio = rangoTotal / puntosInicio;
+        const porcentajeFin = rangoTotal / puntosFin;
+
+        return puntos
     }
 }
 
@@ -985,7 +1018,8 @@ const mesaTrabajo = {
         if (this.capasIndividualesVivas.length === 0) return
         if (!this.trazoGuardar) return
 
-        this.trazoGuardar.agregarCordenada(cordenada)
+        if (cordenada)
+            this.trazoGuardar.agregarCordenada(cordenada)
 
         if (!this.herramientaActiva.trazoEnProceso(this.trazoGuardar)) {
             if (this.herramientaActiva.trazoValido(this.trazoGuardar)) {
