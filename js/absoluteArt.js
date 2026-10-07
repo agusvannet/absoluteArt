@@ -940,11 +940,11 @@ class trazo {
         const puntosProcesados = []
         let puntosInicio = this.cantPuntosInicio;
         let puntosFin = this.cantPuntosFin;
-
         const rangoTotal = this.cantPuntosFin + this.cantPuntosInicio;
-        const porcentajeInicio = rangoTotal / puntosInicio;
-        const porcentajeFin = rangoTotal / puntosFin;
-
+        let valorMaximo = rangoTotal <= puntos.length ? 1 : puntos.length / rangoTotal;
+        const porcentajeInicio = puntosInicio / rangoTotal;
+        const porcentajeFin = puntosFin / rangoTotal;
+        console.log(valorMaximo, porcentajeInicio, porcentajeFin)
         return puntos
     }
 }
