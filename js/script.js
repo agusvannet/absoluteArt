@@ -451,8 +451,8 @@ let flujo = 1;
 let rotacionInicial = 0;
 let seguirRotacionTrayecto = 0;
 
-let cantPuntosInicio = 1;
-let cantPuntosFin = 1;
+let cantPuntosInicio = 0;
+let cantPuntosFin = 0;
 
 let grosorInicio = 1;
 let grosorFin = 1;
@@ -720,3 +720,4 @@ cuerpo.addEventListener('pointerup', (e) => {
     clickeando = false;
 
 });
+

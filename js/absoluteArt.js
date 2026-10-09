@@ -936,16 +936,131 @@ class trazo {
     }
 
     calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
-        if (puntos.length < 3) return puntos
+        if (puntos.length === 0) return
         const puntosProcesados = []
-        let puntosInicio = this.cantPuntosInicio;
-        let puntosFin = this.cantPuntosFin;
         const rangoTotal = this.cantPuntosFin + this.cantPuntosInicio;
         let valorMaximo = rangoTotal <= puntos.length ? 1 : puntos.length / rangoTotal;
-        const porcentajeInicio = puntosInicio / rangoTotal;
-        const porcentajeFin = puntosFin / rangoTotal;
-        console.log(valorMaximo, porcentajeInicio, porcentajeFin)
-        return puntos
+
+        let puntosInicio = valorMaximo === 1 ?
+            this.cantPuntosInicio :
+            this.cantPuntosInicio === 0 ?
+                0 :
+                Math.round(puntos.length * (this.cantPuntosInicio / rangoTotal))
+        let puntosFin = this.cantPuntosFin === 1 ?
+            this.cantPuntosFin :
+            this.cantPuntosFin === 0 ?
+                0 :
+                puntos.length - puntosInicio;
+
+        if (puntosInicio !== 0) {
+            puntosProcesados.push(
+                puntos[0].clonar(
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    this.alphaInicio, //alpha
+                    this.grosorInicio,//grosor
+                )
+            )
+        }
+        if (puntos  > 1) {
+            let longitudTotalInicio = 0;
+            for (let i = 1; i <= puntosInicio - 1; i++) {
+                const punto0 = puntos[i - 1]
+                const punto1 = puntos[i]
+                longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+            }
+            let longitudAlcanzadaInicio = 0
+            for (let i = 1; i < puntosInicio - 1; i++) {
+                const punto0 = puntos[i - 1]
+                const punto1 = puntos[i]
+                longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+                const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
+                puntosProcesados.push(
+                    punto1.clonar(
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio), //alpha
+                        this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio),//grosor
+                    )
+                )
+            }
+            puntosProcesados.push(
+                puntos[puntosProcesados.length - 1].clonar(
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    valorMaximo, //alpha
+                    valorMaximo,//grosor
+                )
+            )
+        }
+
+        if (valorMaximo === 1) {
+            const valorInicio = puntosInicio !== 0 ? puntosInicio - 1 : 0
+            const valorFin = puntosFin !== 0 ? puntos.length - puntosFin : puntos.length
+            for (let i = valorInicio; i < valorFin; i++) {
+                puntosProcesados.push(
+                    puntos[i].clonar()
+                )
+            }
+        }
+
+        if (puntosFin > 1) {
+            let longitudTotalFin = 0;
+            const inicioFin = puntos.length - puntosFin
+            for (let i = inicioFin; i < puntos.length; i++) {
+                const punto0 = puntos[i - 1]
+                const punto1 = puntos[i]
+                longitudTotalFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+            }
+            let longitudAlcanzadaFin = 0
+            for (let i = inicioFin; i < puntos.length; i++) {
+                const punto0 = puntos[i - 1]
+                const punto1 = puntos[i]
+                longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+                const valorAlcanzado = (longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
+                puntosProcesados.push(
+                    punto1.clonar(
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        this.alphaFin + (1 - valorAlcanzado) * (1 - this.alphaFin), //alpha
+                        this.grosorFin + (1 - valorAlcanzado) * (1 - this.grosorFin),//grosor
+                    )
+                )
+            }
+        }
+
+        if (puntosFin !== 0) {
+            puntosProcesados.push(
+                puntos[puntos.length - 1].clonar(
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    this.alphaFin, //alpha
+                    this.grosorFin,//grosor
+                )
+            )
+        }
+
+        return puntosProcesados
     }
 }
 
