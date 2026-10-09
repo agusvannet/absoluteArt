@@ -946,12 +946,13 @@ class trazo {
             this.cantPuntosInicio === 0 ?
                 0 :
                 Math.round(puntos.length * (this.cantPuntosInicio / rangoTotal))
-        let puntosFin = this.cantPuntosFin === 1 ?
+        let puntosFin = valorMaximo === 1 ?
             this.cantPuntosFin :
             this.cantPuntosFin === 0 ?
                 0 :
-                puntos.length - puntosInicio;
+                puntos.length - (puntosInicio + 1);
 
+        console.log(puntosInicio, puntosFin, puntos.length)
         if (puntosInicio !== 0) {
             puntosProcesados.push(
                 puntos[0].clonar(
@@ -966,7 +967,7 @@ class trazo {
                 )
             )
         }
-        if (puntos  > 1) {
+        if (puntosInicio > 1) {
             let longitudTotalInicio = 0;
             for (let i = 1; i <= puntosInicio - 1; i++) {
                 const punto0 = puntos[i - 1]
@@ -974,7 +975,7 @@ class trazo {
                 longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
             }
             let longitudAlcanzadaInicio = 0
-            for (let i = 1; i < puntosInicio - 1; i++) {
+            for (let i = 1; i < puntosInicio; i++) {
                 const punto0 = puntos[i - 1]
                 const punto1 = puntos[i]
                 longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
@@ -992,18 +993,7 @@ class trazo {
                     )
                 )
             }
-            puntosProcesados.push(
-                puntos[puntosProcesados.length - 1].clonar(
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    valorMaximo, //alpha
-                    valorMaximo,//grosor
-                )
-            )
+
         }
 
         if (valorMaximo === 1) {
@@ -1029,7 +1019,7 @@ class trazo {
                 const punto0 = puntos[i - 1]
                 const punto1 = puntos[i]
                 longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-                const valorAlcanzado = (longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
+                const valorAlcanzado = (1 - longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
                 puntosProcesados.push(
                     punto1.clonar(
                         undefined,
@@ -1038,8 +1028,8 @@ class trazo {
                         undefined,
                         undefined,
                         undefined,
-                        this.alphaFin + (1 - valorAlcanzado) * (1 - this.alphaFin), //alpha
-                        this.grosorFin + (1 - valorAlcanzado) * (1 - this.grosorFin),//grosor
+                        this.alphaFin + valorAlcanzado * (1 - this.alphaFin), //alpha
+                        this.grosorFin + valorAlcanzado * (1 - this.grosorFin),//grosor
                     )
                 )
             }
@@ -1056,6 +1046,21 @@ class trazo {
                     undefined,
                     this.alphaFin, //alpha
                     this.grosorFin,//grosor
+                )
+            )
+        }
+
+        if (valorMaximo !== 1 && puntosFin < 1 && puntosInicio < 1) {
+            puntosProcesados.push(
+                puntos[puntos.length - 1].clonar(
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    (this.alphaFin + this.alphaInicio) / 2, //alpha
+                    (this.grosorFin + this.alphaFin) / 2,//grosor
                 )
             )
         }

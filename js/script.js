@@ -381,7 +381,13 @@ function mostrarRgb(elemento) {
         elem.style.display = 'none'
     }
 }
-
+class valorTrazo {
+    constructor(nombVariable, max, min) {
+        this.nombVariable = nombVariable;
+        this.max = max;
+        this.min = min;
+    }
+}
 
 
 function listarHerramientas() {
