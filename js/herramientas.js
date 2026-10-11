@@ -463,7 +463,7 @@ class pincelSellosSimple extends pincel {
                 }
                 const puntosDibujar = trazo.calcularPuntosInicioFin({
                     puntos: trazo.trayectos[i],
-                    inicioCalcular: (inicioTrayecto) ? inicioTrayecto : 0,
+                    inicioCalcular: inicioTrayecto !== undefined ? inicioTrayecto : 0,
                     finCalcular: finTrayectoSuavizado,
                 })
 

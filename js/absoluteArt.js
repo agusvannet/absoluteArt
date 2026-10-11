@@ -952,58 +952,82 @@ class trazo {
                 0 :
                 puntos.length - (puntosInicio + 1);
 
-        console.log(puntosInicio, puntosFin, puntos.length)
-        if (puntosInicio !== 0) {
-            puntosProcesados.push(
-                puntos[0].clonar(
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    this.alphaInicio, //alpha
-                    this.grosorInicio,//grosor
-                )
-            )
-        }
-        if (puntosInicio > 1) {
-            let longitudTotalInicio = 0;
-            for (let i = 1; i <= puntosInicio - 1; i++) {
-                const punto0 = puntos[i - 1]
-                const punto1 = puntos[i]
-                longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-            }
-            let longitudAlcanzadaInicio = 0
-            for (let i = 1; i < puntosInicio; i++) {
-                const punto0 = puntos[i - 1]
-                const punto1 = puntos[i]
-                longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-                const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
-                puntosProcesados.push(
-                    punto1.clonar(
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio), //alpha
-                        this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio),//grosor
+        if (inicioCalcular <= puntosInicio || valorMaximo !== 1) {
+            if (inicioCalcular <= 0) {
+                if (puntosInicio !== 0) {
+                    puntosProcesados.push(
+                        puntos[0].clonar(
+                            undefined,
+                            undefined,
+                            undefined,
+                            undefined,
+                            undefined,
+                            undefined,
+                            this.alphaInicio, //alpha
+                            this.grosorInicio,//grosor
+                        )
                     )
-                )
+                }
             }
+            if (puntosInicio > 1) {
+                let longitudTotalInicio = 0;
+                for (let i = 1; i <= puntosInicio - 1; i++) {
+                    const punto0 = puntos[i - 1]
+                    const punto1 = puntos[i]
+                    longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+                }
+                let longitudAlcanzadaInicio = 0
+                for (let i = 1; i < puntosInicio; i++) {
+                    const punto0 = puntos[i - 1]
+                    const punto1 = puntos[i]
+                    longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+                    if (inicioCalcular <= i) {
+                        console.log(inicioCalcular)
+                        const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
+                        puntosProcesados.push(
+                            punto1.clonar(
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                undefined,
+                                this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio), //alpha
+                                this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio),//grosor
+                            )
+                        )
+                    }
+                }
 
+            }
         }
 
         if (valorMaximo === 1) {
-            const valorInicio = puntosInicio !== 0 ? puntosInicio - 1 : 0
-            const valorFin = puntosFin !== 0 ? puntos.length - puntosFin : puntos.length
+            let valorInicio = puntosInicio !== 0 ? puntosInicio - 1 : 0
+
+            valorInicio = Math.max(valorInicio, inicioCalcular)
+            let valorFin = puntosFin !== 0 ? puntos.length - puntosFin : puntos.length
+            valorFin = Math.min(valorFin, finCalcular)
+            console.log(valorInicio, inicioCalcular, valorFin, finCalcular)
             for (let i = valorInicio; i < valorFin; i++) {
                 puntosProcesados.push(
                     puntos[i].clonar()
                 )
             }
+
+        } else if (puntosFin < 1 && puntosInicio < 1) {
+            puntosProcesados.push(
+                puntos[puntos.length - 1].clonar(
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    (this.alphaFin + this.alphaInicio) / 2, //alpha
+                    (this.grosorFin + this.alphaFin) / 2,//grosor
+                )
+            )
         }
 
         if (puntosFin > 1) {
@@ -1033,37 +1057,26 @@ class trazo {
                     )
                 )
             }
+
         }
 
-        if (puntosFin !== 0) {
-            puntosProcesados.push(
-                puntos[puntos.length - 1].clonar(
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    this.alphaFin, //alpha
-                    this.grosorFin,//grosor
+        if (inicioCalcular <= puntosInicio || valorMaximo !== 1) {
+            if (puntosFin !== 0) {
+                puntosProcesados.push(
+                    puntos[puntos.length - 1].clonar(
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        this.alphaFin, //alpha
+                        this.grosorFin,//grosor
+                    )
                 )
-            )
+            }
         }
 
-        if (valorMaximo !== 1 && puntosFin < 1 && puntosInicio < 1) {
-            puntosProcesados.push(
-                puntos[puntos.length - 1].clonar(
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    (this.alphaFin + this.alphaInicio) / 2, //alpha
-                    (this.grosorFin + this.alphaFin) / 2,//grosor
-                )
-            )
-        }
 
         return puntosProcesados
     }

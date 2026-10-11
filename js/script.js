@@ -381,15 +381,75 @@ function mostrarRgb(elemento) {
         elem.style.display = 'none'
     }
 }
-class valorTrazo {
-    constructor(nombVariable, max, min) {
+class valTraz {
+    constructor(tipoDue, nombVariable, dimiNom, max, min, ini, salto, clases = 'tolerancia verde') {
         this.nombVariable = nombVariable;
+        this.dimiNom = dimiNom;
+        this.tipoDue = tipoDue;
         this.max = max;
         this.min = min;
+        this.ini = ini;
+        this.salto = salto;
+        this.clases = clases;
     }
 }
 
+const valoresTrazo = [
+    //           dueño , nombre , diminutivo nombre , maximo , minimo , inicial , salto , clases
+    new valTraz('configuracionesLapiz', 'grosor', 'grosor', 300, 1, 10, 1),
+    new valTraz('configuracionesLapiz', 'opacidadPrincipal', 'opprin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'opacidadSecundaria', 'opsecu', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'separacion', 'sep', 5, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'flujo', 'flujo', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'rotacionInicial', 'rotIni', 360, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizado', 'suav', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'senGroVel', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'senAlpVel', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'cantPuntosInicio', 'durIni', 40, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'cantPuntosFin', 'durFin', 40, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'grosorInicio', 'grosIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'grosorFin', 'grosFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'alphaInicio', 'alpIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'alphaFin', 'alpFin', 1, 0, 1, 0.01),
 
+    new valTraz('confBald', 'toleranciaCanal.rgb.r', 'TolR', 1, 0, 0, 0.01, 'tolerancia rojo rgb'),
+    new valTraz('confBald', 'reflejarCanal.rgb.r', 'RefR', 1, 0, 0, 0.01, 'tolerancia compensacion rojo rgb'),
+    new valTraz('confBald', 'toleranciaCanal.rgb.g', 'TolG', 1, 0, 0, 0.01, 'tolerancia verde rgb'),
+    new valTraz('confBald', 'reflejarCanal.rgb.g', 'RefG', 1, 0, 0, 0.01, 'tolerancia compensacion verde rgb'),
+    new valTraz('confBald', 'toleranciaCanal.rgb.b', 'TolB', 1, 0, 0, 0.01, 'tolerancia azul rgb'),
+    new valTraz('confBald', 'reflejarCanal.rgb.b', 'RefB', 1, 0, 0, 0.01, 'tolerancia compensacion azul rgb'),
+
+    new valTraz('confBald', 'toleranciaCanal.hsv.h', 'TolH', 1, 0, 0, 0.01, 'tolerancia degradado h hsv" style="display: none;'),
+    new valTraz('confBald', 'reflejarCanal.hsv.h', 'RefH', 1, 0, 0, 0.01, 'tolerancia compensacion degradado h hsv" style="display: none;'),
+    new valTraz('confBald', 'toleranciaCanal.hsv.v', 'TolV', 1, 0, 0, 0.01, 'tolerancia degradado v hsv" style="display: none;'),
+    new valTraz('confBald', 'reflejarCanal.hsv.v', 'RefV', 1, 0, 0, 0.01, 'tolerancia compensacion degradado v hsv" style="display: none;'),
+    new valTraz('confBald', 'toleranciaCanal.hsv.s', 'TolS', 1, 0, 0, 0.01, 'tolerancia degradado s hsv" style="display: none;'),
+    new valTraz('confBald', 'reflejarCanal.hsv.s', 'RefS', 1, 0, 0, 0.01, 'tolerancia compensacion degradado s hsv" style="display: none;'),
+
+    new valTraz('confBald', 'toleranciaCanal.alpha ', 'TolA', 1, 0, 0, 0.01, 'tolerancia gris'),
+    new valTraz('confBald', 'reflejarCanal.alpha ', 'RefA', 1, 0, 0, 0.01, 'tolerancia gris compensacion '),
+]
+function listarValoresTrazo() {
+    for (const valor of valoresTrazo) {
+        const ubi = document.getElementById(valor.tipoDue)
+        ubi.insertAdjacentHTML('beforeend', `
+            <div class="${valor.clases}"  id="goku">
+                <p>${valor.dimiNom}</p>
+                <input type="range" name=""
+                    oninput="document.getElementById('number${valor.dimiNom}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                    value="${valor.ini}" id="rango${valor.dimiNom}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                <input type="number" name=""
+                    oninput="document.getElementById('rango${valor.dimiNom}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                    value="${valor.ini}" id="number${valor.dimiNom}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+            </div>
+        `);
+    }
+}
+listarValoresTrazo();
 function listarHerramientas() {
     for (const herramienta of pintor.listaHerramientas) {
         if (herramienta.categoria.nombre === 'sello')
