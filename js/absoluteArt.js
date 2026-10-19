@@ -493,9 +493,19 @@ class trazo {
         colorCompararBalde = { r: 0, g: 0, b: 0, a: 0, },
         respetarSignoX = true,
         respetarSignoY = true,
-        suavizado = 0,
+
+        suavizadoHorizontal = 0,
+        suavizadoVertical = 0,
+        suavizadoPresion = 0,
+        suavizadoVelocidad = 0,
+        suavizadoInclinacionHorizontal = 0,
+        suavizadoInclinacionVertical = 0,
+        suavizadoAlpha = 0,
+        suavizadoGrosor = 0,
+
         puntosSuavizado = 2,
         redondearFigura = false,
+
         sensibilidadGrosorPresion = 0,
         sensibilidadOpacidadPresion = 0,
         sensibilidadGrosorVelocidad = 0,
@@ -552,7 +562,16 @@ class trazo {
         this.colorCompararBalde = colorCompararBalde;
         this.respetarSignoX = respetarSignoX;
         this.respetarSignoY = respetarSignoY;
-        this.suavizado = suavizado;
+
+        this.suavizadoHorizontal = suavizadoHorizontal;
+        this.suavizadoVertical = suavizadoVertical;
+        this.suavizadoPresion = suavizadoPresion;
+        this.suavizadoVelocidad = suavizadoVelocidad;
+        this.suavizadoInclinacionHorizontal = suavizadoInclinacionHorizontal;
+        this.suavizadoInclinacionVertical = suavizadoInclinacionVertical;
+        this.suavizadoAlpha = suavizadoAlpha;
+        this.suavizadoGrosor = suavizadoGrosor;
+
         this.puntosSuavizado = puntosSuavizado;
         this.redondearFigura = redondearFigura;
         this.sensibilidadGrosorPresion = sensibilidadGrosorPresion;
@@ -706,7 +725,17 @@ class trazo {
             },
             respetarSignoX: this.respetarSignoX,
             respetarSignoY: this.respetarSignoY,
+
             suavizado: this.suavizado,
+            suavizadoHorizontal: this.suavizadoHorizontal,
+            suavizadoVertical: this.suavizadoVertical,
+            suavizadoPresion: this.suavizadoPresion,
+            suavizadoVelocidad: this.suavizadoVelocidad,
+            suavizadoInclinacionHorizontal: this.suavizadoInclinacionHorizontal,
+            suavizadoInclinacionVertical: this.suavizadoInclinacionVertical,
+            suavizadoAlpha: this.suavizadoAlpha,
+            suavizadoGrosor: this.suavizadoGrosor,
+
             puntosSuavizado: this.puntosSuavizado,
             redondearFigura: this.redondearFigura,
             sensibilidadGrosorPresion: this.sensibilidadGrosorPresion,
@@ -762,6 +791,7 @@ class trazo {
         return cordenadas;
     }
     ajustarSeparacionTrayecto({ separacion, sobrante = 0, trayecto, trayectoSeccionado = [] } = {}) {
+        if (trayecto.length === 0) return { trayectoSeccionado, sobrante }
         if (sobrante === 0)
             trayectoSeccionado.push(
                 trayecto[0].clonar()
@@ -819,7 +849,7 @@ class trazo {
         return { trayectoSeccionado, sobrante };
     }
     obtenerTrayectoSuavizado({ puntos, puntosSuavizado, rebotar = false, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
-        if (puntos.length < 3) return puntos;
+        if (puntos.length === 1) return puntos;
         let trayectoSuavizado = [];
         if (inicioCalcular === 0 && !rebotar)
             trayectoSuavizado.push(puntos[0].clonar())
@@ -864,14 +894,14 @@ class trazo {
 
             trayectoSuavizado.push(
                 new cordenada(
-                    puntoPromedio.x * this.suavizado + puntos[i].x * (1 - this.suavizado),
-                    puntoPromedio.y * this.suavizado + puntos[i].y * (1 - this.suavizado),
-                    puntoPromedio.presion * this.suavizado + puntos[i].presion * (1 - this.suavizado),
-                    puntoPromedio.msPx * this.suavizado + puntos[i].msPx * (1 - this.suavizado),
-                    puntoPromedio.inclinacionX * this.suavizado + puntos[i].inclinacionX * (1 - this.suavizado),
-                    puntoPromedio.inclinacionY * this.suavizado + puntos[i].inclinacionY * (1 - this.suavizado),
-                    puntoPromedio.alpha * this.suavizado + puntos[i].alpha * (1 - this.suavizado),
-                    puntoPromedio.grosor * this.suavizado + puntos[i].grosor * (1 - this.suavizado),
+                    puntoPromedio.x * this.suavizadoHorizontal + puntos[i].x * (1 - this.suavizadoHorizontal),
+                    puntoPromedio.y * this.suavizadoVertical + puntos[i].y * (1 - this.suavizadoVertical),
+                    puntoPromedio.presion * this.suavizadoPresion + puntos[i].presion * (1 - this.suavizadoPresion),
+                    puntoPromedio.msPx * this.suavizadoVelocidad + puntos[i].msPx * (1 - this.suavizadoVelocidad),
+                    puntoPromedio.inclinacionX * this.suavizadoInclinacionHorizontal + puntos[i].inclinacionX * (1 - this.suavizadoInclinacionHorizontal),
+                    puntoPromedio.inclinacionY * this.suavizadoInclinacionVertical + puntos[i].inclinacionY * (1 - this.suavizadoInclinacionVertical),
+                    puntoPromedio.alpha * this.suavizadoAlpha + puntos[i].alpha * (1 - this.suavizadoAlpha),
+                    puntoPromedio.grosor * this.suavizadoGrosor + puntos[i].grosor * (1 - this.suavizadoGrosor),
                 )
             );
         }
@@ -935,7 +965,7 @@ class trazo {
         }
     }
 
-    calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
+    calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length }) {
         if (puntos.length === 0) return
         const puntosProcesados = []
         const rangoTotal = this.cantPuntosFin + this.cantPuntosInicio;
@@ -952,131 +982,83 @@ class trazo {
                 0 :
                 puntos.length - (puntosInicio + 1);
 
-        if (inicioCalcular <= puntosInicio || valorMaximo !== 1) {
-            if (inicioCalcular <= 0) {
-                if (puntosInicio !== 0) {
-                    puntosProcesados.push(
-                        puntos[0].clonar(
-                            undefined,
-                            undefined,
-                            undefined,
-                            undefined,
-                            undefined,
-                            undefined,
-                            this.alphaInicio, //alpha
-                            this.grosorInicio,//grosor
-                        )
-                    )
-                }
+
+        let longitudTotalInicio = 0
+        if (inicioCalcular <= puntosInicio) {
+            for (let i = 1; i <= puntosInicio - 1; i++) {
+                const punto0 = puntos[i - 1]
+                const punto1 = puntos[i]
+                longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
             }
-            if (puntosInicio > 1) {
-                let longitudTotalInicio = 0;
-                for (let i = 1; i <= puntosInicio - 1; i++) {
-                    const punto0 = puntos[i - 1]
-                    const punto1 = puntos[i]
-                    longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-                }
-                let longitudAlcanzadaInicio = 0
-                for (let i = 1; i < puntosInicio; i++) {
+        }
+
+        let inicioPuntosFin = puntos.length - puntosFin;
+        let longitudTotalFin = 0;
+        if (finCalcular >= inicioPuntosFin) {
+            for (let i = inicioPuntosFin; i < puntos.length - 1; i++) {
+                const punto0 = puntos[i]
+                const punto1 = puntos[i + 1]
+                longitudTotalFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+            }
+        }
+        const inicio =
+            inicioCalcular <= puntosInicio
+                ? 0
+                : inicioCalcular >= inicioPuntosFin
+                    ? inicioPuntosFin
+                    : inicioCalcular
+
+        const fin = finCalcular
+
+
+        let longitudAlcanzadaInicio = 0;
+        let longitudAlcanzadaFin = 0;
+        for (let i = inicio; i < fin; i++) {
+            let alpha = valorMaximo;
+            let grosor = valorMaximo;
+            if (i <= puntosInicio) {
+                if (i === 0) {
+                    alpha = this.alphaInicio
+                    grosor = this.grosorInicio
+                } else {
                     const punto0 = puntos[i - 1]
                     const punto1 = puntos[i]
                     longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-                    if (inicioCalcular <= i) {
-                        console.log(inicioCalcular)
-                        const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
-                        puntosProcesados.push(
-                            punto1.clonar(
-                                undefined,
-                                undefined,
-                                undefined,
-                                undefined,
-                                undefined,
-                                undefined,
-                                this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio), //alpha
-                                this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio),//grosor
-                            )
-                        )
-                    }
+                    const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
+
+                    alpha = this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio) //alpha
+                    grosor = this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio)//grosor
                 }
+            } else if (i >= inicioPuntosFin) {
+                if (i === puntos.length - 1) {
+                    alpha = this.alphaFin
+                    grosor = this.grosorFin
+                } else {
+                    const punto0 = puntos[i]
+                    const punto1 = puntos[i + 1]
+                    longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
+                    const valorAlcanzado = (1 - longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
 
+                    alpha = this.alphaFin + valorAlcanzado * (1 - this.alphaFin) //alpha
+                    grosor = this.grosorFin + valorAlcanzado * (1 - this.grosorFin)//grosor
+                }
             }
-        }
 
-        if (valorMaximo === 1) {
-            let valorInicio = puntosInicio !== 0 ? puntosInicio - 1 : 0
-
-            valorInicio = Math.max(valorInicio, inicioCalcular)
-            let valorFin = puntosFin !== 0 ? puntos.length - puntosFin : puntos.length
-            valorFin = Math.min(valorFin, finCalcular)
-            console.log(valorInicio, inicioCalcular, valorFin, finCalcular)
-            for (let i = valorInicio; i < valorFin; i++) {
+            if (inicioCalcular <= i && i < finCalcular) {
                 puntosProcesados.push(
-                    puntos[i].clonar()
-                )
-            }
-
-        } else if (puntosFin < 1 && puntosInicio < 1) {
-            puntosProcesados.push(
-                puntos[puntos.length - 1].clonar(
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    undefined,
-                    (this.alphaFin + this.alphaInicio) / 2, //alpha
-                    (this.grosorFin + this.alphaFin) / 2,//grosor
-                )
-            )
-        }
-
-        if (puntosFin > 1) {
-            let longitudTotalFin = 0;
-            const inicioFin = puntos.length - puntosFin
-            for (let i = inicioFin; i < puntos.length; i++) {
-                const punto0 = puntos[i - 1]
-                const punto1 = puntos[i]
-                longitudTotalFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-            }
-            let longitudAlcanzadaFin = 0
-            for (let i = inicioFin; i < puntos.length; i++) {
-                const punto0 = puntos[i - 1]
-                const punto1 = puntos[i]
-                longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
-                const valorAlcanzado = (1 - longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
-                puntosProcesados.push(
-                    punto1.clonar(
+                    puntos[i].clonar(
                         undefined,
                         undefined,
                         undefined,
                         undefined,
                         undefined,
                         undefined,
-                        this.alphaFin + valorAlcanzado * (1 - this.alphaFin), //alpha
-                        this.grosorFin + valorAlcanzado * (1 - this.grosorFin),//grosor
-                    )
-                )
-            }
-
-        }
-
-        if (inicioCalcular <= puntosInicio || valorMaximo !== 1) {
-            if (puntosFin !== 0) {
-                puntosProcesados.push(
-                    puntos[puntos.length - 1].clonar(
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        undefined,
-                        this.alphaFin, //alpha
-                        this.grosorFin,//grosor
+                        alpha, //alpha
+                        grosor,//grosor
                     )
                 )
             }
         }
-
 
         return puntosProcesados
     }
@@ -1385,7 +1367,6 @@ const pintor = {
     lienzosSello: [
         lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
     ],
-
     generadorHerramientas: {
         lineaSimple: (parametros) => { return new lineaSimple(parametros) },
         rectanguloSimple: (parametros) => { return new rectanguloSimple(parametros) },
@@ -1433,8 +1414,7 @@ const pintor = {
         if (primerRenderizado) {
             this.prepararSello(trazoReal)
             lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoGotero, alto: lienzo.alto, largo: lienzo.largo })
-            trazoTemporal.sobrante = 0
-            trazoReal.sobrante = 0
+
         }
 
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion, alto: lienzo.alto, largo: lienzo.largo })
@@ -1449,7 +1429,11 @@ const pintor = {
             trazoReal.modoDibujo = 'normal'
 
             if (trazoReal.trayectos[0].length - (puntosMantener + 2) >= 0) {
-                const indicePintar = (trazoReal.trayectos[0].length - 1 - puntosMantener)
+                if (trazoReal.sobrante === undefined) {
+                    trazoTemporal.sobrante = 0
+                    trazoReal.sobrante = 0
+                }
+                const indicePintar = (trazoReal.trayectos[0].length - puntosMantener)
                 trazoReal.sobrante = trazoTemporal.sobrante;
                 this.dibujar({
                     lienzoDibujar: this.lienzosIntermediarios.lienzoGotero,

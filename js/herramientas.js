@@ -437,14 +437,7 @@ class pincelSellosSimple extends pincel {
     }
 
     obtenerPuntosMoviles(trazo) {
-        const puntosTrayecto =
-            (trazo.trayectos[0].length < trazo.cantPuntosInicio + trazo.cantPuntosFin) ?
-                trazo.cantPuntosInicio + trazo.cantPuntosFin :
-                Math.max(
-                    trazo.cantPuntosInicio,
-                    trazo.cantPuntosFin
-                )
-
+        const puntosTrayecto = trazo.cantPuntosInicio + trazo.cantPuntosFin
         return Math.round(
             Math.max(
                 puntosTrayecto,
@@ -455,34 +448,53 @@ class pincelSellosSimple extends pincel {
     dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto, renderizadoGoteo }) {
         for (let i = inicioTrayectos; i <= finTrayectos; i++) {
             for (const sello of sellos) {
-                let finTrayectoSuavizado = trazo.trayectos[i].length - 1
-                if (finTrayecto) {
-                    finTrayectoSuavizado = finTrayecto
-                    if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
-                        finTrayectoSuavizado++;
-                }
+
+                const inicioCalcular =
+                    inicioTrayecto !== undefined
+                        ? Math.max(inicioTrayecto - trazo.puntosSuavizado, 0)
+                        : 0
+                const finCalcular =
+                    finTrayecto !== undefined
+                        ? Math.min(finTrayecto + (finTrayecto - inicioTrayecto + 1) + trazo.puntosSuavizado, trazo.trayectos[i].length)
+                        : trazo.trayectos[i].length
+
+                if (inicioTrayecto === undefined) inicioTrayecto = 0
+                if (finTrayecto === undefined) finTrayecto = trazo.trayectos[i].length - 1
+
                 const puntosDibujar = trazo.calcularPuntosInicioFin({
                     puntos: trazo.trayectos[i],
-                    inicioCalcular: inicioTrayecto !== undefined ? inicioTrayecto : 0,
-                    finCalcular: finTrayectoSuavizado,
+                    inicioCalcular: inicioCalcular,
+                    finCalcular: finCalcular,
                 })
+
+                const inicioSuavizado = Math.min(0, inicioTrayecto - trazo.puntosSuavizado) + trazo.puntosSuavizado
+
+                let finSuavizado = inicioSuavizado + (finTrayecto - inicioTrayecto)
+                if (renderizadoGoteo)
+                    finSuavizado++;
+
 
                 let trayectoSuavizado = trazo.obtenerTrayectoSuavizado({
                     rebotar: trazo.rebotarSuavizado,
                     puntos: puntosDibujar,
                     puntosSuavizado: trazo.puntosSuavizado,
+
+                    inicioCalcular: inicioSuavizado,
+                    finCalcular: finSuavizado,
                 })
+
 
                 let puntoFinalTrayectoria = undefined;
                 if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
                     puntoFinalTrayectoria = trayectoSuavizado.pop()
+
                 if (trazo.separar) {
                     const infoSeparacion = trazo.ajustarSeparacionTrayecto({ sobrante: trazo.sobrante, trayecto: trayectoSuavizado })
                     trayectoSuavizado = infoSeparacion.trayectoSeccionado
                     if (typeof (trazo.sobrante) === "number") trazo.sobrante = infoSeparacion.sobrante
 
                 }
-                if (!trazo.flujo) return
+                if (trazo.flujo === 0) return
                 const cordenadas = trayectoSuavizado
                 let rotacionTrayecto = 0
                 for (let n = 0; n < cordenadas.length; n++) {
@@ -545,7 +557,17 @@ class figuraSellos extends lineaSimple {
         clonTrazo.sensibilidadOpacidadVelocidad = 0;
         clonTrazo.sensibilidadGrosorVelocidad = 0;
 
-        if (!trazo.redondearFigura) clonTrazo.suavizado = 0;
+        if (!trazo.redondearFigura) {
+            clonTrazo.suavizado = 0
+            clonTrazo.suavizadoHorizontal = 0;
+            clonTrazo.suavizadoVertical = 0;
+            clonTrazo.suavizadoPresion = 0;
+            clonTrazo.suavizadoVelocidad = 0;
+            clonTrazo.suavizadoInclinacionHorizontal = 0
+            clonTrazo.suavizadoInclinacionVertical = 0
+            clonTrazo.suavizadoAlpha = 0
+            clonTrazo.suavizadoGrosor = 0
+        };
         const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
         pintor.dibujar({ lienzoDibujar: lienzoIntermediario.lienzoComunSecundario, trazo: clonTrazo })

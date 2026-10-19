@@ -403,7 +403,16 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'flujo', 'flujo', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'rotacionInicial', 'rotIni', 360, 0, 0, 1),
     new valTraz('configuracionesLapiz', 'seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizado', 'suav', 1, 0, 0, 0.01),
+
+    new valTraz('configuracionesLapiz', 'suavizadoHorizontal', 'suavHor', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoVertical', 'suavVer', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoPresion', 'suavPres', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoVelocidad', 'suavVel', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoInclinacionHorizontal', 'suavIncHor', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoInclinacionVertical', 'suavIncVer', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoAlpha', 'suavAlp', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoGrosor', 'suavGros', 1, 0, 0, 0.01),
+
     new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
     new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, 0, 0, 0.01),
@@ -433,6 +442,8 @@ const valoresTrazo = [
     new valTraz('confBald', 'toleranciaCanal.alpha ', 'TolA', 1, 0, 0, 0.01, 'tolerancia gris'),
     new valTraz('confBald', 'reflejarCanal.alpha ', 'RefA', 1, 0, 0, 0.01, 'tolerancia gris compensacion '),
 ]
+
+
 function listarValoresTrazo() {
     for (const valor of valoresTrazo) {
         const ubi = document.getElementById(valor.tipoDue)
@@ -507,8 +518,18 @@ let compararColorDistinto = false;
 let respetarSignoX = true;
 let respetarSignoY = true;
 let redondearFigura = false;
-let suavizado = 0;
+
+let suavizadoHorizontal = 0;
+let suavizadoVertical = 0;
+let suavizadoPresion = 0;
+let suavizadoVelocidad = 0;
+let suavizadoInclinacionHorizontal = 0;
+let suavizadoInclinacionVertical = 0;
+let suavizadoAlpha = 0;
+let suavizadoGrosor = 0;
+
 let puntosSuavizado = 2;
+
 let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
 let sensibilidadGrosorVelocidad = 0;
@@ -579,7 +600,14 @@ function obtenerTrazoActual(cordInicial) {
         respetarSignoX,
         respetarSignoY,
 
-        suavizado,
+        suavizadoHorizontal,
+        suavizadoVertical,
+        suavizadoPresion,
+        suavizadoVelocidad,
+        suavizadoInclinacionHorizontal,
+        suavizadoInclinacionVertical,
+        suavizadoAlpha,
+        suavizadoGrosor,
         puntosSuavizado,
 
         redondearFigura,

@@ -295,7 +295,6 @@ class lienzoBase {
             mancha[hexa] = manchaTemporal[colo32];
         }
 
-        console.log(mancha);
         return { mancha };
     }
 
@@ -442,7 +441,6 @@ class lienzoHtml extends lienzoBase {
         aclarar: 'lighten',
         diferencia: 'difference',
         recortar: 'source-atop',
-        setear: 'sourece-in',
     }
 
     pegarLienzo({ lienzo, x, y, rotacion = 0, xPivote = 0, yPivote = 0, largo = lienzo.largo, alto = lienzo.alto, alpha = 1, modoPegado = 'normal' }) { // pegar en ESTE lienzo}
@@ -657,9 +655,6 @@ class lienzoHtml extends lienzoBase {
 const lienzos = {
     contadorLienzos: 0,
     obtener({ largo, alto, canvas, muchaLectura = true, tipo = 'permanente' }) {// faltan lienzos, por ahora solo el lienzoPlano pero si agregase react native faltaria ese tambien ,
-        //  todos deben tener las mismas funciones , porlomenos las que ese usen al dibujar
-        //   console.log('num lien crea : ', this.contadorLienzos)
-        //  console.log(' max ram  : ', ((largo * alto * 8 * this.contadorLienzos) / 1048576).toFixed(2), 'MB')// es por 8 para no meter un * 2 * mas 
         this.contadorLienzos++;
         return new lienzoHtml({
             largo,

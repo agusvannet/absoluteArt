@@ -1,3 +1,4 @@
+let contadorCordenadas = 0;
 class cordenada {
     constructor(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1, grosor = 1,) {
         this.x = x;
@@ -8,6 +9,9 @@ class cordenada {
         this.grosor = grosor;
         this.inclinacionY = inclinacionY;
         this.inclinacionX = inclinacionX;
+
+
+        contadorCordenadas++;
     }
     static maxMsPx = 0.5;
     static minMsPx = 0.004;
