@@ -495,8 +495,11 @@ class pincelSellosSimple extends pincel {
 
                 }
                 if (trazo.flujo === 0) return
-                const cordenadas = trayectoSuavizado
+                let cordenadas = trayectoSuavizado
                 let rotacionTrayecto = 0
+
+                trazo.calcularAleatorizacon({ cordenadas, modificar: true });
+
                 for (let n = 0; n < cordenadas.length; n++) {
 
                     if (cordenadas[n + 1] || puntoFinalTrayectoria) {
@@ -516,7 +519,7 @@ class pincelSellosSimple extends pincel {
                         lienzo: sello,
                         xPivote: grosor / 2,
                         yPivote: grosor / 2,
-                        rotacion: trazo.rotacionInicial + rotacionFinal
+                        rotacion: (cordenadas[n].rotacion * (Math.PI * 2)) + trazo.rotacionInicial + rotacionFinal
                     })
                 }
             }

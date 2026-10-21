@@ -404,6 +404,8 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'rotacionInicial', 'rotIni', 360, 0, 0, 1),
     new valTraz('configuracionesLapiz', 'seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
 
+    'suavizados',
+
     new valTraz('configuracionesLapiz', 'suavizadoHorizontal', 'suavHor', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoVertical', 'suavVer', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoPresion', 'suavPres', 1, 0, 0, 0.01),
@@ -412,18 +414,43 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'suavizadoInclinacionVertical', 'suavIncVer', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoAlpha', 'suavAlp', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoGrosor', 'suavGros', 1, 0, 0, 0.01),
-
+    new valTraz('configuracionesLapiz', 'suavizadoRotacion', 'suavRot', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
+
+    'sensibilidad',
+
     new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'senRotPre', 1, 0, 0, 0.01),
+
     new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'senGroVel', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'senAlpVel', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'cantPuntosInicio', 'durIni', 40, 0, 0, 1),
-    new valTraz('configuracionesLapiz', 'cantPuntosFin', 'durFin', 40, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'senRotVel', 1, 0, 0, 0.01),
+
+    'Inicio Fin',
+
+    new valTraz('configuracionesLapiz', 'cantPuntosInicio', 'durIni', 200, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'cantPuntosFin', 'durFin', 200, 0, 0, 1),
+
     new valTraz('configuracionesLapiz', 'grosorInicio', 'grosIni', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'grosorFin', 'grosFin', 1, 0, 1, 0.01),
+
     new valTraz('configuracionesLapiz', 'alphaInicio', 'alpIni', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'alphaFin', 'alpFin', 1, 0, 1, 0.01),
+
+    new valTraz('configuracionesLapiz', 'rotacionInicio', 'rotInic', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'rotacionFin', 'rotFin', 1, 0, 1, 0.01),
+
+    'ruido',
+
+
+    new valTraz('configuracionesLapiz', 'ruidoVertical', 'ruiVer', 10, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoHorizontal', 'ruiHor', 10, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoAlpha', 'ruiAlp', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoGrosor', 'ruiGro', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoRotacion', 'ruiRot', 1, 0, 0, 0.01),
+
+    //  de aca pa abajo son cosas del balde
 
     new valTraz('confBald', 'toleranciaCanal.rgb.r', 'TolR', 1, 0, 0, 0.01, 'tolerancia rojo rgb'),
     new valTraz('confBald', 'reflejarCanal.rgb.r', 'RefR', 1, 0, 0, 0.01, 'tolerancia compensacion rojo rgb'),
@@ -446,9 +473,10 @@ const valoresTrazo = [
 
 function listarValoresTrazo() {
     for (const valor of valoresTrazo) {
-        const ubi = document.getElementById(valor.tipoDue)
-        ubi.insertAdjacentHTML('beforeend', `
-            <div class="${valor.clases}"  id="goku">
+        if (valor.constructor.name === 'valTraz') {
+            const ubi = document.getElementById(valor.tipoDue)
+            ubi.insertAdjacentHTML('beforeend', `
+            <div class="${valor.clases}"  >
                 <p>${valor.dimiNom}</p>
                 <input type="range" name=""
                     oninput="document.getElementById('number${valor.dimiNom}').value = this.value, ${valor.nombVariable} = Number(this.value)"
@@ -458,19 +486,28 @@ function listarValoresTrazo() {
                     value="${valor.ini}" id="number${valor.dimiNom}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
             </div>
         `);
+
+        } else {
+            const ubi = document.getElementById('configuracionesLapiz')
+            ubi.insertAdjacentHTML('beforeend', `
+            <div class="tolerancia tolerancia gris "  >
+                <p>${valor}</p>
+            </div>
+        `);
+        }
     }
 }
 listarValoresTrazo();
 function listarHerramientas() {
     for (const herramienta of pintor.listaHerramientas) {
         if (herramienta.categoria.nombre === 'sello')
-            document.getElementById("sellos").insertAdjacentHTML('beforeend', `<option value="${herramienta.nombre}" >${herramienta.nombre}</option>`);
+            document.getElementById("sellos").insertAdjacentHTML('beforeend', `<option option value = "${herramienta.nombre}" > ${herramienta.nombre}</option > `);
         else
-            document.getElementById("herramientas").insertAdjacentHTML('beforeend', `<option value="${herramienta.nombre}" >${herramienta.nombre}</option>`);
+            document.getElementById("herramientas").insertAdjacentHTML('beforeend', `<option option value = "${herramienta.nombre}" > ${herramienta.nombre}</option > `);
     }
     const modosDIbujo = Object.keys(canvas.modosPegado)
     for (const nombre of modosDIbujo) {
-        document.getElementById("modoDibujoHerramienta").insertAdjacentHTML('beforeend', `<option value="${nombre}" >${nombre}</option>`);
+        document.getElementById("modoDibujoHerramienta").insertAdjacentHTML('beforeend', `<option option value = "${nombre}" > ${nombre}</option > `);
     }
 }
 listarHerramientas();
@@ -527,13 +564,18 @@ let suavizadoInclinacionHorizontal = 0;
 let suavizadoInclinacionVertical = 0;
 let suavizadoAlpha = 0;
 let suavizadoGrosor = 0;
+let suavizadoRotacion = 0;
 
 let puntosSuavizado = 2;
 
 let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
+let sensibilidadRotacionPresion = 0;
+
 let sensibilidadGrosorVelocidad = 0;
 let sensibilidadOpacidadVelocidad = 0;
+let sensibilidadRotacionVelocidad = 0;
+
 let flujo = 1;
 let rotacionInicial = 0;
 let seguirRotacionTrayecto = 0;
@@ -546,6 +588,16 @@ let grosorFin = 1;
 
 let alphaInicio = 1;
 let alphaFin = 1;
+
+let rotacionInicio = 1;
+let rotacionFin = 1;
+
+let ruidoVertical = 0;
+let ruidoHorizontal = 0;
+let ruidoAlpha = 0;
+let ruidoGrosor = 0;
+let ruidoRotacion = 0;
+
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -608,6 +660,8 @@ function obtenerTrazoActual(cordInicial) {
         suavizadoInclinacionVertical,
         suavizadoAlpha,
         suavizadoGrosor,
+        suavizadoRotacion,
+
         puntosSuavizado,
 
         redondearFigura,
@@ -631,6 +685,16 @@ function obtenerTrazoActual(cordInicial) {
 
         alphaInicio,
         alphaFin,
+
+        rotacionInicio,
+        rotacionFin,
+
+        ruidoVertical,
+        ruidoHorizontal,
+        ruidoAlpha,
+        ruidoGrosor,
+        ruidoRotacion,
+
     })
     return trazoGuardar;
 }
