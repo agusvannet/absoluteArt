@@ -402,6 +402,8 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'separacion', 'sep', 5, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'flujo', 'flujo', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'rotacionInicial', 'rotIni', 360, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'anchoInicial', 'ancIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'altoInicial', 'altoIni', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
 
     'suavizados',
@@ -415,17 +417,39 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'suavizadoAlpha', 'suavAlp', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoGrosor', 'suavGros', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'suavizadoRotacion', 'suavRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoAncho', 'suavAnch', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoAlto', 'suavAlt', 1, 0, 0, 0.01),
+
+    new valTraz('configuracionesLapiz', 'suavizadoH', 'suavH', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoS', 'suavS', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'suavizadoV', 'suavV', 1, 0, 0, 0.01),
+
+
+
+
     new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
 
     'sensibilidad',
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'senRotPre', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'senRotPre', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAnchoPresion', 'senAncPre', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAltoPresion', 'senAltPre', 1, -1, 0, 0.01),
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'senGroVel', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'senAlpVel', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'senRotVel', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionH', 'senPresH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionS', 'senPresS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionV', 'senPresV', 1, -1, 0, 0.01),
+
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'senGroVel', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'senAlpVel', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'senRotVel', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAnchoVelocidad', 'senAncVel', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAltoVelocidad', 'senAltVel', 1, -1, 0, 0.01),
+
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadH', 'senVelH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadS', 'senVelS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadV', 'senVelV', 1, -1, 0, 0.01),
 
     'Inicio Fin',
 
@@ -441,16 +465,38 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'rotacionInicio', 'rotInic', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'rotacionFin', 'rotFin', 1, 0, 1, 0.01),
 
-    'ruido',
+    new valTraz('configuracionesLapiz', 'anchoInicio', 'anchIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'anchoFin', 'anchFin', 1, 0, 1, 0.01),
 
+    new valTraz('configuracionesLapiz', 'altoInicio', 'altIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'altoFin', 'altFin', 1, 0, 1, 0.01),
+
+    new valTraz('configuracionesLapiz', 'hInicio', 'hInicio', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'hFin', 'hFin', 1, 0, 1, 0.01),
+
+    new valTraz('configuracionesLapiz', 'sInicio', 'anchIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'sFin', 'sFin', 1, 0, 1, 0.01),
+
+    new valTraz('configuracionesLapiz', 'vInicio', 'altIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'vin', 'vin', 1, 0, 1, 0.01),
+
+
+    'ruido',
 
     new valTraz('configuracionesLapiz', 'ruidoVertical', 'ruiVer', 10, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'ruidoHorizontal', 'ruiHor', 10, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'ruidoAlpha', 'ruiAlp', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'ruidoGrosor', 'ruiGro', 1, 0, 0, 0.01),
     new valTraz('configuracionesLapiz', 'ruidoRotacion', 'ruiRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoAncho', 'ruiAnc', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoAlto', 'ruiAlt', 1, 0, 0, 0.01),
 
-    //  de aca pa abajo son cosas del balde
+    new valTraz('configuracionesLapiz', 'ruidoH', 'ruiH', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoS', 'ruiS', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'ruidoV', 'ruiV', 1, 0, 0, 0.01),
+
+
+    //  de aca pa abajo son cosas del balde 
 
     new valTraz('confBald', 'toleranciaCanal.rgb.r', 'TolR', 1, 0, 0, 0.01, 'tolerancia rojo rgb'),
     new valTraz('confBald', 'reflejarCanal.rgb.r', 'RefR', 1, 0, 0, 0.01, 'tolerancia compensacion rojo rgb'),
@@ -565,16 +611,34 @@ let suavizadoInclinacionVertical = 0;
 let suavizadoAlpha = 0;
 let suavizadoGrosor = 0;
 let suavizadoRotacion = 0;
+let suavizadoAncho = 0;
+let suavizadoAlto = 0;
+
+let suavizadoH = 0;
+let suavizadoS = 0;
+let suavizadoV = 0;
 
 let puntosSuavizado = 2;
 
 let sensibilidadGrosorPresion = 0;
 let sensibilidadOpacidadPresion = 0;
 let sensibilidadRotacionPresion = 0;
+let sensibilidadAnchoPresion = 0;
+let sensibilidadAltoPresion = 0;
+
+let sensibilidadPresionH = 0;
+let sensibilidadPresionS = 0;
+let sensibilidadPresionV = 0;
 
 let sensibilidadGrosorVelocidad = 0;
 let sensibilidadOpacidadVelocidad = 0;
 let sensibilidadRotacionVelocidad = 0;
+let sensibilidadAnchoVelocidad = 0;
+let sensibilidadAltoVelocidad = 0;
+
+let sensibilidadVelocidadH = 0;
+let sensibilidadVelocidadS = 0;
+let sensibilidadVelocidadV = 0;
 
 let flujo = 1;
 let rotacionInicial = 0;
@@ -592,12 +656,35 @@ let alphaFin = 1;
 let rotacionInicio = 1;
 let rotacionFin = 1;
 
+let anchoInicio = 1;
+let anchoFin = 1;
+
+let altoInicio = 1;
+let altoFin = 1;
+
+let hInicio = 1
+let hFin = 1
+
+let sInicio = 1
+let sFin = 1
+
+let vInicio = 1
+let vFin = 1
+
 let ruidoVertical = 0;
 let ruidoHorizontal = 0;
 let ruidoAlpha = 0;
 let ruidoGrosor = 0;
 let ruidoRotacion = 0;
+let ruidoAncho = 0;
+let ruidoAlto = 0;
 
+let ruidoH = 0;
+let ruidoS = 0;
+let ruidoV = 0;
+
+let anchoInicial = 1;
+let altoInicial = 1;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
@@ -661,6 +748,12 @@ function obtenerTrazoActual(cordInicial) {
         suavizadoAlpha,
         suavizadoGrosor,
         suavizadoRotacion,
+        suavizadoAncho,
+        suavizadoAlto,
+
+        suavizadoH,
+        suavizadoS,
+        suavizadoV,
 
         puntosSuavizado,
 
@@ -668,9 +761,23 @@ function obtenerTrazoActual(cordInicial) {
 
         sensibilidadGrosorPresion,
         sensibilidadOpacidadPresion,
+        sensibilidadRotacionPresion,
+        sensibilidadAnchoPresion,
+        sensibilidadAltoPresion,
+
+        sensibilidadPresionH,
+        sensibilidadPresionS,
+        sensibilidadPresionV,
 
         sensibilidadGrosorVelocidad,
         sensibilidadOpacidadVelocidad,
+        sensibilidadRotacionVelocidad,
+        sensibilidadAnchoVelocidad,
+        sensibilidadAltoVelocidad,
+
+        sensibilidadVelocidadH,
+        sensibilidadVelocidadS,
+        sensibilidadVelocidadV,
 
         semilla: Date.now(),
 
@@ -689,11 +796,34 @@ function obtenerTrazoActual(cordInicial) {
         rotacionInicio,
         rotacionFin,
 
+        anchoInicio,
+        anchoFin,
+
+        altoInicio,
+        altoFin,
+
+        hInicio,
+        hFin,
+
+        sInicio,
+        sFin,
+
+        vInicio,
+        vFin,
+
         ruidoVertical,
         ruidoHorizontal,
         ruidoAlpha,
         ruidoGrosor,
         ruidoRotacion,
+        ruidoAncho,
+        ruidoAlto,
+        ruidoH,
+        ruidoS,
+        ruidoV,
+
+        anchoInicial,
+        altoInicial,
 
     })
     return trazoGuardar;
@@ -813,7 +943,13 @@ cuerpo.addEventListener('pointermove', (e) => {
                     cordenadaInicial.x,
                     cordenadaInicial.y,
                     cordenadaInicial.presion,
-                    velocidadInicial
+                    velocidadInicial, // msPX
+                    // inclinacion X
+                    // inclinacion Y
+                    // alpha
+                    // grosor
+                    // rotacion 
+                    // ancho
                 ),
                 lienzoReal: canvas,
                 parametrosTrazo: obtenerTrazoActual(cordenadaInicial)
@@ -825,8 +961,14 @@ cuerpo.addEventListener('pointermove', (e) => {
             cordenada: new cordenada(
                 cordenadaActual.x,
                 cordenadaActual.y,
-                (e.pointerType === 'pen') ? e.pressure : 1,
-                movimientoActual
+                (e.pointerType === 'pen') ? e.pressure : 1, // presion
+                movimientoActual, // msPX
+                // inclinacion X
+                // inclinacion Y
+                // alpha
+                // grosor
+                // rotacion 
+                // ancho
             ),
             lienzoReal: canvas
         })
@@ -853,7 +995,13 @@ cuerpo.addEventListener('pointerup', (e) => {
                     cordenadaInicial.x,
                     cordenadaInicial.y,
                     cordenadaInicial.presion,
-                    velocidadInicial
+                    velocidadInicial,
+                    // inclinacion X
+                    // inclinacion Y
+                    // alpha
+                    // grosor
+                    // rotacion 
+                    // ancho
                 ),
                 lienzoReal: canvas,
                 parametrosTrazo: obtenerTrazoActual(cordenadaInicial)
@@ -867,8 +1015,14 @@ cuerpo.addEventListener('pointerup', (e) => {
                 cordenada: new cordenada(
                     cordenadaActual.x,
                     cordenadaActual.y,
-                    (e.pointerType === 'pen') ? e.pressure : 1,
-                    Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx)
+                    (e.pointerType === 'pen') ? e.pressure : 1, // presion
+                    Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx), //msPX
+                    // inclinacion X
+                    // inclinacion Y
+                    // alpha
+                    // grosor
+                    // rotacion 
+                    // ancho
                 ),
                 lienzoReal: canvas
             })
@@ -879,3 +1033,23 @@ cuerpo.addEventListener('pointerup', (e) => {
 
 });
 
+hInicio
+sInicio
+vInicio
+
+hFin
+sFin
+vFin
+
+/*
+        this.x = x; // cualquier numero 
+        this.y = y; // cualquier numero 
+        this.presion = presion; // 0 - 1
+        this.msPx = msPx; // 0.004 - 0.5
+        this.inclinacionX = inclinacionX; // -90 - 90
+        this.inclinacionY = inclinacionY; // -90 - 90
+        this.alpha = alpha; // 0 - 1
+        this.grosor = grosor; // 0 - 1
+        this.rotacion = rotacion; // 0  - 2 PI
+        this.ancho = ancho; // 0 - 1
+*/

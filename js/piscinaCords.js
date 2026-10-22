@@ -1,6 +1,6 @@
 let contadorCordenadas = 0;
 class cordenada {
-    constructor(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1, grosor = 1, rotacion = 0) {
+    constructor(x, y, presion = 1, msPx = 1, inclinacionX = 0, inclinacionY = 0, alpha = 1, grosor = 1, rotacion = 0, ancho = 1, alto = 1, h = 0, s = 1, v = 1) {
         this.x = x; // cualquier numero 
         this.y = y; // cualquier numero 
         this.presion = presion; // 0 - 1
@@ -10,6 +10,11 @@ class cordenada {
         this.alpha = alpha; // 0 - 1
         this.grosor = grosor; // 0 - 1
         this.rotacion = rotacion; // 0  - 2 PI
+        this.ancho = ancho; // 0 - 1
+        this.alto = alto; // 0 - 1
+        this.h = h; // 0 - 1
+        this.s = s; // 0 - 1
+        this.v = v; // 0 - 1
 
         contadorCordenadas++;
     }
@@ -26,8 +31,13 @@ class cordenada {
         inclinacionY = this.inclinacionY,
         alpha = this.alpha,
         grosor = this.grosor,
-        rotacion = this.rotacion) {
-        const cord = new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha, grosor, rotacion)
+        rotacion = this.rotacion,
+        ancho = this.ancho,
+        alto = this.ancho,
+        h = this.h,
+        s = this.s,
+        v = this.v) {
+        const cord = new cordenada(x, y, presion, msPx, inclinacionX, inclinacionY, alpha, grosor, rotacion, ancho, alto, h, s, v)
         cord.indice = this.indice
         return cord
     }

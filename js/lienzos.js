@@ -441,6 +441,7 @@ class lienzoHtml extends lienzoBase {
         aclarar: 'lighten',
         diferencia: 'difference',
         recortar: 'source-atop',
+        copiar: 'copy'
     }
 
     pegarLienzo({ lienzo, x, y, rotacion = 0, xPivote = 0, yPivote = 0, largo = lienzo.largo, alto = lienzo.alto, alpha = 1, modoPegado = 'normal' }) { // pegar en ESTE lienzo}
@@ -495,9 +496,16 @@ class lienzoHtml extends lienzoBase {
     limpiarRectangulo({ x, y, largo, alto }) {
         this.ctx.clearRect(x, y, largo, alto);
     }
-    pintarRectangulo({ x, y, largo, alto, r, g, b, a }) {
+    pintarRectangulo({ x, y, largo, alto, r, g, b, a, modoPegado = 'normal' }) {
+        if (modoPegado !== 'normal') {
+            this.ctx.save();
+            this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
+        }
         this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
         this.ctx.fillRect(x, y, largo, alto)
+        if (modoPegado !== 'normal')
+            this.ctx.restore()
+
     }
     pintarElipse({ x, y, largo, alto, r, g, b, a, rotacion, inicio, fin }) {
         this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';

@@ -445,7 +445,8 @@ class pincelSellosSimple extends pincel {
             ) * 1.5)
     }
 
-    dibujo({ lienzo, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto, renderizadoGoteo }) {
+    dibujo({ lienzo, lienzoSelloIntermediario, trazo, sellos, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto, renderizadoGoteo }) {
+        const hsvVariable = trazo.hsvVariable()
         for (let i = inicioTrayectos; i <= finTrayectos; i++) {
             for (const sello of sellos) {
 
@@ -466,13 +467,12 @@ class pincelSellosSimple extends pincel {
                     inicioCalcular: inicioCalcular,
                     finCalcular: finCalcular,
                 })
-
+                trazo.agregarValoresIniciales({ cordenadas: puntosDibujar, modificar: true })
                 const inicioSuavizado = Math.min(0, inicioTrayecto - trazo.puntosSuavizado) + trazo.puntosSuavizado
 
                 let finSuavizado = inicioSuavizado + (finTrayecto - inicioTrayecto)
                 if (renderizadoGoteo)
                     finSuavizado++;
-
 
                 let trayectoSuavizado = trazo.obtenerTrayectoSuavizado({
                     rebotar: trazo.rebotarSuavizado,
@@ -483,6 +483,7 @@ class pincelSellosSimple extends pincel {
                     finCalcular: finSuavizado,
                 })
 
+                trazo.procesadoSensibilidades({ cordenadas: trayectoSuavizado, modificar: true })
 
                 let puntoFinalTrayectoria = undefined;
                 if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
@@ -498,28 +499,56 @@ class pincelSellosSimple extends pincel {
                 let cordenadas = trayectoSuavizado
                 let rotacionTrayecto = 0
 
-                trazo.calcularAleatorizacon({ cordenadas, modificar: true });
-
+                trazo.calcularAleatorizacon({ cordenadas, modificar: true, /* formula: (n, sem) => { return -(Math.random()) } */ });
                 for (let n = 0; n < cordenadas.length; n++) {
-
                     if (cordenadas[n + 1] || puntoFinalTrayectoria) {
                         const cord1 = cordenadas[n]
                         const cord2 = cordenadas[n + 1] ? cordenadas[n + 1] : puntoFinalTrayectoria
                         rotacionTrayecto = Math.atan2(cord2.y - cord1.y, cord2.x - cord1.x);
                     }
+
                     const rotacionFinal = trazo.seguirRotacionTrayecto ? rotacionTrayecto * trazo.seguirRotacionTrayecto : 0
-                    const grosor = trazo.obtenerGrosorFinal(cordenadas[n]) * cordenadas[n].grosor
-                    const cordFinal = trazo.obtenerCordFinal(cordenadas[n])
+                    const grosor = trazo.grosor * cordenadas[n].grosor
+                    const ancho = grosor * cordenadas[n].ancho
+                    const alto = grosor * cordenadas[n].alto
+                    const xFinal = (cordenadas[n].x - ancho / 2) + trazo.puntoInicial.x
+                    const yFinal = (cordenadas[n].y - alto / 2) + trazo.puntoInicial.y
+
+                    if (hsvVariable) {
+                        const rgbFinal = utiles.colorHsvRgb({
+                            h: cordenadas[n].h * 360,
+                            s: cordenadas[n].s,
+                            v: cordenadas[n].v
+                        })
+                        lienzoSelloIntermediario.pegarLienzo({
+                            x: 0,
+                            y: 0,
+                            lienzo: sello,
+                            modoPegado: 'copiar',
+                        })
+
+                        lienzoSelloIntermediario.pintarRectangulo({
+                            x: 0,
+                            y: 0,
+                            largo: sello.largo,
+                            alto: sello.alto,
+                            a: 1,
+                            r: rgbFinal.r,
+                            g: rgbFinal.g,
+                            b: rgbFinal.b,
+                            modoPegado: 'recortar'
+                        })
+                    }
                     lienzo.pegarLienzo({
-                        x: cordFinal.x - grosor / 2,
-                        y: cordFinal.y - grosor / 2,
-                        largo: grosor,
-                        alto: grosor,
-                        alpha: trazo.obtenerAlphaFinal(cordenadas[n], 1) * cordenadas[n].alpha * trazo.flujo,
-                        lienzo: sello,
-                        xPivote: grosor / 2,
-                        yPivote: grosor / 2,
-                        rotacion: (cordenadas[n].rotacion * (Math.PI * 2)) + trazo.rotacionInicial + rotacionFinal
+                        x: xFinal,
+                        y: yFinal,
+                        largo: ancho,
+                        alto: alto,
+                        alpha: cordenadas[n].alpha * trazo.flujo,
+                        lienzo: hsvVariable ? lienzoSelloIntermediario : sello,
+                        xPivote: ancho / 2,
+                        yPivote: alto / 2,
+                        rotacion: (cordenadas[n].rotacion * (Math.PI * 2)) + rotacionFinal
                     })
                 }
             }
@@ -530,6 +559,7 @@ class pincelSellosSimple extends pincel {
         if (trazo.rgba[0].a === 0) return
         const returnar = this.dibujo({
             lienzo: lienzoIntermediario.lienzoComun,
+            lienzoSelloIntermediario: lienzoIntermediario.lienzoSelloIntermediario,
             trazo,
             sellos,
             inicioTrayectos,

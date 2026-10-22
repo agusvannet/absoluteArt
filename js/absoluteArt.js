@@ -503,6 +503,12 @@ class trazo {
         suavizadoAlpha = 0,
         suavizadoGrosor = 0,
         suavizadoRotacion = 0,
+        suavizadoAncho = 0,
+        suavizadoAlto = 0,
+
+        suavizadoH = 0,
+        suavizadoS = 0,
+        suavizadoV = 0,
 
         puntosSuavizado = 2,
         redondearFigura = false,
@@ -510,11 +516,22 @@ class trazo {
         sensibilidadGrosorPresion = 0,
         sensibilidadOpacidadPresion = 0,
         sensibilidadRotacionPresion = 0,
+        sensibilidadAnchoPresion = 0,
+        sensibilidadAltoPresion = 0,
+
+        sensibilidadPresionH = 0,
+        sensibilidadPresionS = 0,
+        sensibilidadPresionV = 0,
 
         sensibilidadGrosorVelocidad = 0,
         sensibilidadOpacidadVelocidad = 0,
         sensibilidadRotacionVelocidad = 0,
+        sensibilidadAnchoVelocidad = 0,
+        sensibilidadAltoVelocidad = 0,
 
+        sensibilidadVelocidadH = 0,
+        sensibilidadVelocidadS = 0,
+        sensibilidadVelocidadV = 0,
 
         semilla = 1,
 
@@ -527,17 +544,35 @@ class trazo {
         alphaInicio = 1,
         alphaFin = 1,
         rotacionInicio = 0,
+        anchoInicio = 1,
+        altoInicio = 1,
+        hInicio = 0,
+        sInicio = 1,
+        vInicio = 1,
 
         grosorInicio = 1,
         grosorFin = 1,
         rotacionFin = 0,
+        anchoFin = 1,
+        altoFin = 1,
+        hFin = 0,
+        sFin = 1,
+        vFin = 1,
 
         ruidoVertical = 0,
         ruidoHorizontal = 0,
         ruidoAlpha = 0,
         ruidoGrosor = 0,
         ruidoRotacion = 0,
+        ruidoAncho = 0,
+        ruidoAlto = 0,
 
+        ruidoH = 0,
+        ruidoS = 0,
+        ruidoV = 0,
+
+        anchoInicial = 1,
+        altoInicial = 1,
     }) {
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
@@ -590,6 +625,12 @@ class trazo {
         this.suavizadoAlpha = suavizadoAlpha;
         this.suavizadoGrosor = suavizadoGrosor;
         this.suavizadoRotacion = suavizadoRotacion;
+        this.suavizadoAncho = suavizadoAncho;
+        this.suavizadoAlto = suavizadoAlto;
+
+        this.suavizadoH = suavizadoH;
+        this.suavizadoS = suavizadoS;
+        this.suavizadoV = suavizadoV;
 
         this.puntosSuavizado = puntosSuavizado;
         this.redondearFigura = redondearFigura;
@@ -597,10 +638,20 @@ class trazo {
         this.sensibilidadGrosorPresion = sensibilidadGrosorPresion;
         this.sensibilidadOpacidadPresion = sensibilidadOpacidadPresion;
         this.sensibilidadRotacionPresion = sensibilidadRotacionPresion;
+        this.sensibilidadAnchoPresion = sensibilidadAnchoPresion;
+        this.sensibilidadAltoPresion = sensibilidadAltoPresion;
+        this.sensibilidadPresionH = sensibilidadPresionH;
+        this.sensibilidadPresionS = sensibilidadPresionS;
+        this.sensibilidadPresionV = sensibilidadPresionV;
 
         this.sensibilidadGrosorVelocidad = sensibilidadGrosorVelocidad;
         this.sensibilidadOpacidadVelocidad = sensibilidadOpacidadVelocidad;
         this.sensibilidadRotacionVelocidad = sensibilidadRotacionVelocidad;
+        this.sensibilidadAnchoVelocidad = sensibilidadAnchoVelocidad;
+        this.sensibilidadAltoVelocidad = sensibilidadAltoVelocidad;
+        this.sensibilidadVelocidadH = sensibilidadVelocidadH;
+        this.sensibilidadVelocidadS = sensibilidadVelocidadS;
+        this.sensibilidadVelocidadV = sensibilidadVelocidadV;
 
         this.semilla = semilla;
         this.rotacionInicial = rotacionInicial;
@@ -618,11 +669,35 @@ class trazo {
         this.rotacionInicio = rotacionInicio;
         this.rotacionFin = rotacionFin;
 
+        this.anchoInicio = anchoInicio;
+        this.anchoFin = anchoFin;
+
+        this.altoInicio = altoInicio;
+        this.altoFin = altoFin;
+
+        this.hInicio = hInicio;
+        this.hFin = hFin;
+
+        this.sInicio = sInicio;
+        this.sFin = sFin;
+
+        this.vInicio = vInicio;
+        this.vFin = vFin;
+
         this.ruidoVertical = ruidoVertical;
         this.ruidoHorizontal = ruidoHorizontal;
         this.ruidoAlpha = ruidoAlpha;
         this.ruidoGrosor = ruidoGrosor;
         this.ruidoRotacion = ruidoRotacion;
+        this.ruidoAncho = ruidoAncho;
+        this.ruidoAlto = ruidoAlto;
+
+        this.ruidoH = ruidoH;
+        this.ruidoS = ruidoS;
+        this.ruidoV = ruidoV;
+
+        this.anchoInicial = anchoInicial;
+        this.altoInicial = altoInicial;
     }
     separar = true
     static minimoSeparacion = 0.01;
@@ -771,6 +846,12 @@ class trazo {
             suavizadoAlpha: this.suavizadoAlpha,
             suavizadoGrosor: this.suavizadoGrosor,
             suavizadoRotacion: this.suavizadoRotacion,
+            suavizadoAncho: this.suavizadoAncho,
+            suavizadoAlto: this.suavizadoAlto,
+
+            suavizadoH: this.suavizadoH,
+            suavizadoS: this.suavizadoS,
+            suavizadoV: this.suavizadoV,
 
             puntosSuavizado: this.puntosSuavizado,
             redondearFigura: this.redondearFigura,
@@ -778,10 +859,14 @@ class trazo {
             sensibilidadGrosorPresion: this.sensibilidadGrosorPresion,
             sensibilidadOpacidadPresion: this.sensibilidadOpacidadPresion,
             sensibilidadRotacionPresion: this.sensibilidadRotacionPresion,
+            sensibilidadAnchoPresion: this.sensibilidadAnchoPresion,
+            sensibilidadAltoPresion: this.sensibilidadAltoPresion,
 
             sensibilidadGrosorVelocidad: this.sensibilidadGrosorVelocidad,
             sensibilidadOpacidadVelocidad: this.sensibilidadOpacidadVelocidad,
             sensibilidadRotacionVelocidad: this.sensibilidadRotacionVelocidad,
+            sensibilidadAnchoVelocidad: this.sensibilidadAnchoVelocidad,
+            sensibilidadAltoVelocidad: this.sensibilidadAltoVelocidad,
 
             semilla: this.semilla,
 
@@ -800,12 +885,26 @@ class trazo {
             rotacionInicio: this.rotacionInicio,
             rotacionFin: this.rotacionFin,
 
+            anchoInicio: this.anchoInicio,
+            anchoFin: this.anchoFin,
+
+            altoInicio: this.altoInicio,
+            altoFin: this.altoFin,
+
             ruidoVertical: this.ruidoVertical,
             ruidoHorizontal: this.ruidoHorizontal,
             ruidoAlpha: this.ruidoAlpha,
             ruidoGrosor: this.ruidoGrosor,
             ruidoRotacion: this.ruidoRotacion,
+            ruidoAncho: this.ruidoAncho,
+            ruidoAlto: this.ruidoAlto,
 
+            ruidoH: this.ruidoH,
+            ruidoS: this.ruidoS,
+            ruidoV: this.ruidoV,
+
+            anchoInicial: this.anchoInicial,
+            altoInicial: this.altoInicial,
         })
     }
     agregarTrazo(cordenada) {
@@ -877,6 +976,11 @@ class trazo {
             const diferenciaAlphaSeccionada = (finTramo.alpha - origenTramo.alpha) / puntos
             const diferenciaGrosorSeccionada = (finTramo.grosor - origenTramo.grosor) / puntos
             const diferenciaRotacionSeccionada = (finTramo.rotacion - origenTramo.rotacion) / puntos
+            const diferenciaAnchoSeccionada = (finTramo.ancho - origenTramo.ancho) / puntos
+            const diferenciaAltoSeccionada = (finTramo.alto - origenTramo.alto) / puntos
+            const diffH = (finTramo.h - origenTramo.h) / puntos
+            const diffS = (finTramo.s - origenTramo.s) / puntos
+            const diffV = (finTramo.v - origenTramo.v) / puntos
             const dirX = largo / hyp;
             const dirY = alto / hyp;
 
@@ -894,6 +998,11 @@ class trazo {
                         origenTramo.alpha + diferenciaAlphaSeccionada * n,
                         origenTramo.grosor + diferenciaGrosorSeccionada * n,
                         origenTramo.rotacion + diferenciaRotacionSeccionada * n,
+                        origenTramo.ancho + diferenciaAnchoSeccionada * n,
+                        origenTramo.alto + diferenciaAltoSeccionada * n,
+                        origenTramo.h + diffH * n,
+                        origenTramo.s + diffS * n,
+                        origenTramo.v + diffV * n,
                     )
                 );
                 distancia += separacion;
@@ -912,7 +1021,21 @@ class trazo {
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
-            let sumaX = 0, sumaY = 0, puntosValidos = 0, sumaPresion = 0, sumaVelocidad = 0, sumaInclinacionX = 0, sumaInclinacionY = 0, sumaAlpha = 0, sumaGrosor = 0, sumaRotacion = 0;
+            let sumaX = 0,
+                sumaY = 0,
+                puntosValidos = 0,
+                sumaPresion = 0,
+                sumaVelocidad = 0,
+                sumaInclinacionX = 0,
+                sumaInclinacionY = 0,
+                sumaAlpha = 0,
+                sumaGrosor = 0,
+                sumaRotacion = 0,
+                sumaAncho = 0,
+                sumaAlto = 0,
+                sumaH = 0,
+                sumaS = 0,
+                sumaV = 0;
 
             const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
             const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
@@ -933,9 +1056,14 @@ class trazo {
                 sumaInclinacionY += (puntos[indice]) ? puntos[indice].inclinacionY : 0;
                 sumaAlpha += (puntos[indice]) ? puntos[indice].alpha : 0;
                 sumaGrosor += (puntos[indice]) ? puntos[indice].grosor : 0;
+                sumaRotacion += (puntos[indice]) ? puntos[indice].rotacion : 0;
+                sumaAncho += (puntos[indice]) ? puntos[indice].ancho : 0;
+                sumaAlto += (puntos[indice]) ? puntos[indice].alto : 0;
+                sumaH += (puntos[indice]) ? puntos[indice].h : 0;
+                sumaS += (puntos[indice]) ? puntos[indice].s : 0;
+                sumaV += (puntos[indice]) ? puntos[indice].v : 0;
                 puntosValidos++;
             }
-
 
             const promX = sumaX / puntosValidos;
             const promY = sumaY / puntosValidos;
@@ -946,7 +1074,11 @@ class trazo {
             const promAlp = sumaAlpha / puntosValidos;
             const promGro = sumaGrosor / puntosValidos;
             const promRot = sumaRotacion / puntosValidos;
-
+            const promAnch = sumaAncho / puntosValidos;
+            const promAlto = sumaAlto / puntosValidos;
+            const promH = sumaH / puntosValidos;
+            const promS = sumaS / puntosValidos;
+            const promV = sumaV / puntosValidos;
 
             trayectoSuavizado.push(
                 new cordenada(
@@ -959,6 +1091,11 @@ class trazo {
                     promAlp * this.suavizadoAlpha + puntos[i].alpha * (1 - this.suavizadoAlpha),
                     promGro * this.suavizadoGrosor + puntos[i].grosor * (1 - this.suavizadoGrosor),
                     promRot * this.suavizadoRotacion + puntos[i].rotacion * (1 - this.suavizadoRotacion),
+                    promAnch * this.suavizadoAncho + puntos[i].ancho * (1 - this.suavizadoAncho),
+                    promAlto * this.suavizadoAlto + puntos[i].alto * (1 - this.suavizadoAlto),
+                    promH * this.suavizadoH + puntos[i].h * (1 - this.suavizadoH),
+                    promS * this.suavizadoS + puntos[i].s * (1 - this.suavizadoS),
+                    promV * this.suavizadoV + puntos[i].v * (1 - this.suavizadoV),
                 )
             );
         }
@@ -967,62 +1104,6 @@ class trazo {
             trayectoSuavizado.push(puntos[puntos.length - 1].clonar());
         return trayectoSuavizado;
     }
-    obtenerValoresFinales(cord) {
-        const alpha = []
-        for (const actual of this.rgba) {
-            alpha.push(this.obtenerAlphaFinal(cord, actual.a))
-        }
-
-        const cordFinal = this.obtenerCordFinal(cord)
-        return {
-            grosor: this.obtenerGrosorFinal(cord),
-            alpha,
-            x: cordFinal.x,
-            y: cordFinal.y
-        }
-    }
-    obtenerAlphaFinal(cord, alpha) {
-        let alphaFinal = alpha;
-        if (this.sensibilidadOpacidadPresion) {
-            const presion = (this.sensibilidadOpacidadPresion > 0) ? cord.presion : 1 - cord.presion
-            const alphaSens = (1 - Math.abs(this.sensibilidadOpacidadPresion)) * alpha + Math.abs(this.sensibilidadOpacidadPresion) * (alpha * presion)
-            alphaFinal = alphaSens
-        }
-
-        if (this.sensibilidadOpacidadVelocidad) {
-            const pxNormalizada = cord.msPx / cordenada.maxMsPx
-            const msPx = (this.sensibilidadOpacidadVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
-            const alphaSens = (1 - Math.abs(this.sensibilidadOpacidadVelocidad)) * alpha + Math.abs(this.sensibilidadOpacidadVelocidad) * (alpha * msPx)
-            alphaFinal = alphaSens
-        }
-
-        return alphaFinal
-    }
-    obtenerGrosorFinal(cord, grosor = this.grosor) {
-        let grosorFinal = grosor;
-
-        if (this.sensibilidadGrosorVelocidad) {
-            const pxNormalizada = cord.msPx / cordenada.maxMsPx
-            const msPx = (this.sensibilidadGrosorVelocidad > 0) ? pxNormalizada : 1 - pxNormalizada
-            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorVelocidad)) * grosorFinal + Math.abs(this.sensibilidadGrosorVelocidad) * (grosorFinal * msPx)
-            grosorFinal = grosorSens
-        }
-
-        if (this.sensibilidadGrosorPresion) {
-            const presion = (this.sensibilidadGrosorPresion > 0) ? cord.presion : 1 - cord.presion
-            const grosorSens = (1 - Math.abs(this.sensibilidadGrosorPresion)) * grosorFinal + Math.abs(this.sensibilidadGrosorPresion) * (grosorFinal * presion)
-            grosorFinal = grosorSens
-        }
-        return grosorFinal
-    }
-    
-    obtenerCordFinal(cord) {
-        return {
-            x: cord.x + this.puntoInicial.x,
-            y: cord.y + this.puntoInicial.y
-        }
-    }
-
     calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length }) {
         if (puntos.length === 0) return
         const puntosProcesados = []
@@ -1075,11 +1156,22 @@ class trazo {
             let alpha = valorMaximo;
             let grosor = valorMaximo;
             let rotacion = 0;
+            let ancho = 1;
+            let alto = 1;
+            let h = 0;
+            let s = 1;
+            let v = 1;
             if (i <= puntosInicio) {
                 if (i === 0) {
                     alpha = this.alphaInicio
                     grosor = this.grosorInicio
                     rotacion = this.rotacionInicio
+                    ancho = this.anchoInicio
+                    alto = this.altoInicio
+                    h = this.hInicio
+                    s = this.sInicio
+                    v = this.vInicio
+
                 } else {
                     const punto0 = puntos[i - 1]
                     const punto1 = puntos[i]
@@ -1088,7 +1180,12 @@ class trazo {
 
                     alpha = this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio) //alpha
                     grosor = this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio)//grosor
-                    rotacion = this.rotacionInicio + valorAlcanzado * (1 - this.rotacionInicio)//grosor
+                    rotacion = this.rotacionInicio + valorAlcanzado * (1 - this.rotacionInicio)//rotacion
+                    ancho = this.anchoInicio + valorAlcanzado * (1 - this.anchoInicio)//rotacion
+                    alto = this.altoInicio + valorAlcanzado * (1 - this.altoInicio)//rotacion
+                    h = this.hInicio + valorAlcanzado * (1 - this.hInicio)//rotacion
+                    s = this.sInicio + valorAlcanzado * (1 - this.sInicio)//rotacion
+                    v = this.vInicio + valorAlcanzado * (1 - this.vInicio)//rotacion
 
                 }
             } else if (i >= inicioPuntosFin) {
@@ -1096,6 +1193,11 @@ class trazo {
                     alpha = this.alphaFin
                     grosor = this.grosorFin
                     rotacion = this.rotacionFin
+                    ancho = this.anchoFin
+                    alto = this.altoFin
+                    h = this.hFin
+                    s = this.sFin
+                    v = this.vFin
                 } else {
                     const punto0 = puntos[i]
                     const punto1 = puntos[i + 1]
@@ -1104,7 +1206,13 @@ class trazo {
 
                     alpha = this.alphaFin + valorAlcanzado * (1 - this.alphaFin) //alpha
                     grosor = this.grosorFin + valorAlcanzado * (1 - this.grosorFin)//grosor
-                    rotacion = this.rotacionFin + valorAlcanzado * (1 - this.rotacionFin)//grosor
+                    rotacion = this.rotacionFin + valorAlcanzado * (1 - this.rotacionFin)//rotacion
+                    ancho = this.anchoFin + valorAlcanzado * (1 - this.anchoFin)//rotacion
+                    alto = this.altoFin + valorAlcanzado * (1 - this.altoFin)//rotacion
+                    h = this.hFin + valorAlcanzado * (1 - this.hFin)//rotacion
+                    s = this.sFin + valorAlcanzado * (1 - this.sFin)//rotacion
+                    v = this.vFin + valorAlcanzado * (1 - this.vFin)//rotacion
+
                 }
             }
 
@@ -1120,6 +1228,11 @@ class trazo {
                         alpha, //alpha
                         grosor,//grosor
                         rotacion,//rotacion
+                        ancho, // ancho
+                        alto, // alto
+                        h,
+                        s,
+                        v
                     )
                 )
             }
@@ -1133,7 +1246,12 @@ class trazo {
             this.ruidoHorizontal === 0 &&
             this.ruidoAlpha === 0 &&
             this.ruidoGrosor === 0 &&
-            this.ruidoRotacion === 0
+            this.ruidoRotacion === 0 &&
+            this.ruidoAncho === 0 &&
+            this.ruidoAlto === 0 &&
+            this.ruidoH === 0 &&
+            this.ruidoS === 0 &&
+            this.ruidoV === 0
         ) return cordenadas
 
         const puntos = modificar ? cordenadas : []
@@ -1145,24 +1263,45 @@ class trazo {
             let ruiAlp = puntoActual.alpha
             let ruiGro = puntoActual.grosor
             let ruiRot = puntoActual.rotacion
+            let ruiAnc = puntoActual.ancho
+            let ruiAlt = puntoActual.alto
+            let ruiH = puntoActual.h
+            let ruiS = puntoActual.s
+            let ruiV = puntoActual.v
+
 
             const sumaCord = ruiX + ruiY
 
-            if (this.ruidoVertical) {
-                ruiY += (this.ruidoVertical * (ruiGro * this.grosor)) * formula((sumaCord + puntoActual.y) * this.semilla, this.semilla)
-            }
-            if (this.ruidoHorizontal) {
-                ruiX += (this.ruidoHorizontal * (ruiGro * this.grosor)) * formula((sumaCord + puntoActual.x) * this.semilla, this.semilla)
-            }
-            if (this.ruidoAlpha) {
-                ruiAlp = ruiAlp * (1 - this.ruidoAlpha) + this.ruidoAlpha * formula((sumaCord + ruiAlp) * this.semilla, this.semilla)
-            }
-            if (this.ruidoGrosor) {
-                ruiGro = ruiGro * (1 - this.ruidoGrosor) + this.ruidoGrosor * formula((sumaCord + ruiGro) * this.semilla, this.semilla)
-            }
-            if (this.ruidoRotacion) {
-                ruiRot = ruiRot * (1 - this.ruidoRotacion) + this.ruidoRotacion * formula((sumaCord + ruiRot) * this.semilla, this.semilla)
-            }
+            if (this.ruidoVertical)
+                ruiY += (this.ruidoVertical * (ruiGro * this.grosor)) * formula((sumaCord + puntoActual.y + this.puntoInicial.y) * this.semilla, this.semilla)
+
+            if (this.ruidoHorizontal)
+                ruiX += (this.ruidoHorizontal * (ruiGro * this.grosor)) * formula((sumaCord + puntoActual.x + this.puntoInicial.x) * this.semilla, this.semilla)
+
+            if (this.ruidoAlpha)
+                ruiAlp = Math.min(1, Math.max(0, (ruiAlp + (ruiAlp * this.ruidoAlpha * formula((sumaCord + ruiAlp) * this.semilla, this.semilla / 2)))))
+
+            if (this.ruidoGrosor)
+                ruiGro = Math.min(1, Math.max(0, (ruiGro + (ruiGro * this.ruidoGrosor * formula((sumaCord + ruiGro) * this.semilla, this.semilla / 3)))))
+
+            if (this.ruidoRotacion)
+                ruiRot = Math.max(0, (ruiRot + (this.ruidoRotacion * formula((sumaCord + ruiRot) * this.semilla, this.semilla / 4)))) % 1
+
+            if (this.ruidoAncho)
+                ruiAnc = Math.min(1, Math.max(0, (ruiAnc + (ruiAnc * this.ruidoAncho * formula((sumaCord + ruiAnc) * this.semilla, this.semilla / 5)))))
+
+            if (this.ruidoAlto)
+                ruiAlt = Math.min(1, Math.max(0, (ruiAlt + (ruiAlt * this.ruidoAlto * formula((sumaCord + ruiAlt) * this.semilla, this.semilla / 6)))))
+
+            if (this.ruidoH)
+                ruiH = Math.max(0, (ruiH + (this.ruidoH * formula((sumaCord + ruiH) * this.semilla, this.semilla / 7)))) % 1
+
+            if (this.ruidoS)
+                ruiS = Math.min(1, Math.max(0, (ruiS + (ruiS * this.ruidoS * formula((sumaCord + ruiS) * this.semilla, this.semilla / 8)))))
+
+            if (this.ruidoV)
+                ruiV = Math.min(1, Math.max(0, (ruiV + (ruiV * this.ruidoV * formula((sumaCord + ruiV) * this.semilla, this.semilla / 9)))))
+
 
 
             if (!modificar) {
@@ -1176,6 +1315,11 @@ class trazo {
                     ruiAlp, //alpha
                     ruiGro,//grosor
                     ruiRot,//grosor
+                    ruiAnc,//ancho
+                    ruiAlt,//ancho
+                    ruiH,
+                    ruiS,
+                    ruiV,
                 )
             } else {
                 puntoActual.x = ruiX
@@ -1183,10 +1327,254 @@ class trazo {
                 puntoActual.alpha = ruiAlp
                 puntoActual.grosor = ruiGro
                 puntoActual.rotacion = ruiRot
+                puntoActual.ancho = ruiAnc
+                puntoActual.alto = ruiAlt
+                puntoActual.h = ruiH
+                puntoActual.s = ruiS
+                puntoActual.v = ruiV
             }
         }
-        if (modificar) return puntos
+        if (!modificar) return puntos
 
+    }
+
+    procesadoSensibilidades({ cordenadas, modificar = true }) {
+        if (this.sensibilidadGrosorPresion === 0 &&
+            this.sensibilidadOpacidadPresion === 0 &&
+            this.sensibilidadRotacionPresion === 0 &&
+            this.sensibilidadAnchoPresion === 0 &&
+            this.sensibilidadAltoPresion === 0 &&
+            this.sensibilidadPresionH === 0 &&
+            this.sensibilidadPresionS === 0 &&
+            this.sensibilidadPresionV === 0 &&
+
+            this.sensibilidadGrosorVelocidad === 0 &&
+            this.sensibilidadOpacidadVelocidad === 0 &&
+            this.sensibilidadRotacionVelocidad === 0 &&
+            this.sensibilidadAnchoVelocidad === 0 &&
+            this.sensibilidadAltoVelocidad === 0 &&
+            this.sensibilidadVelocidadH === 0 &&
+            this.sensibilidadVelocidadS === 0 &&
+            this.sensibilidadVelocidadV === 0
+        ) return cordenadas
+
+        const puntos = modificar ? cordenadas : []
+
+        const grosPre = Math.abs(this.sensibilidadGrosorPresion)
+        const grosVel = Math.abs(this.sensibilidadGrosorVelocidad)
+
+        const alpPre = Math.abs(this.sensibilidadOpacidadPresion)
+        const alpVel = Math.abs(this.sensibilidadOpacidadVelocidad)
+
+        const rotPre = Math.abs(this.sensibilidadRotacionPresion)
+        const rotVel = Math.abs(this.sensibilidadRotacionVelocidad)
+
+        const anchPre = Math.abs(this.sensibilidadAnchoPresion)
+        const anchVel = Math.abs(this.sensibilidadAnchoVelocidad)
+
+        const altPre = Math.abs(this.sensibilidadAltoPresion)
+        const altVel = Math.abs(this.sensibilidadAltoVelocidad)
+
+        const hPre = Math.abs(this.sensibilidadPresionH)
+        const hVel = Math.abs(this.sensibilidadVelocidadH)
+
+        const sPre = Math.abs(this.sensibilidadPresionS)
+        const sVel = Math.abs(this.sensibilidadVelocidadS)
+
+        const vPre = Math.abs(this.sensibilidadPresionV)
+        const vVel = Math.abs(this.sensibilidadVelocidadV)
+
+        for (let i = 0; i < cordenadas.length; i++) {
+            const puntoActual = cordenadas[i]
+            const velocidad = puntoActual.msPx / cordenada.maxMsPx;
+
+            if (this.sensibilidadGrosorPresion !== 0) {
+                const multGrosPres =
+                    this.sensibilidadGrosorPresion > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.grosor = puntoActual.grosor * (1 - grosPre) + (puntoActual.grosor * multGrosPres) * grosPre
+            }
+            if (this.sensibilidadGrosorVelocidad !== 0) {
+                const multGrosVel =
+                    this.sensibilidadGrosorVelocidad > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.grosor = puntoActual.grosor * (1 - grosVel) + (puntoActual.grosor * multGrosVel) * grosVel
+            }
+
+            if (this.sensibilidadOpacidadPresion !== 0) {
+                const multAlpPres =
+                    this.sensibilidadOpacidadPresion > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.alpha = puntoActual.alpha * (1 - alpPre) + (puntoActual.alpha * multAlpPres) * alpPre
+            }
+            if (this.sensibilidadOpacidadVelocidad !== 0) {
+                const multAlpVel =
+                    this.sensibilidadOpacidadVelocidad > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.alpha = puntoActual.alpha * (1 - alpVel) + (puntoActual.alpha * multAlpVel) * alpVel
+            }
+
+            if (this.sensibilidadRotacionPresion !== 0) {
+                const mulRotPres = this.sensibilidadRotacionPresion > 0
+                    ? puntoActual.presion
+                    : 1 - puntoActual.presion
+                puntoActual.rotacion = (puntoActual.rotacion + mulRotPres * rotPre) % 1
+            }
+            if (this.sensibilidadRotacionVelocidad !== 0) {
+                const mulRotVel = this.sensibilidadRotacionVelocidad > 0
+                    ? velocidad
+                    : 1 - velocidad
+                puntoActual.rotacion = (puntoActual.rotacion + mulRotVel * rotVel) % 1
+            }
+
+            if (this.sensibilidadAnchoPresion !== 0) {
+                const multAnchPres =
+                    this.sensibilidadAnchoPresion > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.ancho = puntoActual.ancho * (1 - anchPre) + (puntoActual.ancho * multAnchPres) * anchPre
+            }
+            if (this.sensibilidadAnchoVelocidad !== 0) {
+                const multAnchVel =
+                    this.sensibilidadAnchoVelocidad > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.ancho = puntoActual.ancho * (1 - anchVel) + (puntoActual.ancho * multAnchVel) * anchVel
+            }
+
+            if (this.sensibilidadAltoPresion !== 0) {
+                const multAltPres =
+                    this.sensibilidadAltoPresion > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.alto = puntoActual.alto * (1 - altPre) + (puntoActual.alto * multAltPres) * altPre
+            }
+            if (this.sensibilidadAltoVelocidad !== 0) {
+                const multAlthVel =
+                    this.sensibilidadAltoVelocidad > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.alto = puntoActual.alto * (1 - altVel) + (puntoActual.alto * multAlthVel) * altVel
+            }
+
+            if (this.sensibilidadPresionH !== 0) {
+                const mulPresH = this.sensibilidadPresionH > 0
+                    ? puntoActual.presion
+                    : 1 - puntoActual.presion
+                puntoActual.h = (puntoActual.h + mulPresH * hPre) % 1
+            }
+            if (this.sensibilidadVelocidadH !== 0) {
+                const mulVelH = this.sensibilidadVelocidadH > 0
+                    ? velocidad
+                    : 1 - velocidad
+                puntoActual.h = (puntoActual.h + mulVelH * hVel) % 1
+            }
+
+            if (this.sensibilidadPresionS !== 0) {
+                const multPresS =
+                    this.sensibilidadPresionS > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.s = puntoActual.s * (1 - sPre) + (puntoActual.s * multPresS) * sPre
+            }
+            if (this.sensibilidadVelocidadS !== 0) {
+                const multVelS =
+                    this.sensibilidadVelocidadS > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.s = puntoActual.s * (1 - sVel) + (puntoActual.s * multVelS) * sVel
+            }
+
+            if (this.sensibilidadPresionV !== 0) {
+                const multPresV =
+                    this.sensibilidadPresionV > 0
+                        ? puntoActual.presion
+                        : 1 - puntoActual.presion
+                puntoActual.v = puntoActual.v * (1 - vPre) + (puntoActual.v * multPresV) * vPre
+            }
+            if (this.sensibilidadVelocidadV !== 0) {
+                const multVelV =
+                    this.sensibilidadVelocidadV > 0
+                        ? velocidad
+                        : 1 - velocidad
+                puntoActual.v = puntoActual.v * (1 - vVel) + (puntoActual.v * multVelV) * vVel
+            }
+
+            if (!modificar)
+                puntos.push(
+                    puntoActual.clonar(
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        puntoActual.alpha, //alpha
+                        puntoActual.grosor,//grosor
+                        puntoActual.rotacion,//rotacion
+                        puntoActual.ancho,//ancho
+                        puntoActual.alto,//alto
+                        puntoActual.h,
+                        puntoActual.s,
+                        puntoActual.v,
+                    )
+                )
+        }
+        if (!modificar) return puntos
+    }
+
+    agregarValoresIniciales({ cordenadas, modificar = true }) {
+        const puntos = modificar ? cordenadas : []
+        const hsvInicial = utiles.colorRgbHvs(this.rgba[0])
+        const rotacion = (this.rotacionInicial / (Math.PI / 180)) / 360
+        const ancho = this.anchoInicial
+        const alto = this.altoInicial
+        for (let i = 0; i < cordenadas.length; i++) {
+
+            const puntoActual = cordenadas[i]
+            if (!modificar) {
+                puntos.push(
+                    puntoActual.clonar(
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        undefined,
+                        puntoActual.rotacion = (puntoActual.rotacion + rotacion) % 1,
+                        puntoActual.ancho = puntoActual.ancho * ancho,
+                        puntoActual.alto = puntoActual.alto * alto,
+                        puntoActual.h = (puntoActual.h + hsvInicial.h / 360) % 1,
+                        puntoActual.s = hsvInicial.s * puntoActual.s,
+                        puntoActual.v = hsvInicial.v * puntoActual.v,
+                    )
+                )
+            } else {
+                puntoActual.rotacion = (puntoActual.rotacion + rotacion) % 1
+                puntoActual.ancho = puntoActual.ancho * ancho
+                puntoActual.alto = puntoActual.alto * alto
+                puntoActual.h = (puntoActual.h + hsvInicial.h / 360) % 1
+                puntoActual.s = hsvInicial.s * puntoActual.s
+                puntoActual.v = hsvInicial.v * puntoActual.v
+            }
+        }
+        if (!modificar) return puntos
+    }
+
+    hsvVariable() {
+        return (
+            true
+            //this.ruidoH > 0 || this.ruidoS > 0 || this.ruidoV > 0 ||
+            //this.sensibilidadVelocidadH !== 0 || this.sensibilidadPresionH !== 0 ||
+            //this.sensibilidadVelocidadS !== 0 || this.sensibilidadPresionS !== 0 ||
+            //this.sensibilidadVelocidadV !== 0 || this.sensibilidadPresionV !== 0
+        )
     }
 }
 
@@ -1489,6 +1877,7 @@ const pintor = {
         lienzoCapa: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComun: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
         lienzoComunSecundario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
+        lienzoSelloIntermediario: lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
     },
     lienzosSello: [
         lienzos.obtener({ muchaLectura: true, alto: 1, largo: 1, tipo: 'temporal' }),
@@ -1513,6 +1902,7 @@ const pintor = {
     dibujar({ lienzoDibujar, trazo, prepararSello, inTrayectos, inTrayecto, finTrayectos, finTrayecto, renderizadoGoteo }) {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComun, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComunSecundario, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
+        lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoSelloIntermediario, alto: trazo.grosor, largo: trazo.grosor })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
         if (prepararSello) this.prepararSello(trazo)
         const returnar = herramienta.usar({
