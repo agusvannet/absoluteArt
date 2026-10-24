@@ -33,7 +33,7 @@ class cordenada {
         grosor = this.grosor,
         rotacion = this.rotacion,
         ancho = this.ancho,
-        alto = this.ancho,
+        alto = this.alto,
         h = this.h,
         s = this.s,
         v = this.v) {

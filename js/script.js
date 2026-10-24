@@ -429,27 +429,49 @@ const valoresTrazo = [
 
     new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
 
-    'sensibilidad',
+    'sensibilidad presion',
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'senGroPre', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'senAlpPre', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'senRotPre', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAnchoPresion', 'senAncPre', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAltoPresion', 'senAltPre', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAnchoPresion', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAltoPresion', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionH', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionS', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadPresionV', 'sensV', 1, -1, 0, 0.01),
 
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionH', 'senPresH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionS', 'senPresS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionV', 'senPresV', 1, -1, 0, 0.01),
+    'sensibilidad velocidad',
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'senGroVel', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'senAlpVel', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'senRotVel', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAnchoVelocidad', 'senAncVel', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAltoVelocidad', 'senAltVel', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAnchoVelocidad', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadAltoVelocidad', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadH', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadS', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadV', 'sensV', 1, -1, 0, 0.01),
 
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadH', 'senVelH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadS', 'senVelS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadV', 'senVelV', 1, -1, 0, 0.01),
+    'sensibilidad inclinacion X',
+
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXGrosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAlpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXRotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAncho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAlto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXH', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXS', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXV', 'sensV', 1, -1, 0, 0.01),
+
+    'sensibilidad inclinacion Y',
+
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYGrosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAlpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYRotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAncho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAlto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYH', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYS', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYV', 'sensV', 1, -1, 0, 0.01),
 
     'Inicio Fin',
 
@@ -471,14 +493,14 @@ const valoresTrazo = [
     new valTraz('configuracionesLapiz', 'altoInicio', 'altIni', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'altoFin', 'altFin', 1, 0, 1, 0.01),
 
-    new valTraz('configuracionesLapiz', 'hInicio', 'hInicio', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'hFin', 'hFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'hInicio', 'hInici', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'hFin', 'hFini', 1, 0, 1, 0.01),
 
-    new valTraz('configuracionesLapiz', 'sInicio', 'anchIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'sInicio', 'sIni', 1, 0, 1, 0.01),
     new valTraz('configuracionesLapiz', 'sFin', 'sFin', 1, 0, 1, 0.01),
 
-    new valTraz('configuracionesLapiz', 'vInicio', 'altIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'vin', 'vin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'vInicio', 'vIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'vFin', 'vFin', 1, 0, 1, 0.01),
 
 
     'ruido',
@@ -525,11 +547,11 @@ function listarValoresTrazo() {
             <div class="${valor.clases}"  >
                 <p>${valor.dimiNom}</p>
                 <input type="range" name=""
-                    oninput="document.getElementById('number${valor.dimiNom}').value = this.value, ${valor.nombVariable} = Number(this.value)"
-                    value="${valor.ini}" id="rango${valor.dimiNom}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                    oninput="document.getElementById('number${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                    value="${valor.ini}" id="rango${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
                 <input type="number" name=""
-                    oninput="document.getElementById('rango${valor.dimiNom}').value = this.value, ${valor.nombVariable} = Number(this.value)"
-                    value="${valor.ini}" id="number${valor.dimiNom}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                    oninput="document.getElementById('rango${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                    value="${valor.ini}" id="number${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
             </div>
         `);
 
@@ -625,7 +647,6 @@ let sensibilidadOpacidadPresion = 0;
 let sensibilidadRotacionPresion = 0;
 let sensibilidadAnchoPresion = 0;
 let sensibilidadAltoPresion = 0;
-
 let sensibilidadPresionH = 0;
 let sensibilidadPresionS = 0;
 let sensibilidadPresionV = 0;
@@ -635,10 +656,27 @@ let sensibilidadOpacidadVelocidad = 0;
 let sensibilidadRotacionVelocidad = 0;
 let sensibilidadAnchoVelocidad = 0;
 let sensibilidadAltoVelocidad = 0;
-
 let sensibilidadVelocidadH = 0;
 let sensibilidadVelocidadS = 0;
 let sensibilidadVelocidadV = 0;
+
+let sensibilidadInclinacionXAlpha = 0;
+let sensibilidadInclinacionXGrosor = 0;
+let sensibilidadInclinacionXRotacion = 0;
+let sensibilidadInclinacionXAncho = 0;
+let sensibilidadInclinacionXAlto = 0;
+let sensibilidadInclinacionXH = 0;
+let sensibilidadInclinacionXS = 0;
+let sensibilidadInclinacionXV = 0;
+
+let sensibilidadInclinacionYAlpha = 0;
+let sensibilidadInclinacionYGrosor = 0;
+let sensibilidadInclinacionYRotacion = 0;
+let sensibilidadInclinacionYAncho = 0;
+let sensibilidadInclinacionYAlto = 0;
+let sensibilidadInclinacionYH = 0;
+let sensibilidadInclinacionYS = 0;
+let sensibilidadInclinacionYV = 0;
 
 let flujo = 1;
 let rotacionInicial = 0;
@@ -764,7 +802,6 @@ function obtenerTrazoActual(cordInicial) {
         sensibilidadRotacionPresion,
         sensibilidadAnchoPresion,
         sensibilidadAltoPresion,
-
         sensibilidadPresionH,
         sensibilidadPresionS,
         sensibilidadPresionV,
@@ -774,10 +811,27 @@ function obtenerTrazoActual(cordInicial) {
         sensibilidadRotacionVelocidad,
         sensibilidadAnchoVelocidad,
         sensibilidadAltoVelocidad,
-
         sensibilidadVelocidadH,
         sensibilidadVelocidadS,
         sensibilidadVelocidadV,
+
+        sensibilidadInclinacionXAlpha,
+        sensibilidadInclinacionXGrosor,
+        sensibilidadInclinacionXRotacion,
+        sensibilidadInclinacionXAncho,
+        sensibilidadInclinacionXAlto,
+        sensibilidadInclinacionXH,
+        sensibilidadInclinacionXS,
+        sensibilidadInclinacionXV,
+
+        sensibilidadInclinacionYAlpha,
+        sensibilidadInclinacionYGrosor,
+        sensibilidadInclinacionYRotacion,
+        sensibilidadInclinacionYAncho,
+        sensibilidadInclinacionYAlto,
+        sensibilidadInclinacionYH,
+        sensibilidadInclinacionYS,
+        sensibilidadInclinacionYV,
 
         semilla: Date.now(),
 
@@ -921,7 +975,8 @@ canvasDom.addEventListener('pointerdown', (e) => {
     clickInicial = true;
     cordenadaInicial = utiles.adaptarCordCanvas(e.clientX, e.clientY, canvasDom)
     cordenadaInicial.presion = (e.pointerType === 'pen') ? e.pressure : 1
-
+    cordenadaInicial.inclinacionX = (e.pointerType === 'pen') ? e.tiltX : 0// inclinacion X
+    cordenadaInicial.inclinacionY = (e.pointerType === 'pen') ? e.tiltY : 0// inclinacion Y
 });
 
 cuerpo.addEventListener('pointermove', (e) => {
@@ -944,8 +999,8 @@ cuerpo.addEventListener('pointermove', (e) => {
                     cordenadaInicial.y,
                     cordenadaInicial.presion,
                     velocidadInicial, // msPX
-                    // inclinacion X
-                    // inclinacion Y
+                    cordenadaInicial.inclinacionX, // inclinacion X
+                    cordenadaInicial.inclinacionY // inclinacion Y
                     // alpha
                     // grosor
                     // rotacion 
@@ -963,8 +1018,8 @@ cuerpo.addEventListener('pointermove', (e) => {
                 cordenadaActual.y,
                 (e.pointerType === 'pen') ? e.pressure : 1, // presion
                 movimientoActual, // msPX
-                // inclinacion X
-                // inclinacion Y
+                (e.pointerType === 'pen') ? e.tiltX : 0,// inclinacion X
+                (e.pointerType === 'pen') ? e.tiltY : 0,// inclinacion Y
                 // alpha
                 // grosor
                 // rotacion 
@@ -996,8 +1051,8 @@ cuerpo.addEventListener('pointerup', (e) => {
                     cordenadaInicial.y,
                     cordenadaInicial.presion,
                     velocidadInicial,
-                    // inclinacion X
-                    // inclinacion Y
+                    cordenadaInicial.inclinacionX, // inclinacion X
+                    cordenadaInicial.inclinacionY // inclinacion Y
                     // alpha
                     // grosor
                     // rotacion 
@@ -1017,8 +1072,8 @@ cuerpo.addEventListener('pointerup', (e) => {
                     cordenadaActual.y,
                     (e.pointerType === 'pen') ? e.pressure : 1, // presion
                     Math.max(Math.min(movimientoActual, cordenada.maxMsPx), cordenada.minMsPx), //msPX
-                    // inclinacion X
-                    // inclinacion Y
+                    (e.pointerType === 'pen') ? e.tiltX : 0,// inclinacion X
+                    (e.pointerType === 'pen') ? e.tiltY : 0,// inclinacion Y
                     // alpha
                     // grosor
                     // rotacion 
