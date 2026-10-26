@@ -359,7 +359,7 @@ function cambiarModoFusion() {
 function mostrarHsv(elemento) {
     document.getElementById('botonRGB').style.backgroundColor = 'white'
     elemento.style.backgroundColor = 'green'
-    modeloColorComparador = 'hsv';
+    trazoActual.modeloColorComparador = 'hsv';
     for (const rgb of document.getElementsByClassName('rgb')) {
         rgb.style.display = 'none'
     }
@@ -371,7 +371,7 @@ function mostrarHsv(elemento) {
 function mostrarRgb(elemento) {
     document.getElementById('botonHSV').style.backgroundColor = 'white'
     elemento.style.backgroundColor = 'green'
-    modeloColorComparador = 'rgb';
+    trazoActual.modeloColorComparador = 'rgb';
     for (const elem of document.getElementsByClassName('rgb')) {
 
         elem.style.display = 'flex'
@@ -394,166 +394,205 @@ class valTraz {
     }
 }
 
+const trazoActual = {
+    suavizado: {},
+    ruido: {},
+    toleranciaCanal: {
+        rgb: {},
+        hsv: {},
+    },
+    reflejarCanal: {
+        rgb: {},
+        hsv: {},
+    },
+    sensibilidad: {
+        presion: {},
+        msPx: {},
+        inclinacionX: {},
+        inclinacionY: {},
+        inclinacionGeneral: {},
+    }
+}
+
 const valoresTrazo = [
     //           dueño , nombre , diminutivo nombre , maximo , minimo , inicial , salto , clases
-    new valTraz('configuracionesLapiz', 'grosor', 'grosor', 300, 1, 10, 1),
-    new valTraz('configuracionesLapiz', 'opacidadPrincipal', 'opprin', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'opacidadSecundaria', 'opsecu', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'separacion', 'sep', 5, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'flujo', 'flujo', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'rotacionInicial', 'rotIni', 360, 0, 0, 1),
-    new valTraz('configuracionesLapiz', 'anchoInicial', 'ancIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'altoInicial', 'altoIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
-
+    new valTraz('configuracionesLapiz', 'trazoActual.grosor', 'grosor', 300, 1, 10, 1),
+    new valTraz('configuracionesLapiz', 'trazoActual.opacidadPrincipal', 'opprin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.opacidadSecundaria', 'opsecu', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.separacion', 'sep', 5, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.flujo', 'flujo', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.anchoInicial', 'ancIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.altoInicial', 'altoIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.rotacionInicial', 'rotIni', 360, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'trazoActual.seguirRotacionTrayecto', 'segRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.rotacionSegunInclinacion', 'rotSegInc', 1, 0, 0, 0.01),
     'suavizados',
+    //#region suavizados
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.x', 'suavHor', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.y', 'suavVer', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.presion', 'suavPres', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.msPx', 'suavVel', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.inclinacionX', 'suavIncHor', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.inclinacionY', 'suavIncVer', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.alpha', 'suavAlp', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.grosor', 'suavGros', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.rotacion', 'suavRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.ancho', 'suavAnch', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.altura', 'suavAlt', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.h', 'suavH', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.s', 'suavS', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.suavizado.v', 'suavV', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'suavizadoHorizontal', 'suavHor', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoVertical', 'suavVer', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoPresion', 'suavPres', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoVelocidad', 'suavVel', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoInclinacionHorizontal', 'suavIncHor', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoInclinacionVertical', 'suavIncVer', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoAlpha', 'suavAlp', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoGrosor', 'suavGros', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoRotacion', 'suavRot', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoAncho', 'suavAnch', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoAlto', 'suavAlt', 1, 0, 0, 0.01),
-
-    new valTraz('configuracionesLapiz', 'suavizadoH', 'suavH', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoS', 'suavS', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'suavizadoV', 'suavV', 1, 0, 0, 0.01),
-
-
-
-
-    new valTraz('configuracionesLapiz', 'puntosSuavizado', 'puntSuav', 100, 2, 2, 1),
-
+    //#region sensibilidad presion
     'sensibilidad presion',
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.grosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.alpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.rotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.ancho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.alto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.h', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.s', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.presion.v', 'sensV', 1, -1, 0, 0.01),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorPresion', 'sensGros', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadPresion', 'sensAlph', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionPresion', 'sensRota', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAnchoPresion', 'sensAnch', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAltoPresion', 'sensAlto', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionH', 'sensH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionS', 'sensS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadPresionV', 'sensV', 1, -1, 0, 0.01),
-
+    //#region sensibilidad msPx
     'sensibilidad velocidad',
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.grosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.alpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.rotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.ancho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.alto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.h', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.s', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.msPx.v', 'sensV', 1, -1, 0, 0.01),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'sensibilidadGrosorVelocidad', 'sensGros', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadOpacidadVelocidad', 'sensAlph', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadRotacionVelocidad', 'sensRota', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAnchoVelocidad', 'sensAnch', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadAltoVelocidad', 'sensAlto', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadH', 'sensH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadS', 'sensS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadVelocidadV', 'sensV', 1, -1, 0, 0.01),
-
+    //#region sensibilidad inclinacionX
     'sensibilidad inclinacion X',
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.grosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.alpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.rotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.ancho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.alto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.h', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.s', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionX.v', 'sensV', 1, -1, 0, 0.01),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXGrosor', 'sensGros', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAlpha', 'sensAlph', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXRotacion', 'sensRota', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAncho', 'sensAnch', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXAlto', 'sensAlto', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXH', 'sensH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXS', 'sensS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionXV', 'sensV', 1, -1, 0, 0.01),
-
+    //#region sensibilidad inclinacionY
     'sensibilidad inclinacion Y',
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.grosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.alpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.rotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.ancho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.alto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.h', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.s', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionY.v', 'sensV', 1, -1, 0, 0.01),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYGrosor', 'sensGros', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAlpha', 'sensAlph', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYRotacion', 'sensRota', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAncho', 'sensAnch', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYAlto', 'sensAlto', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYH', 'sensH', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYS', 'sensS', 1, -1, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'sensibilidadInclinacionYV', 'sensV', 1, -1, 0, 0.01),
+    //#region sensibilidad inclinacionGeneral
+    'sensibilidad inclinacion general',
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.grosor', 'sensGros', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.alpha', 'sensAlph', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.rotacion', 'sensRota', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.ancho', 'sensAnch', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.alto', 'sensAlto', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.h', 'sensH', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.s', 'sensS', 1, -1, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sensibilidad.inclinacionGeneral.v', 'sensV', 1, -1, 0, 0.01),
+    //#endregion  
 
+    //#region inicio fin
     'Inicio Fin',
+    new valTraz('configuracionesLapiz', 'trazoActual.cantPuntosInicio', 'durIni', 200, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'trazoActual.cantPuntosFin', 'durFin', 200, 0, 0, 1),
+    new valTraz('configuracionesLapiz', 'trazoActual.grosorInicio', 'grosIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.grosorFin', 'grosFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.alphaInicio', 'alpIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.alphaFin', 'alpFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.rotacionInicio', 'rotInic', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.rotacionFin', 'rotFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.anchoInicio', 'anchIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.anchoFin', 'anchFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.altoInicio', 'altIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.altoFin', 'altFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.hInicio', 'hInici', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.hFin', 'hFini', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sInicio', 'sIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.sFin', 'sFin', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.vInicio', 'vIni', 1, 0, 1, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.vFin', 'vFin', 1, 0, 1, 0.01),
+    //#endregion  
 
-    new valTraz('configuracionesLapiz', 'cantPuntosInicio', 'durIni', 200, 0, 0, 1),
-    new valTraz('configuracionesLapiz', 'cantPuntosFin', 'durFin', 200, 0, 0, 1),
-
-    new valTraz('configuracionesLapiz', 'grosorInicio', 'grosIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'grosorFin', 'grosFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'alphaInicio', 'alpIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'alphaFin', 'alpFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'rotacionInicio', 'rotInic', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'rotacionFin', 'rotFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'anchoInicio', 'anchIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'anchoFin', 'anchFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'altoInicio', 'altIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'altoFin', 'altFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'hInicio', 'hInici', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'hFin', 'hFini', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'sInicio', 'sIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'sFin', 'sFin', 1, 0, 1, 0.01),
-
-    new valTraz('configuracionesLapiz', 'vInicio', 'vIni', 1, 0, 1, 0.01),
-    new valTraz('configuracionesLapiz', 'vFin', 'vFin', 1, 0, 1, 0.01),
-
-
+    //#region ruido
     'ruido',
-
-    new valTraz('configuracionesLapiz', 'ruidoVertical', 'ruiVer', 10, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoHorizontal', 'ruiHor', 10, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoAlpha', 'ruiAlp', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoGrosor', 'ruiGro', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoRotacion', 'ruiRot', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoAncho', 'ruiAnc', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoAlto', 'ruiAlt', 1, 0, 0, 0.01),
-
-    new valTraz('configuracionesLapiz', 'ruidoH', 'ruiH', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoS', 'ruiS', 1, 0, 0, 0.01),
-    new valTraz('configuracionesLapiz', 'ruidoV', 'ruiV', 1, 0, 0, 0.01),
-
-
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.y', 'ruiVer', 10, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.x', 'ruiHor', 10, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.alpha', 'ruiAlp', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.grosor', 'ruiGro', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.rotacion', 'ruiRot', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.ancho', 'ruiAnc', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.alto', 'ruiAlt', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.h', 'ruiH', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.s', 'ruiS', 1, 0, 0, 0.01),
+    new valTraz('configuracionesLapiz', 'trazoActual.ruido.v', 'ruiV', 1, 0, 0, 0.01),
+    //#endregion 
     //  de aca pa abajo son cosas del balde 
+    //#region inicio
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.rgb.r', 'TolR', 1, 0, 0, 0.01, 'tolerancia rojo rgb'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.rgb.r', 'RefR', 1, 0, 0, 0.01, 'tolerancia compensacion rojo rgb'),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.rgb.g', 'TolG', 1, 0, 0, 0.01, 'tolerancia verde rgb'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.rgb.g', 'RefG', 1, 0, 0, 0.01, 'tolerancia compensacion verde rgb'),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.rgb.b', 'TolB', 1, 0, 0, 0.01, 'tolerancia azul rgb'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.rgb.b', 'RefB', 1, 0, 0, 0.01, 'tolerancia compensacion azul rgb'),
 
-    new valTraz('confBald', 'toleranciaCanal.rgb.r', 'TolR', 1, 0, 0, 0.01, 'tolerancia rojo rgb'),
-    new valTraz('confBald', 'reflejarCanal.rgb.r', 'RefR', 1, 0, 0, 0.01, 'tolerancia compensacion rojo rgb'),
-    new valTraz('confBald', 'toleranciaCanal.rgb.g', 'TolG', 1, 0, 0, 0.01, 'tolerancia verde rgb'),
-    new valTraz('confBald', 'reflejarCanal.rgb.g', 'RefG', 1, 0, 0, 0.01, 'tolerancia compensacion verde rgb'),
-    new valTraz('confBald', 'toleranciaCanal.rgb.b', 'TolB', 1, 0, 0, 0.01, 'tolerancia azul rgb'),
-    new valTraz('confBald', 'reflejarCanal.rgb.b', 'RefB', 1, 0, 0, 0.01, 'tolerancia compensacion azul rgb'),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.hsv.h', 'TolH', 360, 0, 0, 0.01, 'tolerancia degradado h hsv" style="display: none;'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.hsv.h', 'RefH', 1, 0, 0, 0.01, 'tolerancia compensacion degradado h hsv" style="display: none;'),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.hsv.v', 'TolV', 1, 0, 0, 0.01, 'tolerancia degradado v hsv" style="display: none;'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.hsv.v', 'RefV', 1, 0, 0, 0.01, 'tolerancia compensacion degradado v hsv" style="display: none;'),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.hsv.s', 'TolS', 1, 0, 0, 0.01, 'tolerancia degradado s hsv" style="display: none;'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.hsv.s', 'RefS', 1, 0, 0, 0.01, 'tolerancia compensacion degradado s hsv" style="display: none;'),
 
-    new valTraz('confBald', 'toleranciaCanal.hsv.h', 'TolH', 1, 0, 0, 0.01, 'tolerancia degradado h hsv" style="display: none;'),
-    new valTraz('confBald', 'reflejarCanal.hsv.h', 'RefH', 1, 0, 0, 0.01, 'tolerancia compensacion degradado h hsv" style="display: none;'),
-    new valTraz('confBald', 'toleranciaCanal.hsv.v', 'TolV', 1, 0, 0, 0.01, 'tolerancia degradado v hsv" style="display: none;'),
-    new valTraz('confBald', 'reflejarCanal.hsv.v', 'RefV', 1, 0, 0, 0.01, 'tolerancia compensacion degradado v hsv" style="display: none;'),
-    new valTraz('confBald', 'toleranciaCanal.hsv.s', 'TolS', 1, 0, 0, 0.01, 'tolerancia degradado s hsv" style="display: none;'),
-    new valTraz('confBald', 'reflejarCanal.hsv.s', 'RefS', 1, 0, 0, 0.01, 'tolerancia compensacion degradado s hsv" style="display: none;'),
-
-    new valTraz('confBald', 'toleranciaCanal.alpha ', 'TolA', 1, 0, 0, 0.01, 'tolerancia gris'),
-    new valTraz('confBald', 'reflejarCanal.alpha ', 'RefA', 1, 0, 0, 0.01, 'tolerancia gris compensacion '),
+    new valTraz('confBald', 'trazoActual.toleranciaCanal.alpha ', 'TolA', 1, 0, 0, 0.01, 'tolerancia gris'),
+    new valTraz('confBald', 'trazoActual.reflejarCanal.alpha ', 'RefA', 1, 0, 0, 0.01, 'tolerancia gris compensacion '),
+    //#endregion
 ]
 
 
 function listarValoresTrazo() {
     for (const valor of valoresTrazo) {
         if (valor.constructor.name === 'valTraz') {
+
             const ubi = document.getElementById(valor.tipoDue)
-            ubi.insertAdjacentHTML('beforeend', `
-            <div class="${valor.clases}"  >
-                <p>${valor.dimiNom}</p>
-                <input type="range" name=""
-                    oninput="document.getElementById('number${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
-                    value="${valor.ini}" id="rango${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
-                <input type="number" name=""
-                    oninput="document.getElementById('rango${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
-                    value="${valor.ini}" id="number${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
-            </div>
-        `);
+            if (valor.nombVariable !== 'trazoActual.rotacionInicial') {
+                ubi.insertAdjacentHTML('beforeend', `
+                    <div class="${valor.clases}"  >
+                        <p>${valor.dimiNom}</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('number${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                            value="${valor.ini}" id="rango${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rango${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value)"
+                            value="${valor.ini}" id="number${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                    </div>
+                `);
+            } else {
+                ubi.insertAdjacentHTML('beforeend', `
+                    <div class="${valor.clases}"  >
+                        <p>${valor.dimiNom}</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('number${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value) / 360"
+                            value="${valor.ini}" id="rango${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rango${valor.nombVariable}').value = this.value, ${valor.nombVariable} = Number(this.value) / 360"
+                            value="${valor.ini}" id="number${valor.nombVariable}" min="${valor.min}" max="${valor.max}" step="${valor.salto}">
+                    </div>
+                `);
+            }
+
 
         } else {
             const ubi = document.getElementById('configuracionesLapiz')
@@ -580,165 +619,27 @@ function listarHerramientas() {
 }
 listarHerramientas();
 
-let colorPrincipal = { r: 0, g: 0, b: 0, }
-let colorSecundario = { r: 0, g: 0, b: 0, }
+
 let opacidadPrincipal = 1;
 let opacidadSecundaria = 1;
 let alphaCompararBalde = 1;
-let grosor = 10;
-let nombreHerramienta = 'lineaSimple';
-let nombreSello = 'selloCuadrado'
-let modoDibujo = 'normal';
-let separacion = 1
-let toleranciaCanal = {
-    alpha: 0,
-    rgb: {
-        r: 0,
-        g: 0,
-        b: 0
-    },
-    hsv: {
-        h: 0,
-        s: 0,
-        v: 0
-    }
-}
-let reflejarCanal = {
-    alpha: 0,
-    rgb: {
-        r: 0,
-        g: 0,
-        b: 0
-    },
-    hsv: {
-        h: 0,
-        s: 0,
-        v: 0
-    }
-}
-let setearBalde = true;
-let reflejarCanales = false;
-let modeloColorComparador = 'rgb'
-let compararColorDistinto = false;
-let respetarSignoX = true;
-let respetarSignoY = true;
-let redondearFigura = false;
 
-let suavizadoHorizontal = 0;
-let suavizadoVertical = 0;
-let suavizadoPresion = 0;
-let suavizadoVelocidad = 0;
-let suavizadoInclinacionHorizontal = 0;
-let suavizadoInclinacionVertical = 0;
-let suavizadoAlpha = 0;
-let suavizadoGrosor = 0;
-let suavizadoRotacion = 0;
-let suavizadoAncho = 0;
-let suavizadoAlto = 0;
-
-let suavizadoH = 0;
-let suavizadoS = 0;
-let suavizadoV = 0;
-
-let puntosSuavizado = 2;
-
-let sensibilidadGrosorPresion = 0;
-let sensibilidadOpacidadPresion = 0;
-let sensibilidadRotacionPresion = 0;
-let sensibilidadAnchoPresion = 0;
-let sensibilidadAltoPresion = 0;
-let sensibilidadPresionH = 0;
-let sensibilidadPresionS = 0;
-let sensibilidadPresionV = 0;
-
-let sensibilidadGrosorVelocidad = 0;
-let sensibilidadOpacidadVelocidad = 0;
-let sensibilidadRotacionVelocidad = 0;
-let sensibilidadAnchoVelocidad = 0;
-let sensibilidadAltoVelocidad = 0;
-let sensibilidadVelocidadH = 0;
-let sensibilidadVelocidadS = 0;
-let sensibilidadVelocidadV = 0;
-
-let sensibilidadInclinacionXAlpha = 0;
-let sensibilidadInclinacionXGrosor = 0;
-let sensibilidadInclinacionXRotacion = 0;
-let sensibilidadInclinacionXAncho = 0;
-let sensibilidadInclinacionXAlto = 0;
-let sensibilidadInclinacionXH = 0;
-let sensibilidadInclinacionXS = 0;
-let sensibilidadInclinacionXV = 0;
-
-let sensibilidadInclinacionYAlpha = 0;
-let sensibilidadInclinacionYGrosor = 0;
-let sensibilidadInclinacionYRotacion = 0;
-let sensibilidadInclinacionYAncho = 0;
-let sensibilidadInclinacionYAlto = 0;
-let sensibilidadInclinacionYH = 0;
-let sensibilidadInclinacionYS = 0;
-let sensibilidadInclinacionYV = 0;
-
-let flujo = 1;
-let rotacionInicial = 0;
-let seguirRotacionTrayecto = 0;
-
-let cantPuntosInicio = 0;
-let cantPuntosFin = 0;
-
-let grosorInicio = 1;
-let grosorFin = 1;
-
-let alphaInicio = 1;
-let alphaFin = 1;
-
-let rotacionInicio = 1;
-let rotacionFin = 1;
-
-let anchoInicio = 1;
-let anchoFin = 1;
-
-let altoInicio = 1;
-let altoFin = 1;
-
-let hInicio = 1
-let hFin = 1
-
-let sInicio = 1
-let sFin = 1
-
-let vInicio = 1
-let vFin = 1
-
-let ruidoVertical = 0;
-let ruidoHorizontal = 0;
-let ruidoAlpha = 0;
-let ruidoGrosor = 0;
-let ruidoRotacion = 0;
-let ruidoAncho = 0;
-let ruidoAlto = 0;
-
-let ruidoH = 0;
-let ruidoS = 0;
-let ruidoV = 0;
-
-let anchoInicial = 1;
-let altoInicial = 1;
 function obtenerColores() {
     const rgba = [{
         r: hexToRgb(document.getElementById('colorPrincipal').value).r,
         g: hexToRgb(document.getElementById('colorPrincipal').value).g,
         b: hexToRgb(document.getElementById('colorPrincipal').value).b,
-        a: opacidadPrincipal
+        a: opacidadPrincipal !== undefined ? opacidadPrincipal : 1
     }, {
         r: hexToRgb(document.getElementById('colorSecundario').value).r,
         g: hexToRgb(document.getElementById('colorSecundario').value).g,
         b: hexToRgb(document.getElementById('colorSecundario').value).b,
-        a: opacidadSecundaria
+        a: opacidadSecundaria !== undefined ? opacidadSecundaria : 1
     }];
     return rgba;
 }
 function obtenerColorComparar(cordInicial) {
-    if (compararColorDistinto) {
+    if (trazoActual.compararColorDistinto) {
         return {
             r: hexToRgb(document.getElementById('colorCompararBalde').value).r,
             g: hexToRgb(document.getElementById('colorCompararBalde').value).g,
@@ -756,133 +657,16 @@ function obtenerColorComparar(cordInicial) {
     }
 }
 function obtenerTrazoActual(cordInicial) {
-    const trazoGuardar = new trazo({
-        trayectos: [],
-        puntoInicial: cordInicial,
-        rgba: obtenerColores(),
-        grosor: Number(grosor),
-        flujo,
-        herramienta: nombreHerramienta,
-        sello: nombreSello,
-        modoDibujo,
-        separacion,
-
-        toleranciaCanal,
-        reflejarCanal,
-
-        setearBalde,
-        modeloColorComparador,
-        reflejarCanales,
-        colorCompararBalde: obtenerColorComparar(cordInicial),
-        respetarSignoX,
-        respetarSignoY,
-
-        suavizadoHorizontal,
-        suavizadoVertical,
-        suavizadoPresion,
-        suavizadoVelocidad,
-        suavizadoInclinacionHorizontal,
-        suavizadoInclinacionVertical,
-        suavizadoAlpha,
-        suavizadoGrosor,
-        suavizadoRotacion,
-        suavizadoAncho,
-        suavizadoAlto,
-
-        suavizadoH,
-        suavizadoS,
-        suavizadoV,
-
-        puntosSuavizado,
-
-        redondearFigura,
-
-        sensibilidadGrosorPresion,
-        sensibilidadOpacidadPresion,
-        sensibilidadRotacionPresion,
-        sensibilidadAnchoPresion,
-        sensibilidadAltoPresion,
-        sensibilidadPresionH,
-        sensibilidadPresionS,
-        sensibilidadPresionV,
-
-        sensibilidadGrosorVelocidad,
-        sensibilidadOpacidadVelocidad,
-        sensibilidadRotacionVelocidad,
-        sensibilidadAnchoVelocidad,
-        sensibilidadAltoVelocidad,
-        sensibilidadVelocidadH,
-        sensibilidadVelocidadS,
-        sensibilidadVelocidadV,
-
-        sensibilidadInclinacionXAlpha,
-        sensibilidadInclinacionXGrosor,
-        sensibilidadInclinacionXRotacion,
-        sensibilidadInclinacionXAncho,
-        sensibilidadInclinacionXAlto,
-        sensibilidadInclinacionXH,
-        sensibilidadInclinacionXS,
-        sensibilidadInclinacionXV,
-
-        sensibilidadInclinacionYAlpha,
-        sensibilidadInclinacionYGrosor,
-        sensibilidadInclinacionYRotacion,
-        sensibilidadInclinacionYAncho,
-        sensibilidadInclinacionYAlto,
-        sensibilidadInclinacionYH,
-        sensibilidadInclinacionYS,
-        sensibilidadInclinacionYV,
-
-        semilla: Date.now(),
-
-        rotacionInicial: rotacionInicial * (Math.PI / 180),
-        seguirRotacionTrayecto,
-
-        cantPuntosInicio,
-        cantPuntosFin,
-
-        grosorInicio,
-        grosorFin,
-
-        alphaInicio,
-        alphaFin,
-
-        rotacionInicio,
-        rotacionFin,
-
-        anchoInicio,
-        anchoFin,
-
-        altoInicio,
-        altoFin,
-
-        hInicio,
-        hFin,
-
-        sInicio,
-        sFin,
-
-        vInicio,
-        vFin,
-
-        ruidoVertical,
-        ruidoHorizontal,
-        ruidoAlpha,
-        ruidoGrosor,
-        ruidoRotacion,
-        ruidoAncho,
-        ruidoAlto,
-        ruidoH,
-        ruidoS,
-        ruidoV,
-
-        anchoInicial,
-        altoInicial,
-
-    })
+    trazoActual.rgba = obtenerColores()
+    trazoActual.puntoInicial = cordInicial
+    trazoActual.semilla = Date.now()
+    trazoActual.colorCompararBalde = obtenerColorComparar(cordInicial)
+    const trazoGuardar = new trazo(
+        trazoActual
+    )
     return trazoGuardar;
 }
-function llenarElCanvasHSVcompleto(idCapa) {
+function llenarElCanvasHSVcompleto() {
     const capa = mesaTrabajo.capas.contenido[0].lienzo;
     const canvas = capa.canvas;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
@@ -969,6 +753,7 @@ let tiempoUltimoMovimiento = 111;
 let ultMov = { x: 0, y: 0 }
 let clickInicial = false;
 let cordenadaInicial = undefined;
+
 canvasDom.addEventListener('pointerdown', (e) => {
     if (clickeando) return
     clickeando = true;
@@ -1020,10 +805,6 @@ cuerpo.addEventListener('pointermove', (e) => {
                 movimientoActual, // msPX
                 (e.pointerType === 'pen') ? e.tiltX : 0,// inclinacion X
                 (e.pointerType === 'pen') ? e.tiltY : 0,// inclinacion Y
-                // alpha
-                // grosor
-                // rotacion 
-                // ancho
             ),
             lienzoReal: canvas
         })
@@ -1087,24 +868,3 @@ cuerpo.addEventListener('pointerup', (e) => {
     clickeando = false;
 
 });
-
-hInicio
-sInicio
-vInicio
-
-hFin
-sFin
-vFin
-
-/*
-        this.x = x; // cualquier numero 
-        this.y = y; // cualquier numero 
-        this.presion = presion; // 0 - 1
-        this.msPx = msPx; // 0.004 - 0.5
-        this.inclinacionX = inclinacionX; // -90 - 90
-        this.inclinacionY = inclinacionY; // -90 - 90
-        this.alpha = alpha; // 0 - 1
-        this.grosor = grosor; // 0 - 1
-        this.rotacion = rotacion; // 0  - 2 PI
-        this.ancho = ancho; // 0 - 1
-*/

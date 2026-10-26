@@ -459,8 +459,8 @@ class pincelSellosSimple extends pincel {
                         ? Math.min(finTrayecto + (finTrayecto - inicioTrayecto + 1) + trazo.puntosSuavizado, trazo.trayectos[i].length)
                         : trazo.trayectos[i].length
 
-                if (inicioTrayecto === undefined) inicioTrayecto = 0
-                if (finTrayecto === undefined) finTrayecto = trazo.trayectos[i].length - 1
+                const inicioTrayectoActual = inicioTrayecto !== undefined ? inicioTrayecto : 0
+                const finTrayectoActual = finTrayecto !== undefined ? finTrayecto : trazo.trayectos[i].length - 1
 
                 const puntosDibujar = trazo.calcularPuntosInicioFin({
                     puntos: trazo.trayectos[i],
@@ -468,9 +468,9 @@ class pincelSellosSimple extends pincel {
                     finCalcular: finCalcular,
                 })
                 trazo.agregarValoresIniciales({ cordenadas: puntosDibujar, modificar: true })
-                const inicioSuavizado = Math.min(0, inicioTrayecto - trazo.puntosSuavizado) + trazo.puntosSuavizado
+                const inicioSuavizado = Math.min(0, inicioTrayectoActual - trazo.puntosSuavizado) + trazo.puntosSuavizado
 
-                let finSuavizado = inicioSuavizado + (finTrayecto - inicioTrayecto)
+                let finSuavizado = inicioSuavizado + (finTrayectoActual - inicioTrayectoActual)
                 if (renderizadoGoteo)
                     finSuavizado++;
 
@@ -486,7 +486,7 @@ class pincelSellosSimple extends pincel {
                 trazo.procesadoSensibilidades({ cordenadas: trayectoSuavizado, modificar: true })
 
                 let puntoFinalTrayectoria = undefined;
-                if (renderizadoGoteo && finTrayecto < trazo.trayectos[i].length - 1)
+                if (renderizadoGoteo && finTrayectoActual < trazo.trayectos[i].length - 1)
                     puntoFinalTrayectoria = trayectoSuavizado.pop()
 
                 if (trazo.separar) {
@@ -585,22 +585,30 @@ class figuraSellos extends lineaSimple {
         clonTrazo.modoDibujo = 'normal'
         clonTrazo.rebotarSuavizado = true;
         clonTrazo.separar = false;
-        clonTrazo.sensibilidadGrosorPresion = 0;
-        clonTrazo.sensibilidadOpacidadPresion = 0;
-        clonTrazo.sensibilidadOpacidadVelocidad = 0;
-        clonTrazo.sensibilidadGrosorVelocidad = 0;
+
+        clonTrazo.cantValSensPresion = 0;
+        clonTrazo.cantValSensVelocidad = 0;
+        clonTrazo.cantValSensInclinacionX = 0;
+        clonTrazo.cantValSensInclinacionY = 0;
+        clonTrazo.cantValSensInclinacionGeneral = 0;
 
         if (!trazo.redondearFigura) {
-            clonTrazo.suavizado = 0
-            clonTrazo.suavizadoHorizontal = 0;
-            clonTrazo.suavizadoVertical = 0;
-            clonTrazo.suavizadoPresion = 0;
-            clonTrazo.suavizadoVelocidad = 0;
-            clonTrazo.suavizadoInclinacionHorizontal = 0
-            clonTrazo.suavizadoInclinacionVertical = 0
-            clonTrazo.suavizadoAlpha = 0
-            clonTrazo.suavizadoGrosor = 0
-        };
+            clonTrazo.suavizado.x = 0;
+            clonTrazo.suavizado.y = 0;
+            clonTrazo.suavizado.presion = 0;
+            clonTrazo.suavizado.msPx = 0;
+            clonTrazo.suavizado.inclinacionX = 0;
+            clonTrazo.suavizado.inclinacionY = 0;
+            clonTrazo.suavizado.alpha = 0;
+            clonTrazo.suavizado.grosor = 0;
+            clonTrazo.suavizado.rotacion = 0;
+            clonTrazo.suavizado.ancho = 0;
+            clonTrazo.suavizado.alto = 0;
+            clonTrazo.suavizado.h = 0;
+            clonTrazo.suavizado.s = 0;
+            clonTrazo.suavizado.v = 0;
+        }
+
         const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
         pintor.dibujar({ lienzoDibujar: lienzoIntermediario.lienzoComunSecundario, trazo: clonTrazo })
