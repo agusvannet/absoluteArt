@@ -1170,9 +1170,10 @@ class trazo {
 
         let longitudTotalInicio = 0
         if (inicioCalcular <= puntosInicio) {
-            for (let i = 1; i <= puntosInicio - 1; i++) {
+            for (let i = 1; i <= puntosInicio; i++) {
                 const punto0 = puntos[i - 1]
                 const punto1 = puntos[i]
+                if (!punto0 || !punto1) continue
                 longitudTotalInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
             }
         }
@@ -1224,15 +1225,14 @@ class trazo {
                     longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
                     const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
 
-                    alpha = this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio) //alpha
-                    grosor = this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio)//grosor
-                    rotacion = this.rotacionInicio + valorAlcanzado * (1 - this.rotacionInicio)//rotacion
-                    ancho = this.anchoInicio + valorAlcanzado * (1 - this.anchoInicio)//rotacion
-                    alto = this.altoInicio + valorAlcanzado * (1 - this.altoInicio)//rotacion
-                    h = this.hInicio + valorAlcanzado * (1 - this.hInicio)//rotacion
-                    s = this.sInicio + valorAlcanzado * (1 - this.sInicio)//rotacion
-                    v = this.vInicio + valorAlcanzado * (1 - this.vInicio)//rotacion
-
+                    alpha = this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio)
+                    grosor = this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio)
+                    rotacion = (this.rotacionInicio * (1 - valorAlcanzado)) % 1
+                    ancho = this.anchoInicio + valorAlcanzado * (1 - this.anchoInicio)
+                    alto = this.altoInicio + valorAlcanzado * (1 - this.altoInicio)
+                    h = (this.hInicio * (1 - valorAlcanzado)) % 1
+                    s = this.sInicio + valorAlcanzado * (1 - this.sInicio)
+                    v = this.vInicio + valorAlcanzado * (1 - this.vInicio)
                 }
             } else if (i >= inicioPuntosFin) {
                 if (i === puntos.length - 1) {
@@ -1250,17 +1250,16 @@ class trazo {
                     longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
                     const valorAlcanzado = (1 - longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
 
-                    alpha = this.alphaFin + valorAlcanzado * (1 - this.alphaFin) //alpha
-                    grosor = this.grosorFin + valorAlcanzado * (1 - this.grosorFin)//grosor
-                    rotacion = this.rotacionFin + valorAlcanzado * (1 - this.rotacionFin)//rotacion
-                    ancho = this.anchoFin + valorAlcanzado * (1 - this.anchoFin)//rotacion
-                    alto = this.altoFin + valorAlcanzado * (1 - this.altoFin)//rotacion
-                    h = this.hFin + valorAlcanzado * (1 - this.hFin)//rotacion
-                    s = this.sFin + valorAlcanzado * (1 - this.sFin)//rotacion
-                    v = this.vFin + valorAlcanzado * (1 - this.vFin)//rotacion
+                    alpha = this.alphaFin + valorAlcanzado * (1 - this.alphaFin)
+                    grosor = this.grosorFin + valorAlcanzado * (1 - this.grosorFin)
+                    rotacion = (this.rotacionFin * (1 - valorAlcanzado)) % 1
+                    ancho = this.anchoFin + valorAlcanzado * (1 - this.anchoFin)
+                    alto = this.altoFin + valorAlcanzado * (1 - this.altoFin)
+                    h = (this.hFin * (1 - valorAlcanzado)) % 1
+                    s = this.sFin + valorAlcanzado * (1 - this.sFin)
+                    v = this.vFin + valorAlcanzado * (1 - this.vFin)
                 }
             }
-
             if (inicioCalcular <= i && i < finCalcular) {
                 puntosProcesados.push(
                     puntos[i].clonar(
@@ -1270,11 +1269,11 @@ class trazo {
                         undefined,
                         undefined,
                         undefined,
-                        alpha, //alpha
-                        grosor,//grosor
-                        rotacion,//rotacion
-                        ancho, // ancho
-                        alto, // alto
+                        alpha,
+                        grosor,
+                        rotacion,
+                        ancho,
+                        alto,
                         h,
                         s,
                         v
@@ -1285,7 +1284,6 @@ class trazo {
 
         return puntosProcesados
     }
-
     calcularAleatorizacon({ cordenadas, modificar = true, formula = (n, sem) => { return Math.sin(n + sem) } }) {
         if (this.ruido.y === 0 &&
             this.ruido.x === 0 &&
@@ -1377,7 +1375,6 @@ class trazo {
         if (!modificar) return puntos
 
     }
-
     procesadoSensibilidades({ cordenadas, modificar = true }) {
         if (
             this.cantValSensPresion === 0 &&
@@ -1515,7 +1512,6 @@ class trazo {
         }
         if (!modificar) return puntos
     }
-
     agregarValoresIniciales({ cordenadas, modificar = true }) {
         const puntos = modificar ? cordenadas : []
         const hsvInicial = utiles.colorRgbHvs(this.rgba[0])
@@ -1560,7 +1556,6 @@ class trazo {
         }
         if (!modificar) return puntos
     }
-
     hsvVariable() {
         return (
             this.ruidoH > 0 || this.ruidoS > 0 || this.ruidoV > 0 ||
@@ -1581,8 +1576,8 @@ const mesaTrabajo = {
         frecuenciaCapturas: 10,
         trayectoMuyLargo: 1000,
         limiteCapturasHistorial: 5,
-        largoLienzo: 1280,
-        altoLienzo: 720
+        largoLienzo: 1920,
+        altoLienzo: 1080
     },
     conteoCapas: 0,
     conteoGrupoCapas: 0,
@@ -1932,9 +1927,9 @@ const pintor = {
         }
 
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacion, alto: lienzo.alto, largo: lienzo.largo })
-        lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacionSecundario, alto: lienzo.alto, largo: lienzo.largo })
 
         if (herrDibujar.perteneceCategoria(this.obtenerCategoria("pinceles"))) {
+            lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoPreVisualizacionSecundario, alto: lienzo.alto, largo: lienzo.largo })
             const puntosMantener = herrDibujar.obtenerPuntosMoviles(trazoReal)
 
             const alphaOriginal = trazoReal.rgba[0].a

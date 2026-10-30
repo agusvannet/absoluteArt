@@ -381,25 +381,43 @@ class poligonoSimple extends figura {
 
     }
     transformarTrazoEnPincel(trazo) {
-        const trazoTransformado = trazo.clonar()
-        for (let i = 1; i < trazoTransformado.trayectos.length; i++) {
-            if (trazoTransformado.trayectos[i].length > 1) trazoTransformado.trayectos[i].splice(0, 1)
+        const clonTrazo = trazo.clonar()
+        for (let i = 1; i < clonTrazo.trayectos.length; i++) {
+            if (clonTrazo.trayectos[i].length > 1) clonTrazo.trayectos[i].splice(0, 1)
         }
-        if (!this.trazoEnProceso(trazo)) trazoTransformado.trayectos[trazoTransformado.trayectos.length - 1][0] = trazoTransformado.trayectos[0][0]
+        if (!this.trazoEnProceso(trazo)) clonTrazo.trayectos[clonTrazo.trayectos.length - 1][0] = clonTrazo.trayectos[0][0]
 
-        trazoTransformado.trayectos = [trazoTransformado.obtenerTrayectoPlano()]
-        trazoTransformado.herramienta = 'pincelSellosSimple'
-        trazoTransformado.modoDibujo = 'normal'
-        trazoTransformado.rebotarSuavizado = false;
-        trazoTransformado.sensibilidadGrosorPresion = 0;
-        trazoTransformado.sensibilidadOpacidadPresion = 0;
-        trazoTransformado.sensibilidadOpacidadVelocidad = 0;
-        trazoTransformado.sensibilidadGrosorVelocidad = 0;
-        if (!trazo.redondearFigura) trazoTransformado.suavizado = 0;
-        for (const rgba of trazoTransformado.rgba) {
+        clonTrazo.trayectos = [clonTrazo.obtenerTrayectoPlano()]
+        clonTrazo.herramienta = 'pincelSellosSimple'
+        clonTrazo.modoDibujo = 'normal'
+        clonTrazo.rebotarSuavizado = true;
+
+        clonTrazo.cantValSensPresion = 0;
+        clonTrazo.cantValSensVelocidad = 0;
+        clonTrazo.cantValSensInclinacionX = 0;
+        clonTrazo.cantValSensInclinacionY = 0;
+        clonTrazo.cantValSensInclinacionGeneral = 0;
+
+        if (!trazo.redondearFigura) {
+            clonTrazo.suavizado.x = 0;
+            clonTrazo.suavizado.y = 0;
+            clonTrazo.suavizado.presion = 0;
+            clonTrazo.suavizado.msPx = 0;
+            clonTrazo.suavizado.inclinacionX = 0;
+            clonTrazo.suavizado.inclinacionY = 0;
+            clonTrazo.suavizado.alpha = 0;
+            clonTrazo.suavizado.grosor = 0;
+            clonTrazo.suavizado.rotacion = 0;
+            clonTrazo.suavizado.ancho = 0;
+            clonTrazo.suavizado.alto = 0;
+            clonTrazo.suavizado.h = 0;
+            clonTrazo.suavizado.s = 0;
+            clonTrazo.suavizado.v = 0;
+        }
+        for (const rgba of clonTrazo.rgba) {
             rgba.a = 1;
         }
-        return trazoTransformado
+        return clonTrazo
     }
 
     trazoValido(trazo) {
@@ -578,7 +596,8 @@ class figuraSellos extends lineaSimple {
         this.verticesFigura = verticesFigura
     }
     usar({ lienzo, trazo, lienzoIntermediario }) {
-        if (!this.trazoValido(trazo)) return
+        if (!trazo.trayectos) return
+        if (!this.trazoValido(trazo) || trazo.trayectos[0][trazo.trayectos[0].length - 1].x === 0 && trazo.trayectos[0][trazo.trayectos[0].length - 1].y === 0) return
 
         const clonTrazo = trazo.clonar();
         clonTrazo.herramienta = 'pincelSellosSimple'

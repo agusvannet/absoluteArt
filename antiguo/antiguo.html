@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>AbsoluteArt</title>
+</head>
+
+<body>
+    <div class="configuracionCapa" id="configuracionCapaActual">
+        <button id="cerrarConfCapa" type="button"
+            onclick="document.getElementById('configuracionCapaActual').style.display = 'none'">x</button>
+
+        <p id="nombreCapaConfigurada">nombreCapa</p>
+        <div class="variablesCapa">
+            <div class="variableCapa ">
+                <p id="letreroCapaOpacidad">opacidad : 1</p>
+                <input type="range" name="" id="capaOpacidad" step="0.01" min="0" max="1" value="1"
+                    oninput="cambiarOpacidadCapa()">
+            </div>
+            <div class="variableCapa">
+                <p id="LetreroCapaVisibilidad">visible : true</p>
+                <input type="checkbox" name="" id="capaVisibilidad" checked onchange="cambiarVisibilidadCapa()">
+            </div>
+            <div class="variableCapa">
+                <p id="letreroCapaEditabilidad">editable : true</p>
+                <input type="checkbox" name="" id="capaEditabilidad" checked onchange="cambiarEditabilidadCapa()">
+            </div>
+            <div class="variableCapa">
+                <p id="letreroCapaPadre">selector capa padre</p>
+                <div class="cambiarGrupo">
+                    <select name="" id="selectorCapaPadre">
+                    </select>
+
+                    <button type="button" onclick="cambiarCapaGrupo()">cambiar</button>
+                </div>
+
+            </div>
+            <div class="variableCapa">
+                <p id="letreroModoFusion">selector modo fusion</p>
+                <div class="cambiarGrupo">
+                    <select name="" id="selectorModoFusion">
+                    </select>
+
+                    <button type="button" onclick="cambiarModoFusion()">cambiar</button>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <div class="acciones">
+            <button type="button" onclick="duplicarCapa() ">duplicar capa</button>
+            <button type="button" onclick="moverCapaLista(capaActual, 1)">mover arriba capa</button>
+            <button type="button" onclick="moverCapaLista(capaActual, -1)">mover abajo capa</button>
+            <button type="button" onclick="">editar historial</button>
+            <button type="button" onclick="eliminarCapaActual()">Eliminar capa</button>
+        </div>
+    </div>
+
+    <div class="seccionArriba">
+        <div class="barraMenu">
+            <button type="button" id="retrocederTrazo" onclick="revertirTrazo()">atras</button>
+            <button type="button" id="recuperarTrazo" onclick="recuperarTrazo()">adeltante</button>
+        </div>
+        <div class="barraHerramientas">
+            <select id="sellos" onchange=" trazoActual.sello = this.value ">
+            </select>
+
+            <select id="herramientas" onchange="  trazoActual.herramienta = this.value ">
+            </select>
+
+            <select id="modoDibujoHerramienta" onchange=" trazoActual.modoDibujo = this.value ">
+            </select>
+
+            <div class="color">
+                <p>colorPrincipal</p>
+                <input type="color" name="" id="colorPrincipal"
+                    onchange=" colorPrincipal = hexToRgb(document.getElementById('colorPrincipal').value)">
+            </div>
+
+            <div class="color">
+                <p>colorSecundario</p>
+                <input type="color" name="" id="colorSecundario"
+                    onchange=" colorSecundario =  hexToRgb(document.getElementById('colorSecundario').value)">
+            </div>
+        </div>
+    </div>
+
+    <section class="lienzo">
+        <div class="seccionIzquierda">
+
+            <p>cosas lapiz y figura</p>
+            <div class="configuracionLapizFondo" id="configuracionesLapiz">
+
+            </div>
+            <div class="inputsLapizFigura inputsBalde">
+                <div class="opcion">
+                    <p>respSigX</p>
+                    <input type="checkbox" checked name=""
+                        oninput="trazoActual.respetarSignoX = this.checked ; console.log(this.checked)">
+                </div>
+                <div class="opcion">
+                    <p>respSigY</p>
+                    <input type="checkbox" checked name=""
+                        oninput="trazoActual.respetarSignoY = this.checked ; console.log(this.checked)">
+                </div>
+                <div class="opcion">
+                    <p>redFigu</p>
+                    <input type="checkbox" name=""
+                        oninput="trazoActual.redondearFigura = this.checked ; console.log(this.checked)">
+                </div>
+            </div>
+
+            <div class="configuracionBalde">
+                <p>cosas del balde</p>
+                <div class="slidersTolerancia" id="confBald">
+
+                </div>
+
+                <div class="inputsBalde">
+                    <div class="opcion">
+                        <p>setear</p>
+                        <input type="checkbox" checked name="" id="setearBalde"
+                            oninput="trazoActual.setearBalde = this.checked">
+                    </div>
+                    <div class="opcion">
+                        <p>refCan</p>
+                        <input type="checkbox" name="" oninput="trazoActual.reflejarCanales = this.checked">
+                    </div>
+                    <div class="opcion">
+                        <p>compColDist</p>
+                        <input type="checkbox" name="" oninput="trazoActual.compararColorDistinto = this.checked">
+                    </div>
+
+                    <button type="button" onclick="llenarElCanvasHSVcompleto()">
+                        colTes
+                    </button>
+                </div>
+
+                <div class="colorBaldeComparar">
+                    <div class="color">
+                        <p>colorCompararBalde</p>
+                        <input type="color" name="" id="colorCompararBalde"
+                            onchange=" trazoActual.colorCompararBalde =  hexToRgb(document.getElementById('colorSecundario').value)">
+                    </div>
+                    <div class="tolerancia gris">
+                        <p>alpComp</p>
+                        <input type="range" name=""
+                            oninput="document.getElementById('numberAlphaComparar').value = this.value, trazoActual.alphaCompararBalde = Number(this.value) "
+                            value="1" id="rangoAlphaComparar" min="0" max="1" step="0.01">
+                        <input type="number" name=""
+                            oninput="document.getElementById('rangoAlphaComparar').value = this.value , trazoActual.alphaCompararBalde = Number(this.value) "
+                            value="1" id="numberAlphaComparar" min="0" max="1" step="0.01">
+                    </div>
+                </div>
+
+                <div class="seleccionModeloColor">
+                    <button id="botonRGB" type="button" style="background-color: green;" onclick="mostrarRgb(this)
+                        ">RGB</button>
+                    <button id="botonHSV" type="button" onclick="mostrarHsv(this)
+                        ">HSV</button>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="canvasPrincipal">
+
+        </canvas>
+
+        <div class="seccionDerecha">
+            <div class="botones-agregar-capas">
+                <button type="button" onclick="agregarCapaDom('individual')">agregar capa</button>
+                <button type="button" onclick="agregarCapaDom('grupo')">agregar grupo</button>
+            </div>
+            <div class="representacionCapas">
+
+
+                <div class="representacionCapa representacionCapaGrupo" id="representacionGrupo0">
+                    <input type="checkbox" name="" class="input" id="desplegableCapa0">
+
+                    <div class="portada">
+                        <label for="desplegableCapa0" class="plegado">
+                            <p> > </p>
+                        </label>
+                        <button type="button" class="infoPlegado" onclick="seleccionarCapa(0 , 'grupo')">
+                            <p class="nombreCapa"> grupo 0</p>
+                        </button>
+                    </div>
+                    <div class="contenido" id="contenido0">
+
+                        <div class="representacionCapa representacionCapaGrupo capaIndividual activo"
+                            id="representacionCapa1">
+                            <input type="checkbox" name="" class="input" id="visibilidadCapa1 onchange= "
+                                cambiarVisibilidadCapa('individual' , 1)">
+                            <div class="portada">
+                                <label for="visibilidadCapa1" class="plegado">
+                                    <p>0</p>
+                                </label>
+                                <button type="button" class="infoPlegado" onclick="seleccionarCapa(1 , 'individual')">
+                                    <p class="nombreCapa"> capa 1</p>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+
+            </div>
+
+        </div>
+    </section>
+
+    <div class="barraEstatus">
+    </div>
+
+    <script src="/js/lienzos.js"></script>
+    <script src="/js/piscinaCords.js"></script>
+    <script src="/js/absoluteArt.js"></script>
+    <script src="/js/herramientas.js"></script>
+    <script src="/antiguo/script.js"></script>
+</body>
+
+</html>
