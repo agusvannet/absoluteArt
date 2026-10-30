@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/interfaz/css/styles.css">
+    <title>AbsoluteArt - Pizarron</title>
+</head>
+
+<body>
+    <div class="desplegable plegado" id="configuracionGeneral">
+        <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('configuracionGeneral')">
+            <img src="/interfaz/imagenes/boton3Rayitas.svg" alt="">
+        </button>
+
+        <div class=" contenido sombreadoGeneral">
+            <button class="opcion boton"></button>
+            <button class="opcion boton"></button>
+            <button class="opcion boton"></button>
+            <button class="opcion boton"></button>
+        </div>
+    </div>
+
+    <div class="desplegable desplegado" id="categoriasHerramienta">
+        <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('categoriasHerramienta')">
+            <img src="/interfaz/imagenes/flechita.svg" alt="">
+        </button>
+
+        <div class=" contenido sombreadoGeneral">
+            <div class="seccionCategoriasHerramienta">
+                <button class="categoriaHerramienta boton">
+                    <img src="/interfaz/imagenes/pincelNaranja.png" alt="">
+                    Personalizado
+                </button>
+                <button class="categoriaHerramienta boton">
+                    <img src="/interfaz/imagenes/pincelNaranja.png" alt="">
+                    Todos
+                </button>
+            </div>
+            <div class="seccionHerramientasCategoria">
+                <div class="cabezeraCategoria">
+                    pinceles (0)
+                    <input type="text" name="" id="buscadorPresets" value="Buscador...">
+                </div>
+
+
+                <div id="listaPresets">
+
+                    <div class="lista">
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+                        <div class="preset">
+                            <div class="presentacion">
+                                <div class="nombrePreset">Pincel simple</div>
+                            </div>
+                            <div class="acciones">
+                                <button type="button" class="boton accionPreset">
+                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="scrollBar vertical sombreadoGeneral">
+                        <div class="carril">
+                            <div class="barra"></div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/lienzos.js"></script>
+    <script src="/js/piscinaCords.js"></script>
+    <script src="/js/absoluteArt.js"></script>
+    <script src="/js/herramientas.js"></script>
+
+    <script src="/interfaz/js/interfaz.js"></script>
+    <script src="/interfaz/js/presets.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,353 @@
+:root {
+    --fondo: rgb(26, 26, 26);
+    --px: calc(100vh / 1080);
+    --colorCaracteristico: #FFA200;
+    --colorPanel: #EBEBEB;
+    --colorSecundarioPanel: #D4D4D4;
+    --colorTercearioPanel: #c4c2c2;
+    --colorCuartarioPanel: rgb(170, 170, 170);
+    --colorQuintoPanel: rgb(126, 126, 126);
+    --colorSextoPanel: #747474;
+
+
+    --padingGeneral: 16;
+
+    --colorSombraGeneral: rgba(255, 255, 255, 0.25);
+    --tamanioSombraGeneral: 10;
+
+    --colorBordeadoSuave: #6A6A6A;
+
+    --tiempoAnimacion: .25s;
+
+    --colorFuente: white;
+    --colorFuenteOpuesta: black;
+    --fondoFuenteOpuesta: rgba(116, 116, 116, .5);
+}
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    position: relative;
+    font-size: 2vh;
+    pointer-events: auto;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+
+body {
+    display: flex;
+    background-color: var(--fondo);
+    width: 100vw;
+    height: 100vh;
+    padding: calc(var(--px) * var(--padingGeneral));
+}
+
+button,
+img,
+input[type="text"] {
+    all: unset;
+}
+
+.sombreadoGeneral {
+    box-shadow: 0 0 calc(var(--px) * var(--tamanioSombraGeneral)) 0 var(--colorSombraGeneral);
+}
+
+#configuracionGeneral {
+    width: calc(var(--px) * 68);
+    height: calc(var(--px) * 68);
+}
+
+#configuracionGeneral>.boton {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colorPanel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--px) * 10);
+}
+
+#configuracionGeneral .boton img {
+    width: 63%;
+    height: 63%;
+}
+
+button:hover {
+    cursor: pointer;
+    background-color: var(--colorCuartarioPanel);
+}
+
+.contenido {
+    position: absolute;
+    border-radius: calc(var(--px) * 10);
+    background-color: var(--colorPanel);
+    width: fit-content;
+    height: fit-content;
+}
+
+#configuracionGeneral .contenido {
+    top: calc(100% + (var(--px) * var(--padingGeneral)));
+    padding: calc(var(--px) * var(--padingGeneral) / 2);
+    display: flex;
+    flex-direction: column;
+}
+
+#configuracionGeneral .contenido .opcion {
+    width: calc(var(--px) * 250);
+    height: calc(var(--px) * 45);
+    background-color: var(--colorSecundarioPanel);
+    border: calc(var(--px) * .25) solid var(--colorBordeadoSuave);
+    border-bottom: unset;
+}
+
+#configuracionGeneral .contenido .opcion:first-child {
+    border-radius: calc(var(--px) * 5) calc(var(--px) * 5) 0 0;
+}
+
+#configuracionGeneral .contenido .opcion:last-child {
+    border-radius: 0 0 calc(var(--px) * 5) calc(var(--px) * 5);
+    border-bottom: calc(var(--px) * .25) solid var(--colorBordeadoSuave);
+}
+
+.plegado .contenido {
+    transform-origin: 0 0;
+    opacity: 0;
+    transform: scale(0);
+    pointer-events: auto;
+    transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
+}
+
+.desplegado .contenido {
+    transform-origin: 0 0;
+    opacity: 1;
+    transform: scale(1);
+}
+
+#categoriasHerramienta {
+    position: absolute;
+    top: 50%;
+    transform: calc(translateY(100%) + var(--padingGeneral));
+    width: calc(var(--px) * 55);
+    height: calc(var(--px) * 55);
+}
+
+#categoriasHerramienta>.boton {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: 100%;
+    background-color: var(--colorPanel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--px) * 10);
+    transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
+    transform: rotate(-90deg);
+}
+
+#categoriasHerramienta .boton img {
+    width: 55%;
+    height: 55%;
+}
+
+#categoriasHerramienta .contenido {
+    overflow: hidden;
+    pointer-events: none;
+    width: calc((var(--px) * 418));
+    height: calc((var(--px) * 748));
+    transform: translateY(-50%);
+    top: 50%;
+    transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
+    display: flex;
+}
+
+#categoriasHerramienta.desplegado>.boton {
+    transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
+    transform: translateY(calc(var(--px) * (-346.85 + var(--padingGeneral) / 2))) translateX(calc(var(--px) * var(--padingGeneral) / 2)) rotate(90deg);
+    background-color: var(--colorQuintoPanel);
+    border-radius: calc(var(--px) * 5);
+}
+
+#categoriasHerramienta .contenido .seccionCategoriasHerramienta {
+    background-color: var(--colorSecundarioPanel);
+    width: calc(var(--px) * 71);
+    height: 100%;
+    padding: calc(var(--px) * 71) 0 calc(var(--px) * var(--padingGeneral) / 2) calc(var(--px) * var(--padingGeneral) / 2);
+}
+
+.categoriaHerramienta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: var(--colorQuintoPanel);
+    width: 100%;
+    height: calc(var(--px) * 74);
+    border-bottom: calc(var(--px) * .25) solid var(--colorCuartarioPanel);
+    font-size: calc(var(--px) * 11);
+    letter-spacing: 1%;
+    color: var(--colorFuente);
+}
+
+.seccionCategoriasHerramienta .categoriaHerramienta:first-child {
+    border-radius: calc(var(--px) * 5) 0 0 0;
+}
+
+.seccionCategoriasHerramienta .categoriaHerramienta:last-child {
+    border-radius: 0 0 0 calc(var(--px) * 5);
+    border-bottom: unset;
+}
+
+.categoriaHerramienta:hover {
+    background-color: var(--colorCuartarioPanel);
+    cursor: pointer;
+}
+
+.contenido .seccionHerramientasCategoria {
+    width: 100%;
+    height: 100%;
+    padding: calc(var(--px) * var(--padingGeneral));
+    padding-right: unset;
+}
+
+.cabezeraCategoria {
+    width: 100%;
+    height: calc(var(--px) * 52);
+    padding-bottom: calc(var(--px) * var(--padingGeneral));
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    font-size: calc(var(--px) * 24);
+    color: var(--colorFuenteOpuesta);
+}
+
+#listaPresets {
+    width: 100%;
+    height: calc(667 * var(--px));
+    overflow-y: scroll;
+    overflow-x: visible;
+    display: flex;
+}
+
+#listaPresets .lista {
+    width: 100%;
+    height: 100%;
+    border: calc(var(--px) * .25) solid var(--colorCuartarioPanel);
+
+}
+
+#listaPresets::-webkit-scrollbar {
+    display: none;
+}
+
+
+
+#buscadorPresets {
+    box-sizing: border-box;
+    height: 100%;
+    width: calc(166 * var(--px));
+    background-color: var(--colorSextoPanel);
+    border-radius: calc(10 * var(--px));
+    padding: calc(6 * var(--px));
+    color: var(--colorFuente);
+    font-size: calc(var(--px) * 18);
+    margin-right: calc(var(--px) * var(--padingGeneral));
+}
+
+.preset {
+    width: 100%;
+    height: calc(75 * var(--px));
+    border-bottom: calc(var(--px) * .25) solid var(--colorCuartarioPanel);
+    display: flex;
+}
+
+.preset .presentacion {
+    width: 100%;
+    height: 100%;
+    background-image: url(/interfaz/imagenes/fondoPng.avif);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% auto;
+    display: flex;
+    align-items: end;
+    justify-content: start;
+}
+
+.preset .presentacion .nombrePreset {
+    height: fit-content;
+    width: fit-content;
+    padding: calc(var(--padingGeneral) * var(--px) / 3) calc(var(--padingGeneral) * var(--px) / 2);
+    background-color: var(--fondoFuenteOpuesta);
+    display: flex;
+    align-items: end;
+    border-radius: 0 calc(var(--px) * 6) 0 0;
+    font-size: calc(var(--px) * 16);
+}
+
+.preset .acciones {
+    width: 30px;
+    min-width: calc(54 * var(--px));
+    height: 100%;
+    background-color: var(--colorTercearioPanel);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.acciones .accionPreset {
+    height: calc(32 * var(--px));
+    aspect-ratio: 1/1;
+    padding: unset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 100%;
+}
+
+#listaPresets .preset .accionPreset img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.scrollBar.vertical {
+    width: calc(var(--px) * var(--padingGeneral));
+    height: 100%;
+}
+
+.scrollBar {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.scrollBar .carril {
+    border-radius: 1000px;
+    border: calc(var(--px) * .125) solid var(--colorQuintoPanel);
+    background-color: var(--colorFuente);
+    height: 100%;
+    width: 65%;
+}
+
+.scrollBar .barra {
+    width: 100%;
+    height: 50%;
+    background-color: var(--colorCaracteristico);
+    border-radius: 1000px;
+}
+
+.scrollBar.desactivado {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.lista {
+    touch-action: auto;
+}
