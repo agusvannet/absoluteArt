@@ -53,86 +53,8 @@
                 <div id="listaPresets">
 
                     <div class="lista">
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="preset">
-                            <div class="presentacion">
-                                <div class="nombrePreset">Pincel simple</div>
-                            </div>
-                            <div class="acciones">
-                                <button type="button" class="boton accionPreset">
-                                    <img src="/interfaz/imagenes/botonNaranja.svg" alt="">
-                                </button>
-                            </div>
-                        </div>
+
+                        
 
                     </div>
                     <div class="scrollBar vertical sombreadoGeneral">
@@ -147,13 +69,30 @@
         </div>
     </div>
 
+    <div class="desplegable desplegado" id="seleccionHerramientas">
+        <div class=" contenido sombreadoGeneral">
+            <div class="herramienta">cursor</div>
+            <div class="herramienta">pincel</div>
+            <div class="herramienta">borrador</div>
+            <div class="herramienta">figura</div>
+            <div class="herramienta">recorte</div>
+            <div class="herramienta">balde</div>
+            <div class="herramienta">texto</div>
+            <div class="herramienta">lazo</div>
+            <div class="herramienta">difuminar</div>
+        </div>
+        <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('seleccionHerramientas')">
+            <img src="/interfaz/imagenes/flechita.svg" alt="">
+        </button>
+    </div>
+
     <script src="/js/lienzos.js"></script>
     <script src="/js/piscinaCords.js"></script>
     <script src="/js/absoluteArt.js"></script>
     <script src="/js/herramientas.js"></script>
+    <script src="/js/presets.js"></script>
 
     <script src="/interfaz/js/interfaz.js"></script>
-    <script src="/interfaz/js/presets.js"></script>
 </body>
 
 </html>

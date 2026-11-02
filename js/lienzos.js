@@ -429,6 +429,7 @@ class lienzoHtml extends lienzoBase {
         } else {
             this.ctx = this.canvas.getContext('2d', { willReadFrequently: true })
         }
+
         this.canvas.width = this.largo
         this.canvas.height = this.alto
     }

@@ -453,7 +453,7 @@ class historial {
 class trazo {
     constructor({
         trayectos = [],
-        puntoInicial,
+        puntoInicial = { x: 0, y: 0 },
         rgba = [{ r: 0, g: 0, b: 0, a: 0, }],
         grosor = 10,
         flujo = 1,
@@ -525,33 +525,40 @@ class trazo {
         this.separacion = separacion;
         this.modoDibujo = modoDibujo;
 
-        this.toleranciaCanal = {
-            alpha: toleranciaCanal.alpha !== undefined ? toleranciaCanal.alpha : 0,
-            rgb: {
-                r: toleranciaCanal.rgb.r !== undefined ? toleranciaCanal.rgb.r : 0,
-                g: toleranciaCanal.rgb.g !== undefined ? toleranciaCanal.rgb.g : 0,
-                b: toleranciaCanal.rgb.b !== undefined ? toleranciaCanal.rgb.b : 0,
-            },
-            hsv: {
-                h: toleranciaCanal.hsv.h !== undefined ? toleranciaCanal.hsv.h : 0,
-                s: toleranciaCanal.hsv.s !== undefined ? toleranciaCanal.hsv.s : 0,
-                v: toleranciaCanal.hsv.v !== undefined ? toleranciaCanal.hsv.v : 0
-            }
+        this.toleranciaCanal = {}
+        if (!toleranciaCanal.rgb)
+            toleranciaCanal.rgb = {}
+        if (!toleranciaCanal.hsv)
+            toleranciaCanal.hsv = {}
+        this.toleranciaCanal.alpha = toleranciaCanal.alpha !== undefined ? toleranciaCanal.alpha : 0
+        this.toleranciaCanal.rgb = {
+            r: toleranciaCanal.rgb.r !== undefined ? toleranciaCanal.rgb.r : 0,
+            g: toleranciaCanal.rgb.g !== undefined ? toleranciaCanal.rgb.g : 0,
+            b: toleranciaCanal.rgb.b !== undefined ? toleranciaCanal.rgb.b : 0,
+        }
+        this.toleranciaCanal.hsv = {
+            h: toleranciaCanal.hsv.h !== undefined ? toleranciaCanal.hsv.h : 0,
+            s: toleranciaCanal.hsv.s !== undefined ? toleranciaCanal.hsv.s : 0,
+            v: toleranciaCanal.hsv.v !== undefined ? toleranciaCanal.hsv.v : 0
         }
 
-        this.reflejarCanal = {
-            alpha: reflejarCanal.alpha !== undefined ? reflejarCanal.alpha : 0,
-            rgb: {
-                r: reflejarCanal.rgb.r !== undefined ? reflejarCanal.rgb.r : 0,
-                g: reflejarCanal.rgb.g !== undefined ? reflejarCanal.rgb.g : 0,
-                b: reflejarCanal.rgb.b !== undefined ? reflejarCanal.rgb.b : 0
-            },
-            hsv: {
-                h: reflejarCanal.hsv.h !== undefined ? reflejarCanal.hsv.h : 0,
-                s: reflejarCanal.hsv.s !== undefined ? reflejarCanal.hsv.s : 0,
-                v: reflejarCanal.hsv.v !== undefined ? reflejarCanal.hsv.v : 0
-            }
+        this.reflejarCanal = {}
+        if (!reflejarCanal.rgb)
+            reflejarCanal.rgb = {}
+        if (!reflejarCanal.hsv)
+            reflejarCanal.hsv = {}
+        this.reflejarCanal.alpha = reflejarCanal.alpha !== undefined ? reflejarCanal.alpha : 0
+        this.reflejarCanal.rgb = {
+            r: reflejarCanal.rgb.r !== undefined ? reflejarCanal.rgb.r : 0,
+            g: reflejarCanal.rgb.g !== undefined ? reflejarCanal.rgb.g : 0,
+            b: reflejarCanal.rgb.b !== undefined ? reflejarCanal.rgb.b : 0,
         }
+        this.reflejarCanal.hsv = {
+            h: reflejarCanal.hsv.h !== undefined ? reflejarCanal.hsv.h : 0,
+            s: reflejarCanal.hsv.s !== undefined ? reflejarCanal.hsv.s : 0,
+            v: reflejarCanal.hsv.v !== undefined ? reflejarCanal.hsv.v : 0
+        }
+
         this.setearBalde = setearBalde;
         this.modeloColorComparador = modeloColorComparador;
         this.reflejarCanales = reflejarCanales;
@@ -674,7 +681,7 @@ class trazo {
         this.altoInicial = altoInicial;
 
 
-        //#region contar sensibilidades ruidos suavizados para no contarlas siempre
+        //#region contar sensibilidades ruidos suavizados
         const cantValActi = (buscar, tipo) => {
             let cantidad = 0
             const valores = Object.keys(buscar[tipo])
@@ -1559,14 +1566,20 @@ class trazo {
     hsvVariable() {
         return (
             this.ruidoH > 0 || this.ruidoS > 0 || this.ruidoV > 0 ||
-            this.sensibilidadVelocidadH !== 0 || this.sensibilidadPresionH !== 0 ||
-            this.sensibilidadVelocidadS !== 0 || this.sensibilidadPresionS !== 0 ||
-            this.sensibilidadVelocidadV !== 0 || this.sensibilidadPresionV !== 0 ||
-            this.sensibilidadInclinacionXH !== 0 || this.sensibilidadInclinacionYH !== 0 ||
-            this.sensibilidadInclinacionXS !== 0 || this.sensibilidadInclinacionYS !== 0 ||
-            this.sensibilidadInclinacionXV !== 0 || this.sensibilidadInclinacionYV !== 0 ||
-            ((this.cantPuntosInicio !== 0) && (this.hInicio !== 1 || this.sInicio !== 1 || this.vInicio !== 1)) ||
-            ((this.cantPuntosFin !== 0) && (this.hFin !== 1 || this.sFin !== 1 || this.vFin !== 1))
+
+            this.sensibilidad.msPx.h !== 0 || this.sensibilidad.presion.h !== 0 ||
+            this.sensibilidad.msPx.s !== 0 || this.sensibilidad.presion.s !== 0 ||
+            this.sensibilidad.msPx.v !== 0 || this.sensibilidad.presion.v !== 0 ||
+
+            this.sensibilidad.presion.h !== 0 || this.sensibilidad.inclinacionY.h !== 0 ||
+            this.sensibilidad.presion.s !== 0 || this.sensibilidad.inclinacionY.s !== 0 ||
+            this.sensibilidad.presion.v !== 0 || this.sensibilidad.inclinacionY.v !== 0 ||
+
+            this.sensibilidad.inclinacionGeneral.h !== 0 ||
+            this.sensibilidad.inclinacionGeneral.s !== 0 ||
+            this.sensibilidad.inclinacionGeneral.v !== 0 ||
+            ((this.cantPuntosInicio !== 0) && (this.hInicio !== 0 || this.sInicio !== 1 || this.vInicio !== 1)) ||
+            ((this.cantPuntosFin !== 0) && (this.hFin !== 0 || this.sFin !== 1 || this.vFin !== 1))
         )
     }
 }
@@ -1897,7 +1910,8 @@ const pintor = {
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoComunSecundario, alto: lienzoDibujar.alto, largo: lienzoDibujar.largo })
         lienzos.acomodar({ lienzo: this.lienzosIntermediarios.lienzoSelloIntermediario, alto: trazo.grosor, largo: trazo.grosor })
         const herramienta = this.obtenerHerramienta(trazo.herramienta)
-        if (prepararSello) this.prepararSello(trazo)
+        if (prepararSello)
+            this.prepararSello(trazo)
         const returnar = herramienta.usar({
             lienzo: lienzoDibujar,
             trazo,

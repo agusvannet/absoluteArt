@@ -803,6 +803,7 @@ pintor.cargarCategorias([
     { nombreCategoria: 'mutacionColor', categoriaPadre: 'edicionLienzo' },
     { nombreCategoria: 'dibujo', categoriaPadre: 'herramienta' },
     { nombreCategoria: 'figuras', categoriaPadre: 'dibujo' },
+    { nombreCategoria: 'figurasSello', categoriaPadre: 'figuras' },
     { nombreCategoria: 'pinceles', categoriaPadre: 'dibujo' },
     { nombreCategoria: 'sello', categoriaPadre: 'dibujo' },
 ]);
@@ -823,7 +824,7 @@ const herramientas = [
     { clase: 'baldeSimple', parametros: { nombre: 'baldeSimple', categoria: pintor.obtenerCategoria('mutacionColor') } },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'cruzSellos', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'cruzSellos', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0, y: 0 },
                 { x: 1, y: 1 }],
                 [{ x: 1, y: 0 },
@@ -832,7 +833,7 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'trianguloSellos', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'trianguloSellos', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0, y: 1 },
                 { x: 1, y: 1 },
                 { x: 0.5, y: 0 },
@@ -841,7 +842,7 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'rectanguloSello', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'rectanguloSello', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0, y: 0 },
                 { x: 0, y: 1 },
                 { x: 1, y: 1 },
@@ -851,7 +852,7 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'romboSello', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'romboSello', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0.5, y: 0 },
                 { x: 1, y: 0.5 },
                 { x: 0.5, y: 1 },
@@ -861,7 +862,7 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'pentagonoSello', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'pentagonoSello', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0.8, y: 1 },
                 { x: 0.2, y: 1 },
                 { x: 0, y: 0.4 },
@@ -872,7 +873,7 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'estrellaSellos', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'estrellaSellos', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0.500, y: 0.000 },
                 { x: 0.618, y: 0.363 },
                 { x: 0.976, y: 0.363 },
@@ -889,14 +890,14 @@ const herramientas = [
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'lineaSello', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'lineaSello', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0, y: 0 },
                 { x: 1, y: 1 }]]
         }
     },
     {
         clase: 'figuraSellos', parametros: {
-            nombre: 'crepperSello', categoria: pintor.obtenerCategoria('figuras'), verticesFigura:
+            nombre: 'crepperSello', categoria: pintor.obtenerCategoria('figurasSello'), verticesFigura:
                 [[{ x: 0, y: 0 },
                 { x: 1, y: 0 },
                 { x: 1, y: 1 },
