@@ -1,10 +1,6 @@
 # absoluteArt
-La idea nacio como un clon de paint pero a medida que voy conociendo mas secciones de un editor grafico profesional mas me le quiero asemejar con este proyecto.
-El proyecto lo dare como finalizado luego de haber superado totalmente el paint de w11 , ademas de tener las herramientas basicas de un editor grafico fuerte como las sensibles a la velocidad y presion , sin olvidar que para que este proyecto sea decente debe de vivir 100% dentro del canvas, por lo tanto tendre que tener una especie de html propio ( van a ser simplemente un nuevo tipo de capas , segun tipo de elemento)
-
-Si ves el estado actual del html absoluteArt es un provisorio , lo unico que se va a mantener al final del proyecto es el absoluteArt.js , todo el html va  desaparecer menos el canvas
-el script.js es un controlador de absoluteArt momentaneo , pronto se reducira a los 3 eventListener y el ctx.
+La idea nació como un clon de Paint, pero a medida que voy conociendo más secciones de un editor gráfico profesional, más me le quiero asemejar con este proyecto.
+El proyecto lo daré como finalizado cuando tenga todo lo del Paint de W11, los básicos de Ibis Paint, algunos detalles de Krita, el rendimiento sea decente y no haya puntos débiles claros.
+Además, el proyecto fue para aprender. Antes de empezar apenas sabía manipular el DOM, por eso quise hacerlo 100% Vanilla en todos los sentidos, sin depender de ninguna librería ni framework.
 
 https://absoluteart.vercel.app/
-
-Lo hago lento ya que lo hago cuando estoy aburrido y no vibe code ya que es para aprender.
