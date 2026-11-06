@@ -310,7 +310,7 @@ class historial {
     historialTrazos = [];
     historialCapturas = []; // {captura:, indice:}
 
-    revertirTrazo() { // NO VEO RAZON PARA QUE NO FUNCIONE
+    revertirTrazo() {
         if (this.historialTrazos.length === 0) return false
         this.lienzo.limpiar()
         this.trazosRevertidos.push(this.historialTrazos[this.historialTrazos.length - 1])
@@ -450,6 +450,14 @@ class historial {
         return clon
     }
 }
+class rangoValor {
+    constructor(minimo, inicial, maximo, salto) {
+        this.minimo = minimo;
+        this.inicial = inicial;
+        this.maximo = maximo;
+        this.salto = salto;
+    }
+}
 class trazo {
     constructor({
         trayectos = [],
@@ -461,7 +469,6 @@ class trazo {
         sello = 'selloCuadrado',
         separacion = 1,
         modoDibujo = 'normal',
-
         setearBalde = true,
         modeloColorComparador = 'rgb',
         reflejarCanales = false,
@@ -470,51 +477,21 @@ class trazo {
         respetarSignoY = true,
         puntosSuavizado = 2,
         redondearFigura = false,
-
-        toleranciaCanal = {
-        },
-        reflejarCanal = {
-        },
-        sensibilidad = {
-            presion: {},
-            msPx: {},
-            inclinacionX: {},
-            inclinacionY: {},
-            inclinacionGeneral: {}
-        },
+        toleranciaCanal = {},
+        reflejarCanal = {},
+        sensibilidad = {},
         suavizado = {},
         ruido = {},
-
-        semilla = 1,
-
+        inicioFin = {},
+        semilla = Date.now(),
         rotacionInicial = 0,
         seguirRotacionTrayecto = 0,
-
-        cantPuntosInicio = 1,
-        cantPuntosFin = 1,
-
-        alphaInicio = 1,
-        alphaFin = 1,
-        rotacionInicio = 0,
-        anchoInicio = 1,
-        altoInicio = 1,
-        hInicio = 0,
-        sInicio = 1,
-        vInicio = 1,
-
-        grosorInicio = 1,
-        grosorFin = 1,
-        rotacionFin = 0,
-        anchoFin = 1,
-        altoFin = 1,
-        hFin = 0,
-        sFin = 1,
-        vFin = 1,
-
         anchoInicial = 1,
         altoInicial = 1,
-
     }) {
+        //#region datos
+
+        //#region datos variados
         this.trayectos = trayectos;
         this.puntoInicial = puntoInicial;
         this.rgba = rgba;
@@ -525,6 +502,23 @@ class trazo {
         this.separacion = separacion;
         this.modoDibujo = modoDibujo;
 
+        this.setearBalde = setearBalde;
+        this.modeloColorComparador = modeloColorComparador;
+        this.reflejarCanales = reflejarCanales;
+        this.colorCompararBalde = colorCompararBalde;
+        this.respetarSignoX = respetarSignoX;
+        this.respetarSignoY = respetarSignoY;
+
+        this.puntosSuavizado = puntosSuavizado;
+        this.redondearFigura = redondearFigura;
+        this.semilla = semilla;
+        this.rotacionInicial = rotacionInicial;
+        this.seguirRotacionTrayecto = seguirRotacionTrayecto;
+        this.anchoInicial = anchoInicial;
+        this.altoInicial = altoInicial;
+        //#endregion
+
+        //#region tolerancia
         this.toleranciaCanal = {}
         if (!toleranciaCanal.rgb)
             toleranciaCanal.rgb = {}
@@ -542,6 +536,8 @@ class trazo {
             v: toleranciaCanal.hsv.v !== undefined ? toleranciaCanal.hsv.v : 0
         }
 
+        //#endregion
+        //#region reflejar
         this.reflejarCanal = {}
         if (!reflejarCanal.rgb)
             reflejarCanal.rgb = {}
@@ -558,129 +554,52 @@ class trazo {
             s: reflejarCanal.hsv.s !== undefined ? reflejarCanal.hsv.s : 0,
             v: reflejarCanal.hsv.v !== undefined ? reflejarCanal.hsv.v : 0
         }
+        //#endregion 
+        //#region inicioFin
+        this.inicioFin = {}
+        if (!inicioFin.inicio)
+            inicioFin.inicio = {}
+        if (!inicioFin.fin)
+            inicioFin.fin = {}
 
-        this.setearBalde = setearBalde;
-        this.modeloColorComparador = modeloColorComparador;
-        this.reflejarCanales = reflejarCanales;
-        this.colorCompararBalde = colorCompararBalde;
-        this.respetarSignoX = respetarSignoX;
-        this.respetarSignoY = respetarSignoY;
+        for (const valor of trazo.valoresInicioFin) {
+            if (typeof (inicioFin[valor]) !== 'object')
+                inicioFin[valor] = {}
 
-        this.suavizado = {
-            x: suavizado.x !== undefined ? suavizado.x : 0,
-            y: suavizado.y !== undefined ? suavizado.y : 0,
-            presion: suavizado.presion !== undefined ? suavizado.presion : 0,
-            msPx: suavizado.msPx !== undefined ? suavizado.msPx : 0,
-            inclinacionX: suavizado.inclinacionX !== undefined ? suavizado.inclinacionX : 0,
-            inclinacionY: suavizado.inclinacionY !== undefined ? suavizado.inclinacionY : 0,
-            alpha: suavizado.alpha !== undefined ? suavizado.alpha : 0,
-            grosor: suavizado.grosor !== undefined ? suavizado.grosor : 0,
-            rotacion: suavizado.rotacion !== undefined ? suavizado.rotacion : 0,
-            ancho: suavizado.ancho !== undefined ? suavizado.ancho : 0,
-            alto: suavizado.alto !== undefined ? suavizado.alto : 0,
-            h: suavizado.h !== undefined ? suavizado.h : 0,
-            s: suavizado.s !== undefined ? suavizado.s : 0,
-            v: suavizado.v !== undefined ? suavizado.v : 0,
+            let valPred = valor !== 'rotacion' && valor !== 'h' ? 1 : 0
+            this.inicioFin[valor] = {}
+            this.inicioFin[valor].inicio = inicioFin[valor].inicio !== undefined ? inicioFin[valor].inicio : valPred
+            this.inicioFin[valor].fin = inicioFin[valor].inicio !== undefined ? inicioFin[valor].fin : valPred
         }
+        //#endregion 
+        //#region suavizado
+        this.suavizado = {}
+        for (const valor of cordenada.valores)
+            this.suavizado[valor] = suavizado[valor] !== undefined ? suavizado[valor] : 0;
 
-        this.sensibilidad = {
-            presion: {
-                grosor: sensibilidad.presion.grosor !== undefined ? sensibilidad.presion.grosor : 0,
-                alpha: sensibilidad.presion.alpha !== undefined ? sensibilidad.presion.alpha : 0,
-                rotacion: sensibilidad.presion.rotacion !== undefined ? sensibilidad.presion.rotacion : 0,
-                ancho: sensibilidad.presion.ancho !== undefined ? sensibilidad.presion.ancho : 0,
-                alto: sensibilidad.presion.alto !== undefined ? sensibilidad.presion.alto : 0,
-                h: sensibilidad.presion.h !== undefined ? sensibilidad.presion.h : 0,
-                s: sensibilidad.presion.s !== undefined ? sensibilidad.presion.s : 0,
-                v: sensibilidad.presion.v !== undefined ? sensibilidad.presion.v : 0,
-            },
-            msPx: {
-                grosor: sensibilidad.msPx.grosor !== undefined ? sensibilidad.msPx.grosor : 0,
-                alpha: sensibilidad.msPx.alpha !== undefined ? sensibilidad.msPx.alpha : 0,
-                rotacion: sensibilidad.msPx.rotacion !== undefined ? sensibilidad.msPx.rotacion : 0,
-                ancho: sensibilidad.msPx.ancho !== undefined ? sensibilidad.msPx.ancho : 0,
-                alto: sensibilidad.msPx.alto !== undefined ? sensibilidad.msPx.alto : 0,
-                h: sensibilidad.msPx.h !== undefined ? sensibilidad.msPx.h : 0,
-                s: sensibilidad.msPx.s !== undefined ? sensibilidad.msPx.s : 0,
-                v: sensibilidad.msPx.v !== undefined ? sensibilidad.msPx.v : 0,
-            },
-            inclinacionX: {
-                grosor: sensibilidad.inclinacionX.grosor !== undefined ? sensibilidad.inclinacionX.grosor : 0,
-                alpha: sensibilidad.inclinacionX.alpha !== undefined ? sensibilidad.inclinacionX.alpha : 0,
-                rotacion: sensibilidad.inclinacionX.rotacion !== undefined ? sensibilidad.inclinacionX.rotacion : 0,
-                ancho: sensibilidad.inclinacionX.ancho !== undefined ? sensibilidad.inclinacionX.ancho : 0,
-                alto: sensibilidad.inclinacionX.alto !== undefined ? sensibilidad.inclinacionX.alto : 0,
-                h: sensibilidad.inclinacionX.h !== undefined ? sensibilidad.inclinacionX.h : 0,
-                s: sensibilidad.inclinacionX.s !== undefined ? sensibilidad.inclinacionX.s : 0,
-                v: sensibilidad.inclinacionX.v !== undefined ? sensibilidad.inclinacionX.v : 0,
-            },
-            inclinacionY: {
-                grosor: sensibilidad.inclinacionY.grosor !== undefined ? sensibilidad.inclinacionY.grosor : 0,
-                alpha: sensibilidad.inclinacionY.alpha !== undefined ? sensibilidad.inclinacionY.alpha : 0,
-                rotacion: sensibilidad.inclinacionY.rotacion !== undefined ? sensibilidad.inclinacionY.rotacion : 0,
-                ancho: sensibilidad.inclinacionY.ancho !== undefined ? sensibilidad.inclinacionY.ancho : 0,
-                alto: sensibilidad.inclinacionY.alto !== undefined ? sensibilidad.inclinacionY.alto : 0,
-                h: sensibilidad.inclinacionY.h !== undefined ? sensibilidad.inclinacionY.h : 0,
-                s: sensibilidad.inclinacionY.s !== undefined ? sensibilidad.inclinacionY.s : 0,
-                v: sensibilidad.inclinacionY.v !== undefined ? sensibilidad.inclinacionY.v : 0,
-            },
-            inclinacionGeneral: {
-                grosor: sensibilidad.inclinacionGeneral.grosor !== undefined ? sensibilidad.inclinacionGeneral.grosor : 0,
-                alpha: sensibilidad.inclinacionGeneral.alpha !== undefined ? sensibilidad.inclinacionGeneral.alpha : 0,
-                rotacion: sensibilidad.inclinacionGeneral.rotacion !== undefined ? sensibilidad.inclinacionGeneral.rotacion : 0,
-                ancho: sensibilidad.inclinacionGeneral.ancho !== undefined ? sensibilidad.inclinacionGeneral.ancho : 0,
-                alto: sensibilidad.inclinacionGeneral.alto !== undefined ? sensibilidad.inclinacionGeneral.alto : 0,
-                h: sensibilidad.inclinacionGeneral.h !== undefined ? sensibilidad.inclinacionGeneral.h : 0,
-                s: sensibilidad.inclinacionGeneral.s !== undefined ? sensibilidad.inclinacionGeneral.s : 0,
-                v: sensibilidad.inclinacionGeneral.v !== undefined ? sensibilidad.inclinacionGeneral.v : 0,
-            }
+        //#endregion 
+        //#region sensibilidad
+        this.sensibilidad = {}
+        for (const actual of trazo.valoresSensibilidades) {
+            if (typeof (sensibilidad[actual]) !== 'object')
+                sensibilidad[actual] = {}
+
+            this.sensibilidad[actual] = {}
+            this.sensibilidad[actual].grosor = sensibilidad[actual].grosor !== undefined ? sensibilidad[actual].grosor : 0
+            this.sensibilidad[actual].alpha = sensibilidad[actual].alpha !== undefined ? sensibilidad[actual].alpha : 0
+            this.sensibilidad[actual].rotacion = sensibilidad[actual].rotacion !== undefined ? sensibilidad[actual].rotacion : 0
+            this.sensibilidad[actual].ancho = sensibilidad[actual].ancho !== undefined ? sensibilidad[actual].ancho : 0
+            this.sensibilidad[actual].alto = sensibilidad[actual].alto !== undefined ? sensibilidad[actual].alto : 0
+            this.sensibilidad[actual].h = sensibilidad[actual].h !== undefined ? sensibilidad[actual].h : 0
+            this.sensibilidad[actual].s = sensibilidad[actual].s !== undefined ? sensibilidad[actual].s : 0
+            this.sensibilidad[actual].v = sensibilidad[actual].v !== undefined ? sensibilidad[actual].v : 0
         }
-
-        this.ruido = {
-            x: ruido.x !== undefined ? ruido.x : 0,
-            y: ruido.y !== undefined ? ruido.y : 0,
-            alpha: ruido.alpha !== undefined ? ruido.alpha : 0,
-            grosor: ruido.grosor !== undefined ? ruido.grosor : 0,
-            rotacion: ruido.rotacion !== undefined ? ruido.rotacion : 0,
-            ancho: ruido.ancho !== undefined ? ruido.ancho : 0,
-            alto: ruido.alto !== undefined ? ruido.alto : 0,
-            h: ruido.h !== undefined ? ruido.h : 0,
-            s: ruido.s !== undefined ? ruido.s : 0,
-            v: ruido.v !== undefined ? ruido.v : 0,
-        }
-
-        this.puntosSuavizado = puntosSuavizado;
-        this.redondearFigura = redondearFigura;
-
-        this.semilla = semilla;
-        this.rotacionInicial = rotacionInicial;
-        this.seguirRotacionTrayecto = seguirRotacionTrayecto;
-
-        this.cantPuntosInicio = cantPuntosInicio;
-        this.cantPuntosFin = cantPuntosFin;
-
-        this.grosorInicio = grosorInicio;
-        this.grosorFin = grosorFin;
-        this.alphaInicio = alphaInicio;
-        this.alphaFin = alphaFin;
-        this.rotacionInicio = rotacionInicio;
-        this.rotacionFin = rotacionFin;
-        this.anchoInicio = anchoInicio;
-        this.anchoFin = anchoFin;
-        this.altoInicio = altoInicio;
-        this.altoFin = altoFin;
-        this.hInicio = hInicio;
-        this.hFin = hFin;
-        this.sInicio = sInicio;
-        this.sFin = sFin;
-        this.vInicio = vInicio;
-        this.vFin = vFin;
-
-
-        this.anchoInicial = anchoInicial;
-        this.altoInicial = altoInicial;
-
-
+        //#endregion 
+        //#region ruido
+        this.ruido = {}
+        for (const valor of trazo.valoresRuido)
+            this.ruido[valor] = suavizado[valor] !== undefined ? suavizado[valor] : 0;
+        //#endregion
         //#region contar sensibilidades ruidos suavizados
         const cantValActi = (buscar, tipo) => {
             let cantidad = 0
@@ -697,10 +616,110 @@ class trazo {
         this.cantValSensInclinacionY = cantValActi(this.sensibilidad, 'inclinacionY')
         this.cantValSensInclinacionGeneral = cantValActi(this.sensibilidad, 'inclinacionGeneral')
         //#endregion
-
+        //#endregion
     }
+
     separar = true
     static minimoSeparacion = 0.01;
+    static valoresInicioFin = ['duracion', 'grosor', 'alpha', 'alto', 'ancho', 'rotacion', 'h', 's', 'v',]
+    static valoresSensibilidades = ['presion', 'msPx', 'inclinacionX', 'inclinacionY', 'inclinacionGeneral']
+    static valoresRuido = ['x', 'y', 'alpha', 'grosor', 'rotacion', 'ancho', 'alto', 'h', 's', 'v',]
+    static rangosValores = {
+        grosor: new rangoValor(1, 10, 300, 1),
+        flujo: new rangoValor(0, 1, 1, 0.01),
+        separacion: new rangoValor(0, 1, 10, 0.01),
+        puntosSuavizado: new rangoValor(2, 1, 50, 1),
+        rotacionInicial: new rangoValor(0, 0, 360, 1),
+        seguirRotacionTrayecto: new rangoValor(0, 0, 1, 0.01),
+        anchoInicial: new rangoValor(0, 1, 1, 1),
+        altoInicial: new rangoValor(0, 1, 1, 1),
+        toleranciaCanal: {
+            alpha: new rangoValor(0, 0, 1, 0.01),
+            rgb: {
+                r: new rangoValor(0, 0, 1, 0.01),
+                g: new rangoValor(0, 0, 1, 0.01),
+                b: new rangoValor(0, 0, 1, 0.01),
+            },
+            hsv: {
+                h: new rangoValor(0, 0, 1, 0.01),
+                s: new rangoValor(0, 0, 1, 0.01),
+                v: new rangoValor(0, 0, 1, 0.01),
+            },
+        },
+        reflejarCanal: {
+            alpha: new rangoValor(0, 0, 1, 0.01),
+            rgb: {
+                r: new rangoValor(0, 0, 1, 0.01),
+                g: new rangoValor(0, 0, 1, 0.01),
+                b: new rangoValor(0, 0, 1, 0.01),
+            },
+            hsv: {
+                h: new rangoValor(0, 0, 1, 0.01),
+                s: new rangoValor(0, 0, 1, 0.01),
+                v: new rangoValor(0, 0, 1, 0.01),
+            },
+        },
+        sensibilidad: (() => {
+            const devolver = {}
+            for (const entrada of trazo.valoresSensibilidades) {
+                if (!devolver[entrada])
+                    devolver[entrada] = {}
+                for (const salida of cordenada.valores)
+                    devolver[entrada][salida] = new rangoValor(0, 0.01, 1, 0)
+            }
+            return devolver
+        })(),
+        suavizado: (() => {
+            const devolver = {}
+            for (const actual of cordenada.valores)
+                devolver[actual] = new rangoValor(0, 0, 1, 0.01);
+            return devolver
+        })(),
+        ruido: (() => {
+            const devolver = {}
+            for (const actual of trazo.valoresRuido)
+                devolver[actual] = new rangoValor(0, 0, 1, 0.01);
+
+            devolver.x = new rangoValor(0, 0, 10, 0.01);
+            devolver.y = new rangoValor(0, 0, 10, 0.01);
+            return devolver
+        })(),
+        inicioFin: (() => {
+            const devolver = {}
+
+            for (const actual of trazo.valoresInicioFin) {
+                devolver[actual] = {}
+                const inicio = actual !== 'rotacion' && actual !== 'h' ? 1 : 0
+                devolver[actual].inicio = new rangoValor(0, inicio, 1, 0.01);
+                devolver[actual].fin = new rangoValor(0, inicio, 1, 0.01);
+            }
+            devolver.duracion = {
+                inicio: new rangoValor(0, 0, 300, 1),
+                fin: new rangoValor(0, 0, 300, 1),
+            }
+            return devolver
+        })(),
+
+    }
+
+    static obtenerRangoValor(valor) { //  se recibe un string o un capa1.capa2.valor como acceder a un objeto pero en string
+        const ruta = valor.split('.')
+        let elementoActual = trazo.rangosValores[ruta[0]]
+        for (let i = 1; i < ruta.length; i++) {
+            elementoActual = elementoActual[ruta[i]]
+        }
+        return elementoActual
+    }
+
+    obtenerValorString(valor) {
+        const ruta = valor.split('.')
+
+        let elementoActual = this[ruta[0]]
+        for (let i = 1; i < ruta.length; i++) {
+            elementoActual = elementoActual[ruta[i]]
+        }
+        return elementoActual
+    }
 
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
@@ -786,13 +805,13 @@ class trazo {
         }
         return clonTrayectos
     }
-    clonar() {
+    clonar(clonarTrayecto = true) {
         return new trazo({
             puntoInicial: { x: this.puntoInicial.x, y: this.puntoInicial.y },
             grosor: this.grosor,
             rgba: this.clonarRGBA(),
             flujo: this.flujo,
-            trayectos: this.clonarTrayectos(),
+            trayectos: clonarTrayecto ? this.clonarTrayectos() : [],
             herramienta: this.herramienta,
             sello: this.sello,
             separacion: this.separacion,
@@ -908,39 +927,51 @@ class trazo {
                 }
             },
 
+            inicioFin: {
+                duracion: {
+                    inicio: this.inicioFin.duracion.inicio,
+                    fin: this.inicioFin.duracion.fin,
+                },
+                rotacion: {
+                    inicio: this.inicioFin.rotacion.inicio,
+                    fin: this.inicioFin.rotacion.fin,
+                },
+                grosor: {
+                    inicio: this.inicioFin.grosor.inicio,
+                    fin: this.inicioFin.grosor.fin,
+                },
+                alpha: {
+                    inicio: this.inicioFin.alpha.inicio,
+                    fin: this.inicioFin.alpha.fin,
+                },
+                alto: {
+                    inicio: this.inicioFin.alto.inicio,
+                    fin: this.inicioFin.alto.fin,
+                },
+                ancho: {
+                    inicio: this.inicioFin.ancho.inicio,
+                    fin: this.inicioFin.ancho.fin,
+                },
+                h: {
+                    inicio: this.inicioFin.h.inicio,
+                    fin: this.inicioFin.h.fin,
+                },
+                s: {
+                    inicio: this.inicioFin.s.inicio,
+                    fin: this.inicioFin.s.fin,
+                },
+                v: {
+                    inicio: this.inicioFin.v.inicio,
+                    fin: this.inicioFin.v.fin,
+                }
+            },
+
             puntosSuavizado: this.puntosSuavizado,
             redondearFigura: this.redondearFigura,
 
 
             semilla: this.semilla,
             seguirRotacionTrayecto: this.seguirRotacionTrayecto,
-
-            cantPuntosInicio: this.cantPuntosInicio,
-            cantPuntosFin: this.cantPuntosFin,
-
-            grosorInicio: this.grosorInicio,
-            grosorFin: this.grosorFin,
-
-            alphaInicio: this.alphaInicio,
-            alphaFin: this.alphaFin,
-
-            rotacionInicio: this.rotacionInicio,
-            rotacionFin: this.rotacionFin,
-
-            anchoInicio: this.anchoInicio,
-            anchoFin: this.anchoFin,
-
-            altoInicio: this.altoInicio,
-            altoFin: this.altoFin,
-
-            hInicio: this.hInicio,
-            hFin: this.hFin,
-
-            sInicio: this.sInicio,
-            sFin: this.sFin,
-
-            vInicio: this.vInicio,
-            vFin: this.vFin,
 
             ruido: {
                 x: this.ruido.x,
@@ -1160,17 +1191,17 @@ class trazo {
     calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length }) {
         if (puntos.length === 0) return
         const puntosProcesados = []
-        const rangoTotal = this.cantPuntosFin + this.cantPuntosInicio;
+        const rangoTotal = this.inicioFin.duracion.fin + this.inicioFin.duracion.inicio;
         let valorMaximo = rangoTotal <= puntos.length ? 1 : puntos.length / rangoTotal;
 
         let puntosInicio = valorMaximo === 1 ?
-            this.cantPuntosInicio :
-            this.cantPuntosInicio === 0 ?
+            this.inicioFin.duracion.inicio :
+            this.inicioFin.duracion.inicio === 0 ?
                 0 :
-                Math.round(puntos.length * (this.cantPuntosInicio / rangoTotal))
+                Math.round(puntos.length * (this.inicioFin.duracion.inicio / rangoTotal))
         let puntosFin = valorMaximo === 1 ?
-            this.cantPuntosFin :
-            this.cantPuntosFin === 0 ?
+            this.inicioFin.duracion.fin :
+            this.inicioFin.duracion.fin === 0 ?
                 0 :
                 puntos.length - (puntosInicio + 1);
 
@@ -1217,14 +1248,14 @@ class trazo {
             let v = 1;
             if (i <= puntosInicio) {
                 if (i === 0) {
-                    alpha = this.alphaInicio
-                    grosor = this.grosorInicio
-                    rotacion = this.rotacionInicio
-                    ancho = this.anchoInicio
-                    alto = this.altoInicio
-                    h = this.hInicio
-                    s = this.sInicio
-                    v = this.vInicio
+                    alpha = this.inicioFin.alpha.inicio
+                    grosor = this.inicioFin.grosor.inicio
+                    rotacion = this.inicioFin.rotacion.inicio
+                    ancho = this.inicioFin.ancho.inicio
+                    alto = this.inicioFin.alto.inicio
+                    h = this.inicioFin.h.inicio
+                    s = this.inicioFin.s.inicio
+                    v = this.inicioFin.v.inicio
 
                 } else {
                     const punto0 = puntos[i - 1]
@@ -1232,39 +1263,39 @@ class trazo {
                     longitudAlcanzadaInicio += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
                     const valorAlcanzado = (longitudAlcanzadaInicio / longitudTotalInicio) * valorMaximo
 
-                    alpha = this.alphaInicio + valorAlcanzado * (1 - this.alphaInicio)
-                    grosor = this.grosorInicio + valorAlcanzado * (1 - this.grosorInicio)
-                    rotacion = (this.rotacionInicio * (1 - valorAlcanzado)) % 1
-                    ancho = this.anchoInicio + valorAlcanzado * (1 - this.anchoInicio)
-                    alto = this.altoInicio + valorAlcanzado * (1 - this.altoInicio)
-                    h = (this.hInicio * (1 - valorAlcanzado)) % 1
-                    s = this.sInicio + valorAlcanzado * (1 - this.sInicio)
-                    v = this.vInicio + valorAlcanzado * (1 - this.vInicio)
+                    alpha = this.inicioFin.alpha.inicio + valorAlcanzado * (1 - this.inicioFin.alpha.inicio)
+                    grosor = this.inicioFin.grosor.inicio + valorAlcanzado * (1 - this.inicioFin.grosor.inicio)
+                    rotacion = (this.inicioFin.rotacion.inicio * (1 - valorAlcanzado)) % 1
+                    ancho = this.inicioFin.ancho.inicio + valorAlcanzado * (1 - this.inicioFin.ancho.inicio)
+                    alto = this.inicioFin.alto.inicio + valorAlcanzado * (1 - this.inicioFin.alto.inicio)
+                    h = (this.inicioFin.h.inicio * (1 - valorAlcanzado)) % 1
+                    s = this.inicioFin.s.inicio + valorAlcanzado * (1 - this.inicioFin.s.inicio)
+                    v = this.inicioFin.v.inicio + valorAlcanzado * (1 - this.inicioFin.v.inicio)
                 }
             } else if (i >= inicioPuntosFin) {
                 if (i === puntos.length - 1) {
-                    alpha = this.alphaFin
-                    grosor = this.grosorFin
-                    rotacion = this.rotacionFin
-                    ancho = this.anchoFin
-                    alto = this.altoFin
-                    h = this.hFin
-                    s = this.sFin
-                    v = this.vFin
+                    alpha = this.inicioFin.alpha.fin
+                    grosor = this.inicioFin.grosor.fin
+                    rotacion = this.inicioFin.rotacion.fin
+                    ancho = this.inicioFin.ancho.fin
+                    alto = this.inicioFin.alto.fin
+                    h = this.inicioFin.h.fin
+                    s = this.inicioFin.s.fin
+                    v = this.inicioFin.v.fin
                 } else {
                     const punto0 = puntos[i]
                     const punto1 = puntos[i + 1]
                     longitudAlcanzadaFin += Math.hypot((punto1.x - punto0.x), (punto1.y - punto0.y))
                     const valorAlcanzado = (1 - longitudAlcanzadaFin / longitudTotalFin) * valorMaximo
 
-                    alpha = this.alphaFin + valorAlcanzado * (1 - this.alphaFin)
-                    grosor = this.grosorFin + valorAlcanzado * (1 - this.grosorFin)
-                    rotacion = (this.rotacionFin * (1 - valorAlcanzado)) % 1
-                    ancho = this.anchoFin + valorAlcanzado * (1 - this.anchoFin)
-                    alto = this.altoFin + valorAlcanzado * (1 - this.altoFin)
-                    h = (this.hFin * (1 - valorAlcanzado)) % 1
-                    s = this.sFin + valorAlcanzado * (1 - this.sFin)
-                    v = this.vFin + valorAlcanzado * (1 - this.vFin)
+                    alpha = this.inicioFin.alpha.fin + valorAlcanzado * (1 - this.inicioFin.alpha.fin)
+                    grosor = this.inicioFin.grosor.fin + valorAlcanzado * (1 - this.inicioFin.grosor.fin)
+                    rotacion = (this.inicioFin.rotacion.fin * (1 - valorAlcanzado)) % 1
+                    ancho = this.inicioFin.ancho.fin + valorAlcanzado * (1 - this.inicioFin.ancho.fin)
+                    alto = this.inicioFin.alto.fin + valorAlcanzado * (1 - this.inicioFin.alto.fin)
+                    h = (this.inicioFin.h.fin * (1 - valorAlcanzado)) % 1
+                    s = this.inicioFin.s.fin + valorAlcanzado * (1 - this.inicioFin.s.fin)
+                    v = this.inicioFin.v.fin + valorAlcanzado * (1 - this.inicioFin.v.fin)
                 }
             }
             if (inicioCalcular <= i && i < finCalcular) {
@@ -2032,7 +2063,7 @@ const pintor = {
             a: 1,
             lienzo: this.lienzosSello[0]
         })
-        this.ultimoTrazo = trazo;
+        this.ultimoTrazo = trazo.clonar(false);
     },
     trazoComplejo(trazo) {
         return this.obtenerHerramienta(trazo.herramienta).trazoComplejo(trazo);

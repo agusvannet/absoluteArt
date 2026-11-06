@@ -9,6 +9,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="/interfaz/css/variables.css">
     <link rel="stylesheet" href="/interfaz/css/styles.css">
     <title>AbsoluteArt - Pizarron</title>
 </head>
@@ -54,7 +55,7 @@
 
                     <div class="lista">
 
-                        
+
 
                     </div>
                     <div class="scrollBar vertical sombreadoGeneral">
@@ -71,17 +72,40 @@
 
     <div class="desplegable desplegado" id="seleccionHerramientas">
         <div class=" contenido sombreadoGeneral">
-            <div class="herramienta">cursor</div>
-            <div class="herramienta">pincel</div>
-            <div class="herramienta">borrador</div>
-            <div class="herramienta">figura</div>
-            <div class="herramienta">recorte</div>
-            <div class="herramienta">balde</div>
-            <div class="herramienta">texto</div>
-            <div class="herramienta">lazo</div>
-            <div class="herramienta">difuminar</div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('cursor')"> cursor </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('pincel')"> pincel </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('borrador')"> borrador </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('figura')"> figura </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('recorte')"> recorte </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('balde')"> balde </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('texto')"> texto </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('lazo')"> lazo </div>
+            <div class="herramienta" onclick="cambiarTipoHerramienta('difuminar')"> difuminar </div>
         </div>
         <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('seleccionHerramientas')">
+            <img src="/interfaz/imagenes/flechita.svg" alt="">
+        </button>
+    </div>
+
+    <div class="desplegable desplegado" id="configuracionPreset">
+        <div class=" contenido sombreadoGeneral">
+            <div class="preVisualizacionPreset">
+                <div class="preset" id="previsualizacionPresetActual">
+                    <div class="presentacion" id="presentacionPresetActual">
+                        <canvas width="1" height="1"></canvas>
+                        <div class="nombrePreset">preset</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="configuracionPreset">
+                <div class="categoriasValoresPreset">
+                </div>
+                <div class="valoresPreset" id="listaValoresPreset">
+                </div>
+            </div>
+        </div>
+        <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('configuracionPreset')">
             <img src="/interfaz/imagenes/flechita.svg" alt="">
         </button>
     </div>
@@ -92,6 +116,7 @@
     <script src="/js/herramientas.js"></script>
     <script src="/js/presets.js"></script>
 
+    <script src="/interfaz/js/gestionMenu.js"></script>
     <script src="/interfaz/js/interfaz.js"></script>
 </body>
 

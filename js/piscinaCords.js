@@ -22,6 +22,7 @@ class cordenada {
     static minMsPx = 0.004;
     static maxInclinacion = 90;
     static minInclinacion = -90;
+    static valores = ['x', 'y', 'presion', 'msPx', 'inclinacionX', 'inclinacionY', 'alpha', 'grosor', 'rotacion', 'ancho', 'alto', 'h', 's', 'v']
     clonar(
         x = this.x,
         y = this.y,

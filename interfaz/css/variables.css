@@ -1,0 +1,25 @@
+:root {
+    --fondo: rgb(26, 26, 26);
+    --px: calc(100vh / 1080);
+    --colorCaracteristico: #ffa200;
+    --colorPanel: #EBEBEB;
+    --colorSecundarioPanel: #D4D4D4;
+    --colorTercearioPanel: #c4c2c2;
+    --colorCuartarioPanel: rgb(170, 170, 170);
+    --colorQuintoPanel: rgb(126, 126, 126);
+    --colorSextoPanel: #747474;
+
+
+    --padingGeneral: 16;
+
+    --colorSombraGeneral: rgba(255, 255, 255, 0.25);
+    --tamanioSombraGeneral: 10;
+
+    --colorBordeadoSuave: #6A6A6A;
+
+    --tiempoAnimacion: .25s;
+
+    --colorFuente: white;
+    --colorFuenteOpuesta: black;
+    --fondoFuenteOpuesta: rgba(116, 116, 116, .5);
+}

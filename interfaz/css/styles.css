@@ -1,29 +1,3 @@
-:root {
-    --fondo: rgb(26, 26, 26);
-    --px: calc(100vh / 1080);
-    --colorCaracteristico: #ffa200;
-    --colorPanel: #EBEBEB;
-    --colorSecundarioPanel: #D4D4D4;
-    --colorTercearioPanel: #c4c2c2;
-    --colorCuartarioPanel: rgb(170, 170, 170);
-    --colorQuintoPanel: rgb(126, 126, 126);
-    --colorSextoPanel: #747474;
-
-
-    --padingGeneral: 16;
-
-    --colorSombraGeneral: rgba(255, 255, 255, 0.25);
-    --tamanioSombraGeneral: 10;
-
-    --colorBordeadoSuave: #6A6A6A;
-
-    --tiempoAnimacion: .25s;
-
-    --colorFuente: white;
-    --colorFuenteOpuesta: black;
-    --fondoFuenteOpuesta: rgba(116, 116, 116, .5);
-}
-
 * {
     padding: 0;
     margin: 0;
@@ -265,6 +239,7 @@ button:hover {
     height: calc(75 * var(--px));
     border-bottom: calc(var(--px) * .25) solid var(--colorCuartarioPanel);
     display: flex;
+    /* Hace que el color de la fuente desaparezca y deje ver el fondo */
 }
 
 .preset.grande {
@@ -334,7 +309,6 @@ button:hover {
     justify-content: center;
 }
 
-
 .scrollBar .carril {
     border-radius: 1000px;
     border: calc(var(--px) * .125) solid var(--colorQuintoPanel);
@@ -398,11 +372,10 @@ button:hover {
 
 #seleccionHerramientas .boton img {
     height: 150%;
-    transform: rotate(90deg);
+    transform: rotate(-90deg);
     transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
 
 }
-
 
 #seleccionHerramientas .contenido,
 #seleccionHerramientas.plegado .contenido {
@@ -417,8 +390,6 @@ button:hover {
     transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
     transform: unset;
 }
-
-
 
 #seleccionHerramientas .contenido .herramienta {
     height: 100%;
@@ -440,5 +411,138 @@ button:hover {
 
 #seleccionHerramientas.plegado img {
     transition: transform var(--tiempoAnimacion) ease, opacity 0.2s ease;
-    transform: rotate(-90deg);
+    transform: rotate(90deg);
+}
+
+
+#configuracionPreset .contenido {
+    height: calc(var(--px) * 748);
+    width: calc(var(--px) * 390);
+    background-color: var(--colorPanel);
+    padding: calc(var(--px) * var(--padingGeneral));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--px);
+    border-radius: calc(var(--px) * 7.5);
+    overflow: hidden;
+
+}
+
+#configuracionPreset .contenido .preVisualizacionPreset {
+    border: calc(var(--px) * .25) solid var(--colorBordeadoSuave);
+    width: 100%;
+    height: calc(var(--px) * 136);
+    border-radius: calc(var(--px) * 7.5);
+    overflow: hidden;
+}
+
+
+#configuracionPreset .contenido .configuracionPreset {
+    width: 100%;
+    height: calc(var(--px) * 564);
+    border-radius: calc(var(--px) * 7.5);
+}
+
+#previsualizacionPresetActual {
+    height: 100%;
+    width: 100%;
+    border-radius: calc(var(--px) * 7.5);
+}
+
+
+
+#configuracionPreset.desplegado .contenido {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(100%);
+    /* acomodar esto despues , esto es solo para sacar de encima de las categorias */
+}
+
+#configuracionPreset .contenido .categoriasValoresPreset {
+    border-radius: calc(var(--px) * 7.5) calc(var(--px) * 7.5) 0 0;
+    width: 100%;
+    height: calc(var(--px) * 56);
+    background-color: var(--colorQuintoPanel);
+}
+
+#configuracionPreset .contenido .valoresPreset {
+    background-color: var(--colorTercearioPanel);
+    width: 100%;
+    height: calc(100% - (var(--px) * 56));
+    border-radius: 0 0 calc(var(--px) * 7.5) calc(var(--px) * 7.5);
+    padding: calc((var(--px) * 8));
+
+}
+
+.valorPreset {
+    background-color: var(--colorCuartarioPanel);
+    width: 100%;
+    border-radius: calc((var(--px) * 6));
+    height: calc((var(--px) * 66));
+    padding: calc((var(--px) * 5));
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: calc(var(--px) * 6);
+}
+
+.valoresPreset .texto {
+    height: 40%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.valoresPreset .texto p {
+    font-size: calc((var(--px) * 17));
+    font-weight: 500;
+    color: white;
+}
+
+.valoresPreset .inputs {
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    gap: calc((var(--px) * 3));
+}
+
+.valoresPreset .inputs button {
+    color: white;
+    font-weight: bolder;
+    background-color: var(--colorCaracteristico);
+    border-radius: 100%;
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.valoresPreset .inputs .rangeCaja {
+    width: 100%;
+    height: 100%;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc((var(--px) * 5));
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.valoresPreset .inputs .rangeCaja input {
+    width: 100%;
+    accent-color: var(--colorCaracteristico);
+}
+
+#listaValoresPreset {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    gap: calc(var(--px) * 8);
+}
+
+.valorPreset.separacionValores {
+    background-color: var(--colorQuintoPanel);
+    padding: calc((var(--px) * 2.5));
 }
