@@ -388,7 +388,7 @@ class poligonoSimple extends figura {
         if (!this.trazoEnProceso(trazo)) clonTrazo.trayectos[clonTrazo.trayectos.length - 1][0] = clonTrazo.trayectos[0][0]
 
         clonTrazo.trayectos = [clonTrazo.obtenerTrayectoPlano()]
-        clonTrazo.herramienta = 'pincelSellosSimple'
+        clonTrazo.herramienta = 'pincelSellos'
         clonTrazo.modoDibujo = 'normal'
         clonTrazo.rebotarSuavizado = true;
 
@@ -449,7 +449,7 @@ class poligonoSimple extends figura {
     }
 
 }
-class pincelSellosSimple extends pincel {
+class pincelSellos extends pincel {
     constructor({ nombre, categoria, trayectoMuyLargo }) {
         super({ nombre, categoria, trayectoMuyLargo })
     }
@@ -517,7 +517,7 @@ class pincelSellosSimple extends pincel {
                 let cordenadas = trayectoSuavizado
                 let rotacionTrayecto = 0
 
-                trazo.calcularAleatorizacon({ cordenadas, modificar: true, /* formula: (n, sem) => { return -(Math.random()) } */ });
+                trazo.calcularAleatorizacon({ cordenadas, modificar: true, });
                 for (let n = 0; n < cordenadas.length; n++) {
                     if (cordenadas[n + 1] || puntoFinalTrayectoria) {
                         const cord1 = cordenadas[n]
@@ -600,9 +600,9 @@ class figuraSellos extends lineaSimple {
         if (!this.trazoValido(trazo) || trazo.trayectos[0][trazo.trayectos[0].length - 1].x === 0 && trazo.trayectos[0][trazo.trayectos[0].length - 1].y === 0) return
 
         const clonTrazo = trazo.clonar();
-        clonTrazo.herramienta = 'pincelSellosSimple'
+        clonTrazo.herramienta = trazo.motorPincel
         clonTrazo.modoDibujo = 'normal'
-        clonTrazo.rebotarSuavizado = true;
+        clonTrazo.rebotarSuavizado = trazo.suavizadoCiclico;
         clonTrazo.separar = false;
 
         clonTrazo.cantValSensPresion = 0;
@@ -631,7 +631,6 @@ class figuraSellos extends lineaSimple {
         const puntosVertices = this.transformarVerticesPuntos(clonTrazo)
         clonTrazo.trayectos = puntosVertices;
         pintor.dibujar({ lienzoDibujar: lienzoIntermediario.lienzoComunSecundario, trazo: clonTrazo })
-
         lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComunSecundario, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
     }
     transformarVerticesPuntos(trazo) {
@@ -755,6 +754,7 @@ class baldeSimple extends herramienta {
     }
 }
 class pincelBarato extends pincel {
+
     obtenerPuntosMoviles() {
         return 2
     }
@@ -764,6 +764,7 @@ class pincelBarato extends pincel {
         for (let n = inicioTrayectos; n <= finTrayectos; n++) {
             inicioTrayecto = inicioTrayecto !== undefined ? inicioTrayecto : 0
             finTrayecto = finTrayecto !== undefined ? finTrayecto : trazo.trayectos[n].length - 1
+            console.log({ lienzo, lienzoIntermediario, trazo, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto })
             lienzoIntermediario.lienzoComun.pintarTrayectoLineas({
                 puntoInicialX: trazo.puntoInicial.x,
                 puntoInicialY: trazo.puntoInicial.y,
@@ -820,7 +821,7 @@ const herramientas = [
     { clase: 'selloTest', parametros: { nombre: 'selloTest', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'selloCircular', parametros: { nombre: 'selloCircular', categoria: pintor.obtenerCategoria('sello') } },
     { clase: 'pincelBarato', parametros: { nombre: 'pincelBarato', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
-    { clase: 'pincelSellosSimple', parametros: { nombre: 'pincelSellosSimple', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
+    { clase: 'pincelSellos', parametros: { nombre: 'pincelSellos', categoria: pintor.obtenerCategoria('pinceles'), trayectoMuyLargo: 4000 } },
     { clase: 'baldeSimple', parametros: { nombre: 'baldeSimple', categoria: pintor.obtenerCategoria('mutacionColor') } },
     {
         clase: 'figuraSellos', parametros: {

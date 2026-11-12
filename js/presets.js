@@ -9,6 +9,9 @@ class preset {
         if (!clonado) {
             preset.contadorPresets++;
         }
+
+        this.acomodarCordenadas()
+
     }
     static trayectosPresets = {
         pinceles: [[]],
@@ -23,6 +26,45 @@ class preset {
     static rgbaGeneralPresets = [{ r: 255, g: 0, b: 0, a: 1 }, { r: 0, g: 255, b: 255, a: 1 }]
     static rgbaFondoBorrar = { r: 0, g: 0, b: 0, a: 1 }
     static maximoGrosorRenderizar = 50
+
+    static recalcularTrayectos({
+        cantPuntos = 10,
+        largo = 1,
+        alto = 1,
+        paddingHorizontal = 0,
+        paddingVertical = 0
+    }) {
+        const tiposTrayectos = Object.keys(preset.trayectosPresets)
+        for (const actual of tiposTrayectos) {
+            preset.trayectosPresets[actual][0] = []
+        }
+        preset.puntoInicialPreset.pinceles.x = paddingHorizontal;
+        preset.puntoInicialPreset.pinceles.y = alto / 2;
+
+        largo -= paddingHorizontal * 2
+        const tamanioSeccion = (pi * 2) / cantPuntos
+        const altitud = alto / 2 - paddingVertical
+        for (let i = 0; i <= cantPuntos; i++) {
+            preset.trayectosPresets.pinceles[0].push(
+                new cordenada(
+                    largo * (tamanioSeccion * i / (pi * 2)),
+                    Math.sin(tamanioSeccion * i).toFixed(5) * altitud
+                ))
+        }
+        preset.puntoInicialPreset.figuras.x = paddingHorizontal;
+        preset.puntoInicialPreset.figuras.y = paddingVertical;
+
+        preset.trayectosPresets.figuras[0].push(
+            new cordenada(
+                0,
+                0
+            ),
+            new cordenada(
+                largo,
+                alto - paddingVertical * 2
+            ))
+    }
+
     renderizarPreset({ canvas, recalcularTrayectos, cantPuntos, altitud, paddingHorizontal, paddingVertical }) {
         const canvasPresetDatos = canvas.getBoundingClientRect()
         if (canvas.height !== canvasPresetDatos.height * 2 || canvas.width !== canvasPresetDatos.width * 2) {
@@ -73,10 +115,10 @@ class preset {
         if (this.trazo.grosor > preset.maximoGrosorRenderizar)
             trazoOriginal = preset.maximoGrosorRenderizar
     }
-    clonar() {
-        return new preset({
-            trazo: this.trazo.clonar(),
 
+    clonar(clonarTrayecto) {
+        return new preset({
+            trazo: this.trazo.clonar(clonarTrayecto),
             nombre: this.nombre,
             categoria: this.categoria,
             subCategoria: this.subCategoria,
@@ -84,43 +126,25 @@ class preset {
         })
     }
 
-    static recalcularTrayectos({
-        cantPuntos = 10,
-        largo = 1,
-        alto = 1,
-        paddingHorizontal = 0,
-        paddingVertical = 0
-    }) {
-        const tiposTrayectos = Object.keys(preset.trayectosPresets)
-        for (const actual of tiposTrayectos) {
-            preset.trayectosPresets[actual][0] = []
+    acomodarCordenadas() {
+        if (pintor.obtenerHerramienta(this.trazo.herramienta).perteneceCategoria(pintor.obtenerCategoria("pinceles"))) {
+            this.trazo.trayectos = preset.trayectosPresets.pinceles
+            this.trazo.puntoInicial = preset.puntoInicialPreset.pinceles
+        } else if (pintor.obtenerHerramienta(this.trazo.herramienta).perteneceCategoria(pintor.obtenerCategoria("figuras"))) {
+            this.trazo.trayectos = preset.trayectosPresets.figuras
+            this.trazo.puntoInicial = preset.puntoInicialPreset.figuras
         }
-        preset.puntoInicialPreset.pinceles.x = paddingHorizontal;
-        preset.puntoInicialPreset.pinceles.y = alto / 2;
-
-        largo -= paddingHorizontal * 2
-        const tamanioSeccion = (pi * 2) / cantPuntos
-        const altitud = alto / 2 - paddingVertical
-        for (let i = 0; i <= cantPuntos; i++) {
-            preset.trayectosPresets.pinceles[0].push(
-                new cordenada(
-                    largo * (tamanioSeccion * i / (pi * 2)),
-                    Math.sin(tamanioSeccion * i).toFixed(5) * altitud
-                ))
-        }
-        preset.puntoInicialPreset.figuras.x = paddingHorizontal;
-        preset.puntoInicialPreset.figuras.y = paddingVertical;
-
-        preset.trayectosPresets.figuras[0].push(
-            new cordenada(
-                0,
-                0
-            ),
-            new cordenada(
-                largo,
-                alto - paddingVertical * 2
-            ))
     }
+
+    restablecer() {
+        this.nombre = respaldosPreset[this.id].nombre
+        this.categoria = respaldosPreset[this.id].categoria
+        this.subCategoria = respaldosPreset[this.id].subCategoria
+        this.trazo = respaldosPreset[this.id].trazo.clonar(false)
+        this.acomodarCordenadas()
+
+    }
+
 }
 
 const categoriaPresets = {
@@ -148,13 +172,6 @@ function agregarPreset({ trazoPreset, nombre = 'generico', categoria = trazoPres
         subCategoria
     })
 
-    if (pintor.obtenerHerramienta(trazoPreset.herramienta).perteneceCategoria(pintor.obtenerCategoria("pinceles"))) {
-        nuevoPreset.trazo.trayectos = preset.trayectosPresets.pinceles
-        nuevoPreset.trazo.puntoInicial = preset.puntoInicialPreset.pinceles
-    } else if (pintor.obtenerHerramienta(trazoPreset.herramienta).perteneceCategoria(pintor.obtenerCategoria("figuras"))) {
-        nuevoPreset.trazo.trayectos = preset.trayectosPresets.figuras
-        nuevoPreset.trazo.puntoInicial = preset.puntoInicialPreset.figuras
-    }
     nuevoPreset.trazo.rgba = preset.rgbaGeneralPresets
 
     const respaldo = nuevoPreset.clonar(false)
@@ -168,15 +185,17 @@ function agregarPreset({ trazoPreset, nombre = 'generico', categoria = trazoPres
     respaldosPreset.push(respaldo)
     return nuevoPreset
 }
+
+const figurasDibujar = ['cruzSellos', 'crepperSello', 'romboSello', 'estrellaSellos', 'lineaSello']
 const modosDibujo = ['normal', 'borrar']
 for (const modo of modosDibujo) {
-    for (const figura of pintor.obtenerCategoria("figurasSello").herramientas) {
+    for (const figura of figurasDibujar) {
         agregarPreset({
             nombre: 'figura ',
             categoria: 'figuras',
+            subCategoria: sello.nombre,
             trazoPreset: new trazo({
-                herramienta: figura.nombre,
-
+                herramienta: figura,
                 separacion: .2,
                 grosor: 20,
 
@@ -185,43 +204,11 @@ for (const modo of modosDibujo) {
         })
     }
     agregarPreset({
-        nombre: 'pincel',
-        categoria: 'pinceles',
-        trazoPreset: new trazo({
-            herramienta: 'pincelSellosSimple',
-            separacion: .2,
-            grosor: 20,
-
-            inicioFin: {
-                duracion: {
-                    inicio: 25,
-                    fin: 25
-                },
-                alpha: {
-                    inicio: .25,
-                    fin: .25
-                }
-            },
-            modoDibujo: modo,
-            flujo: .25,
-        })
-    })
-    agregarPreset({
         nombre: 'pincel ',
         categoria: 'pinceles',
+        subCategoria: sello.nombre,
         trazoPreset: new trazo({
-            herramienta: 'pincelSellosSimple',
-            separacion: .2,
-            grosor: 20,
-            modoDibujo: modo,
-            flujo: .25,
-        })
-    })
-    agregarPreset({
-        nombre: 'pincel ',
-        categoria: 'pinceles',
-        trazoPreset: new trazo({
-            herramienta: 'pincelSellosSimple',
+            herramienta: 'pincelSellos',
             separacion: .0,
             grosor: 20,
             modoDibujo: modo,

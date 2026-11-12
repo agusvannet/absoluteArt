@@ -477,6 +477,7 @@ class trazo {
         respetarSignoY = true,
         puntosSuavizado = 2,
         redondearFigura = false,
+        suavizadoCiclico = false,
         toleranciaCanal = {},
         reflejarCanal = {},
         sensibilidad = {},
@@ -488,6 +489,8 @@ class trazo {
         seguirRotacionTrayecto = 0,
         anchoInicial = 1,
         altoInicial = 1,
+        valoresIniciales = {},
+        motorPincel = 'pincelSellos',
     }) {
         //#region datos
 
@@ -508,6 +511,8 @@ class trazo {
         this.colorCompararBalde = colorCompararBalde;
         this.respetarSignoX = respetarSignoX;
         this.respetarSignoY = respetarSignoY;
+        this.motorPincel = motorPincel;
+        this.suavizadoCiclico = suavizadoCiclico;
 
         this.puntosSuavizado = puntosSuavizado;
         this.redondearFigura = redondearFigura;
@@ -598,8 +603,17 @@ class trazo {
         //#region ruido
         this.ruido = {}
         for (const valor of trazo.valoresRuido)
-            this.ruido[valor] = suavizado[valor] !== undefined ? suavizado[valor] : 0;
+            this.ruido[valor] = ruido[valor] !== undefined ? ruido[valor] : 0;
         //#endregion
+        //#region valoresIniciales
+        this.valoresIniciales = {}
+        for (const valor of trazo.valoresInicioFin) {
+            if (valor !== 'duracion') {
+                let valPred = valor !== 'rotacion' && valor !== 'h' ? 1 : 0
+                this.valoresIniciales[valor] = valoresIniciales[valor] !== undefined ? valoresIniciales[valor] : valPred;
+            }
+        }
+        //#endrregion
         //#region contar sensibilidades ruidos suavizados
         const cantValActi = (buscar, tipo) => {
             let cantidad = 0
@@ -629,10 +643,10 @@ class trazo {
         flujo: new rangoValor(0, 1, 1, 0.01),
         separacion: new rangoValor(0, 1, 10, 0.01),
         puntosSuavizado: new rangoValor(2, 1, 50, 1),
-        rotacionInicial: new rangoValor(0, 0, 360, 1),
+        rotacionInicial: new rangoValor(0, 0, 6.28, 0.01),
         seguirRotacionTrayecto: new rangoValor(0, 0, 1, 0.01),
-        anchoInicial: new rangoValor(0, 1, 1, 1),
-        altoInicial: new rangoValor(0, 1, 1, 1),
+        anchoInicial: new rangoValor(0, 1, 1, 0.01),
+        altoInicial: new rangoValor(0, 1, 1, 0.01),
         toleranciaCanal: {
             alpha: new rangoValor(0, 0, 1, 0.01),
             rgb: {
@@ -664,8 +678,8 @@ class trazo {
             for (const entrada of trazo.valoresSensibilidades) {
                 if (!devolver[entrada])
                     devolver[entrada] = {}
-                for (const salida of cordenada.valores)
-                    devolver[entrada][salida] = new rangoValor(0, 0.01, 1, 0)
+                for (const salida of trazo.valoresInicioFin)
+                    devolver[entrada][salida] = new rangoValor(0, 0, 1, 0.01)
             }
             return devolver
         })(),
@@ -857,6 +871,8 @@ class trazo {
 
             respetarSignoX: this.respetarSignoX,
             respetarSignoY: this.respetarSignoY,
+            motorPincel: this.motorPincel,
+            suavizadoCiclico: this.suavizadoCiclico,
 
             suavizado: {
                 x: this.suavizado.x,
@@ -1609,8 +1625,8 @@ class trazo {
             this.sensibilidad.inclinacionGeneral.h !== 0 ||
             this.sensibilidad.inclinacionGeneral.s !== 0 ||
             this.sensibilidad.inclinacionGeneral.v !== 0 ||
-            ((this.cantPuntosInicio !== 0) && (this.hInicio !== 0 || this.sInicio !== 1 || this.vInicio !== 1)) ||
-            ((this.cantPuntosFin !== 0) && (this.hFin !== 0 || this.sFin !== 1 || this.vFin !== 1))
+            ((this.inicioFin.duracion.inicio !== 0) && (this.inicioFin.h.inicio !== 0 || this.inicioFin.s.inicio !== 1 || this.inicioFin.v.inicio !== 1)) ||
+            ((this.inicioFin.duracion.fin !== 0) && (this.inicioFin.h.fin !== 0 || this.inicioFin.s.fin !== 1 || this.inicioFin.v.fin !== 1))
         )
     }
 }
@@ -1930,7 +1946,7 @@ const pintor = {
         cuadradoDobleColor: (parametros) => { return new cuadradoDobleColor(parametros) },
         selloCaligrafia: (parametros) => { return new selloCaligrafia(parametros) },
         selloCircular: (parametros) => { return new selloCircular(parametros) },// nombre, cateogoria ( basicos )
-        pincelSellosSimple: (parametros) => { return new pincelSellosSimple(parametros) },// nombre, cateogoria ( basicos )
+        pincelSellos: (parametros) => { return new pincelSellos(parametros) },// nombre, cateogoria ( basicos )
         pincelBarato: (parametros) => { return new pincelBarato(parametros) },// nombre, cateogoria ( basicos )
         figuraSellos: (parametros) => { return new figuraSellos(parametros) },// nombre, cateogoria ( basicos )
         baldeSimple: (parametros) => { return new baldeSimple(parametros) },

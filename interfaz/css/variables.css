@@ -7,7 +7,8 @@
     --colorTercearioPanel: #c4c2c2;
     --colorCuartarioPanel: rgb(170, 170, 170);
     --colorQuintoPanel: rgb(126, 126, 126);
-    --colorSextoPanel: #747474;
+    --colorSextoPanel: rgb(124, 123, 123);
+    --colorSeptimoPanel: rgb(99, 99, 99);
 
 
     --padingGeneral: 16;
@@ -22,4 +23,6 @@
     --colorFuente: white;
     --colorFuenteOpuesta: black;
     --fondoFuenteOpuesta: rgba(116, 116, 116, .5);
+
+    --zIndexContenidoFugaz: 200;
 }

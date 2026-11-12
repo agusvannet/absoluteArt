@@ -433,7 +433,7 @@ class lienzoHtml extends lienzoBase {
         this.canvas.width = this.largo
         this.canvas.height = this.alto
     }
-    modosPegado = {
+    static modosPegado = {
         normal: 'source-over',
         borrar: 'destination-out',
         multiplicar: 'multiply',
@@ -447,13 +447,13 @@ class lienzoHtml extends lienzoBase {
 
     pegarLienzo({ lienzo, x, y, rotacion = 0, xPivote = 0, yPivote = 0, largo = lienzo.largo, alto = lienzo.alto, alpha = 1, modoPegado = 'normal' }) { // pegar en ESTE lienzo}
         if (alpha === 0) return
-        let guardar = modoPegado !== 'normal' ? this.modosPegado[modoPegado] : false
+        let guardar = modoPegado !== 'normal' ? lienzoHtml.modosPegado[modoPegado] : false
         guardar = guardar || alpha !== 1 || rotacion !== 0 || xPivote !== 0 || yPivote !== 0;
 
         if (guardar) {
             this.ctx.save();
             if (alpha !== 1) this.ctx.globalAlpha = alpha;
-            if (modoPegado) this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
+            if (modoPegado) this.ctx.globalCompositeOperation = lienzoHtml.modosPegado[modoPegado];
             if (rotacion !== 0) {
                 if (xPivote !== 0 || yPivote !== 0)
                     this.ctx.translate(x + xPivote, y + yPivote)
@@ -500,7 +500,7 @@ class lienzoHtml extends lienzoBase {
     pintarRectangulo({ x, y, largo, alto, r, g, b, a, modoPegado = 'normal' }) {
         if (modoPegado !== 'normal') {
             this.ctx.save();
-            this.ctx.globalCompositeOperation = this.modosPegado[modoPegado];
+            this.ctx.globalCompositeOperation = lienzoHtml.modosPegado[modoPegado];
         }
         this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
         this.ctx.fillRect(x, y, largo, alto)
@@ -550,11 +550,12 @@ class lienzoHtml extends lienzoBase {
         this.ctx.globalCompositeOperation = "source-over";
     }
     pintarTrayectoLineas({ puntoInicialX = 0, puntoInicialY = 0, trayecto, grosor, r, g, b, a, inicioTrayecto, finTrayecto }) {
+        console.log({ puntoInicialX, puntoInicialY, trayecto, grosor, r, g, b, a, inicioTrayecto, finTrayecto })
         if (trayecto.length > 1) {
             this.ctx.lineWidth = grosor;
             this.ctx.strokeStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
             this.ctx.beginPath();
-            for (let i = inicioTrayecto; i < finTrayecto; i++) {
+            for (let i = inicioTrayecto; i < finTrayecto - 1; i++) {
                 this.ctx.moveTo(trayecto[i].x + puntoInicialX, trayecto[i].y + puntoInicialY)
                 this.ctx.lineTo(trayecto[i + 1].x + puntoInicialX, trayecto[i + 1].y + puntoInicialY)
             }
@@ -562,10 +563,11 @@ class lienzoHtml extends lienzoBase {
         }
     }
     pintarTrayectoCirculo({ puntoInicialX = 0, puntoInicialY = 0, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto, finTrayecto }) {
+        console.log({ puntoInicialX, puntoInicialY, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto, finTrayecto })
         if (trayecto.length > 0) {
             this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
             this.ctx.beginPath();
-            for (let i = inicioTrayecto; i <= finTrayecto; i++) {
+            for (let i = inicioTrayecto; i < finTrayecto; i++) {
                 this.ctx.moveTo(trayecto[i].x + puntoInicialX, trayecto[i].y + puntoInicialY)
                 this.ctx.ellipse(
                     trayecto[i].x + puntoInicialX,
