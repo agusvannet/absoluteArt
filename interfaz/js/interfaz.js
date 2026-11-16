@@ -184,12 +184,13 @@ class carpetaValorTrazoNumerico extends carpetaValor {
 }
 
 class carpetaConjunto {
-    constructor(valorProcedencia, carpeta, rangeJefe, valorActualJefe, carpetasHijas = []) {
+    constructor(valorProcedencia, carpeta, rangeJefe, contenedorInputs, valorActualJefe, carpetasHijas = []) {
         this.valorProcedencia = valorProcedencia;
         this.carpeta = carpeta;
         this.rangeJefe = rangeJefe;
         this.valorActualJefe = valorActualJefe;
         this.carpetasHijas = carpetasHijas;
+        this.contenedorInputs = contenedorInputs;
     }
 
     darPaso(multiplicadorPaso = 1) {
@@ -202,7 +203,7 @@ class carpetaConjunto {
                     Number(this.rangeJefe.max),
                 )
             )
-        this.valorActual.innerHTML = this.rangeJefe.value
+        this.valorActualJefe.innerHTML = this.rangeJefe.value
         this.actualizarNumerosHtml();
         return Number(this.rangeJefe.value)
     }
@@ -220,8 +221,8 @@ class carpetaConjunto {
         valorPromedio = (valorPromedio / this.carpetasHijas.length).toFixed(2)
         this.rangeJefe.value = valorPromedio
         this.valorActualJefe.innerHTML = valorPromedio
-        this.rangeJefe.dataset.idTrazo = idPresetActivo
-        this.rangeJefe.dataset.idtrazo = idPresetActivo
+        this.contenedorInputs.dataset.idTrazo = idPresetActivo
+        this.contenedorInputs.dataset.idtrazo = idPresetActivo
     }
     actualizarNumerosHtml() {
         for (const actual of this.carpetasHijas) {
@@ -420,6 +421,14 @@ function agregarValorConjunto(ubicacion, valor, antesDespues = 'afterbegin') {
     for (const actual of valor.listaValores) {
         asignacionesValores += 'trazoActivo.' + actual.accesoVariable + ' = Number(this.value) ;'
     }
+
+    let asignacionesValoresBotonResta = ''
+    for (const actual of valor.listaValores)
+        asignacionesValoresBotonResta += 'trazoActivo.' + actual.accesoVariable + ' = nuevoValorResta' + valor.nombreCompleto + ';'
+    let asignacionesValoresBotonSuma = ''
+    for (const actual of valor.listaValores)
+        asignacionesValoresBotonSuma += 'trazoActivo.' + actual.accesoVariable + ' = nuevoValorSuma' + valor.nombreCompleto + ';'
+
     ubicacion.insertAdjacentHTML(antesDespues, `
         <div class="conjuntoValoresPreset cerrado ${valor.categoria}"  id="${valor.nombreCompleto}">
             <div class="valorPreset">
@@ -428,28 +437,31 @@ function agregarValorConjunto(ubicacion, valor, antesDespues = 'afterbegin') {
                         <p class="nombreValor"> ${valor.nombre} </p>
                         <p class="valorParametro">0</p>
                     </div>
-                    <div class="inputs">
-                        <button type="button" class="botonResta" onclick ="
-                        carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso()
+                    <div class="inputs" data-idtrazo = "${idPresetActivo}">
+                        <button type="button" class="botonResta"  onclick ="
+                        let nuevoValorResta${valor.nombreCompleto} = Number(carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso(-1));
+                        ${asignacionesValoresBotonResta}
+
                         carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
-                        renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                        renderizar(categoriaPresets.todos[Number(this.parentNode.dataset.idtrazo)]) ;
                         ">
                         -
                         </button>
                         <div class="rangeCaja inputRange">
-                            <input type="range" class="range rangeJefe"  data-idtrazo = "${idPresetActivo}" 
-                            onchange="renderizarPreVisualizacionPreset(categoriaPresets.todos[Number(this.dataset.idtrazo)])"
+                            <input type="range" class="range rangeJefe"
+                            onchange="renderizarPreVisualizacionPreset(categoriaPresets.todos[Number(this.parentNode.parentNode.dataset.idtrazo)])"
                             oninput ="${asignacionesValores}
                             this.parentNode.parentNode.parentNode.querySelector('.valorParametro').innerHTML = this.value;
                             carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
-                            renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                            renderizar(categoriaPresets.todos[Number(this.parentNode.parentNode.dataset.idtrazo)]) ;
                             "
                             >
                         </div>
                         <button type="button" class="botonSuma" onclick="
-                        carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso(-1)
+                        let nuevoValorSuma${valor.nombreCompleto}=Number(carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso());
+                        ${asignacionesValoresBotonSuma}
                         carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
-                        renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                        renderizar(categoriaPresets.todos[Number(this.parentNode.dataset.idtrazo)]) ;
                         ">
                         +
                         </button>
@@ -478,11 +490,13 @@ function agregarValorConjunto(ubicacion, valor, antesDespues = 'afterbegin') {
     const rangeJefe = carpetaActual.querySelector('.rangeJefe')
     const valorActualJefe = carpetaActual.querySelector('.valorParametro')
     const listaValores = carpetaActual.querySelector('.lista')
+    const contenedorInputs = carpetaActual.querySelector('.inputs')
     carpetasValoresTrazo[valor.nombreCompleto] =
         new carpetaConjunto(
             valor,
             carpetaActual,
             rangeJefe,
+            contenedorInputs,
             valorActualJefe
         )
 
