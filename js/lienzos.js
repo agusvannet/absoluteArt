@@ -549,8 +549,7 @@ class lienzoHtml extends lienzoBase {
         this.ctx.fill();
         this.ctx.globalCompositeOperation = "source-over";
     }
-    pintarTrayectoLineas({ puntoInicialX = 0, puntoInicialY = 0, trayecto, grosor, r, g, b, a, inicioTrayecto, finTrayecto }) {
-        console.log({ puntoInicialX, puntoInicialY, trayecto, grosor, r, g, b, a, inicioTrayecto, finTrayecto })
+    pintarTrayectoLineas({ puntoInicialX = 0, puntoInicialY = 0, trayecto, grosor, r, g, b, a, inicioTrayecto = 0, finTrayecto = trayecto.length }) {
         if (trayecto.length > 1) {
             this.ctx.lineWidth = grosor;
             this.ctx.strokeStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
@@ -562,8 +561,7 @@ class lienzoHtml extends lienzoBase {
             this.ctx.stroke();
         }
     }
-    pintarTrayectoCirculo({ puntoInicialX = 0, puntoInicialY = 0, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto, finTrayecto }) {
-        console.log({ puntoInicialX, puntoInicialY, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto, finTrayecto })
+    pintarTrayectoCirculo({ puntoInicialX = 0, puntoInicialY = 0, trayecto, radio, r, g, b, a, rotacion, inicio, fin, inicioTrayecto = 0, finTrayecto = trayecto.length }) {
         if (trayecto.length > 0) {
             this.ctx.fillStyle = 'rgba(' + r + ' , ' + g + ' , ' + b + ' , ' + a + ')';
             this.ctx.beginPath();

@@ -6,6 +6,8 @@
     --colorSecundarioPanel: #D4D4D4;
     --colorTercearioPanel: #c4c2c2;
     --colorCuartarioPanel: rgb(170, 170, 170);
+    --colorCuatroYMedioanel: rgb(148, 148, 148);
+
     --colorQuintoPanel: rgb(126, 126, 126);
     --colorSextoPanel: rgb(124, 123, 123);
     --colorSeptimoPanel: rgb(99, 99, 99);
@@ -24,5 +26,41 @@
     --colorFuenteOpuesta: black;
     --fondoFuenteOpuesta: rgba(116, 116, 116, .5);
 
+    --fondoPng: url(/interfaz/imagenes/fondoPng.avif);
+
     --zIndexContenidoFugaz: 200;
 }
+
+/*
+:root {
+    --fondo: rgb(68, 68, 68);
+    --px: calc(100vh / 1080);
+    --colorCaracteristico: #ffa200;
+    --colorPanel: #141414;
+    --colorSecundarioPanel: #2B2B2B;
+    --colorTercearioPanel: #3B3D3D;
+    --colorCuartarioPanel: rgb(85, 85, 85);
+    --colorCuatroYMedioanel: rgb(107, 107, 107);
+
+    --colorQuintoPanel: rgb(129, 129, 129);
+    --colorSextoPanel: rgb(131, 132, 132);
+    --colorSeptimoPanel: rgb(156, 156, 156);
+
+    --padingGeneral: 16;
+
+    --colorSombraGeneral: rgba(0, 0, 0, 0.25);
+    --tamanioSombraGeneral: 10;
+
+    --colorBordeadoSuave: #959595;
+
+    --tiempoAnimacion: .25s;
+
+    --fondoPng: url(/interfaz/imagenes/fondoPngOscuro.jpg);
+
+
+    --colorFuente: rgb(255, 255, 255);
+    --colorFuenteOpuesta: white;
+    --fondoFuenteOpuesta: rgba(139, 139, 139, .5);
+}
+
+*/

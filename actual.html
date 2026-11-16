@@ -77,7 +77,6 @@
             <div class="herramienta" onclick="cambiarTipoHerramienta('figura')"> figura </div>
             <div class="herramienta" onclick="cambiarTipoHerramienta('recorte')"> recorte </div>
             <div class="herramienta" onclick="cambiarTipoHerramienta('balde')"> balde </div>
-            <div class="herramienta" onclick="cambiarTipoHerramienta('texto')"> texto </div>
             <div class="herramienta" onclick="cambiarTipoHerramienta('lazo')"> lazo </div>
             <div class="herramienta" onclick="cambiarTipoHerramienta('difuminar')"> difuminar </div>
         </div>
@@ -92,16 +91,48 @@
                 <div class="preset" id="previsualizacionPresetActual">
                     <div class="presentacion" id="presentacionPresetActual">
                         <canvas width="1" height="1"></canvas>
-                        <div class="nombrePreset">preset</div>
+                        <div id="nombrePreset">preset</div>
                     </div>
                 </div>
             </div>
 
             <div class="configuracionPreset">
                 <div id="categoriasValoresPreset">
+                    <button button type="button" class="categoriaValor config"
+                        onclick="mostrarCategoriaValorCorrecta('config')">
+                        <p>config</p>
+                    </button>
                 </div>
                 <div class="valoresPreset" id="listaValoresPreset">
+                    <div class="seccionCategoria config">
 
+                        <div class="valorPreset config" id="cambioNombrePreset">
+                            <div class="configuracionValor">
+                                <div class="texto">
+                                    <p class="nombreValor">Nombre De Preset</p>
+                                </div>
+                                <div class="valorTextoBoton">
+
+                                    <div class="contenedorInputTexto">
+                                        <input type="text" class="inputTexto" name="" id="nombrePresetActivo">
+                                        <button type="button" class="limpiarTexto" onclick="
+                                            this.parentNode.querySelector('.inputTexto').value = '' ;">
+                                            <img src="/interfaz/imagenes/cruz.svg" alt="x">
+                                        </button>
+                                    </div>
+
+                                    <button type="button" onclick="
+                                        const nuevoNombre =  this.parentNode.querySelector('.contenedorInputTexto').querySelector('.inputTexto').value
+                                        if(nuevoNombre.length < 3 || nuevoNombre.length > 30) return
+                                        categoriaPresets.todos[idPresetActivo].nombre  = nuevoNombre;
+                                        acomodarNombrePreset() ">
+                                        Cambiar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>

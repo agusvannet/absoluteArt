@@ -10,27 +10,7 @@ function plegarDesplegar(idDuenio) {
         carpeta.classList.add('desplegado')
     }
 }
-const scrolsActivos = []
-const scroleables = document.getElementsByClassName('scrollBar')
 
-for (const scrol of scroleables) {
-    const barra = scrol.getElementsByClassName('barra')[0]
-    const lista = scrol.parentElement.getElementsByClassName('lista')[0]
-
-    const altoVisible = lista.clientHeight;
-    const altoContenidoTotal = lista.scrollHeight;
-
-    const proporcion = (Math.min((altoVisible / altoContenidoTotal), 1) * 100)
-    if (proporcion < 100) {
-        barra.style.height = proporcion + '%'
-        scrolsActivos.push({
-            lista,
-            barra
-        })
-    } else {
-        scrol.classList.add('desactivado')
-    }
-}
 
 function agregarPresetHtml(preset) {
     const ubicacion = document.getElementById('listaPresets').getElementsByClassName('lista')[0]
@@ -73,7 +53,7 @@ const renderizar = (preset) => {
     preset.renderizarPreset({
         canvas: document.getElementById('presentacionPresetActual').querySelector('canvas'),
         recalcularTrayectos: true,
-        cantPuntos: 25,
+        cantPuntos: 50,
         paddingHorizontal: 15,
         paddingVertical: 45,
     })
@@ -82,7 +62,8 @@ const renderizar = (preset) => {
 const carpetasValoresTrazo = {}
 
 class carpetaValor {
-    constructor(carpeta, nombre, valorActual) {
+    constructor(valorProcedencia, carpeta, nombre, valorActual) {
+        this.valorProcedencia = valorProcedencia;
         this.carpeta = carpeta;
         this.nombre = nombre;
         this.valorActual = valorActual;
@@ -90,15 +71,15 @@ class carpetaValor {
 }
 
 class carpetaValorSeleccionable extends carpetaValor {
-    constructor(carpeta, nombre, valorActual, listaSeleccionables, lienzoPresentacion, funcionRenderizar = () => { console.log('sin renderizador') }) {
-        super(carpeta, nombre, valorActual)
+    constructor(valorProcedencia, carpeta, nombre, valorActual, listaSeleccionables, lienzoPresentacion, funcionRenderizar = () => { console.log('sin renderizador') }) {
+        super(valorProcedencia, carpeta, nombre, valorActual)
         this.lienzoPresentacion = lienzoPresentacion
         this.listaSeleccionables = listaSeleccionables
         this.funcionRenderizar = funcionRenderizar
     }
 
-    actualizarValoresHtml(valor) {
-        const valorActual = (valor.nombre) ? trazoActivo[valor.accesoVariable] : valor
+    actualizarValoresHtml() {
+        const valorActual = (this.valorProcedencia.nombre) ? trazoActivo[this.valorProcedencia.accesoVariable] : this.valorProcedencia
         this.valorActual.innerHTML = valorActual;
         this.listaSeleccionables.dataset.idtrazo = idPresetActivo
         if (this.lienzoPresentacion) {
@@ -108,7 +89,8 @@ class carpetaValorSeleccionable extends carpetaValor {
 }
 
 class carpetaValorSwitch {
-    constructor(carpeta, divSwitch) {
+    constructor(valorProcedencia, carpeta, divSwitch) {
+        this.valorProcedencia = valorProcedencia;
         this.carpeta = carpeta;
         this.divSwitch = divSwitch;
     }
@@ -126,9 +108,9 @@ class carpetaValorSwitch {
         return returnar
     }
 
-    actualizarValoresHtml(valor) {
+    actualizarValoresHtml() {
         this.divSwitch.dataset.idtrazo = idPresetActivo
-        const valorActual = trazoActivo[valor.accesoVariable]
+        const valorActual = trazoActivo[this.valorProcedencia.accesoVariable]
         if (!valorActual) {
             this.divSwitch.classList.remove('activo')
             this.divSwitch.classList.add('inactivo')
@@ -141,7 +123,8 @@ class carpetaValorSwitch {
 }
 
 class carpetaValorAccion {
-    constructor(carpeta, accion) {
+    constructor(valorProcedencia, carpeta, accion) {
+        this.valorProcedencia = valorProcedencia;
         this.carpeta = carpeta;
         this.accion = accion;
     }
@@ -156,8 +139,8 @@ class carpetaValorAccion {
 }
 
 class carpetaValorTrazoNumerico extends carpetaValor {
-    constructor(carpeta, botonMenos, botonMas, range, nombre, valorActual) {
-        super(carpeta, nombre, valorActual)
+    constructor(valorProcedencia, carpeta, botonMenos, botonMas, range, nombre, valorActual) {
+        super(valorProcedencia, carpeta, nombre, valorActual)
         this.botonMenos = botonMenos;
         this.botonMas = botonMas;
         this.range = range;
@@ -184,9 +167,13 @@ class carpetaValorTrazoNumerico extends carpetaValor {
         this.valorActual.innerHTML = Number(this.range.value)
     }
 
-    actualizarValoresHtml(valor) {
-        this.range.value = categoriaPresets.todos[idPresetActivo].trazo.obtenerValorString(valor.accesoVariable)
-        this.valorActual.innerHTML = carpetasValoresTrazo[valor.nombreCompleto].range.value;
+    actualizarNumerosHtml() {
+        this.range.value = categoriaPresets.todos[idPresetActivo].trazo.obtenerValorString(this.valorProcedencia.accesoVariable)
+        this.actualizarValor()
+    }
+
+    actualizarValoresHtml() {
+        this.actualizarNumerosHtml()
         this.range.dataset.idtrazo = idPresetActivo
         this.botonMas.dataset.idtrazo = idPresetActivo
         this.botonMenos.dataset.idtrazo = idPresetActivo
@@ -196,62 +183,55 @@ class carpetaValorTrazoNumerico extends carpetaValor {
     }
 }
 
-function agregarValorNumerico(ubicacion, valor) {
-    const rango = trazo.obtenerRangoValor(valor.accesoVariable)
-    ubicacion.insertAdjacentHTML('beforeend', `
-                    <div class="valorPreset ${valor.categoria}" id="${valor.nombreCompleto}" data-idtrazo = "${idPresetActivo}">
-                            <div class="configuracionValor">
-                                 <div class="texto">
-                                     <p  class="nombreValor"> ${valor.nombre} </p>
-                                     <p class="valorParametro"></p>
-                                 </div>
-                                    <div class="inputs">
-                                        <button type="button" class="botonResta" data-idtrazo = "${idPresetActivo}"
-                                            onclick="
-                                                trazoActivo.${valor.accesoVariable} = carpetasValoresTrazo['${valor.nombreCompleto}'].restarPaso(Number(this.dataset.idtrazo)) 
-                                            ">
-                                                -
-                                        </button>
-                                     <div class="rangeCaja inputRange">
-                                     <input type="range" class="range" data-idtrazo = "${idPresetActivo}"
-                                     oninput = "
-                                        trazoActivo.${valor.accesoVariable} = Number(this.value) ;
-                                        renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
-                                        carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarValor(); 
-                                      " 
-                                      onchange="
-                                      renderizarPreVisualizacionPreset(categoriaPresets.todos[Number(this.dataset.idtrazo)])
-                                      ">
-                                 </div>
-                             <button type="button" class="botonSuma" data-idtrazo = "${idPresetActivo}"
-                             onclick="
-                                trazoActivo.${valor.accesoVariable} = carpetasValoresTrazo['${valor.nombreCompleto}'].sumarPaso(Number(this.dataset.idtrazo)) 
-                             ">
-                                 +
-                             </button>
-                             </div>
-                        </div>
-                    </div>
-                        `);
-    const carpetaActual = document.getElementById(valor.nombreCompleto)
-    carpetasValoresTrazo[valor.nombreCompleto] =
-        new carpetaValorTrazoNumerico(
-            carpetaActual,
-            carpetaActual.getElementsByClassName('botonResta')[0],
-            carpetaActual.getElementsByClassName('botonSuma')[0],
-            carpetaActual.getElementsByClassName('range')[0],
-            carpetaActual.getElementsByClassName('nombreValor')[0],
-            carpetaActual.getElementsByClassName('valorParametro')[0],
-        )
+class carpetaConjunto {
+    constructor(valorProcedencia, carpeta, rangeJefe, valorActualJefe, carpetasHijas = []) {
+        this.valorProcedencia = valorProcedencia;
+        this.carpeta = carpeta;
+        this.rangeJefe = rangeJefe;
+        this.valorActualJefe = valorActualJefe;
+        this.carpetasHijas = carpetasHijas;
+    }
 
-    carpetasValoresTrazo[valor.nombreCompleto].range.min = rango.minimo
-    carpetasValoresTrazo[valor.nombreCompleto].range.max = rango.maximo
-    carpetasValoresTrazo[valor.nombreCompleto].range.step = rango.salto
+    darPaso(multiplicadorPaso = 1) {
+        const valor = Number(this.rangeJefe.value)
+        this.rangeJefe.value =
+            Math.max(
+                Number(this.rangeJefe.min),
+                Math.min(
+                    valor + this.rangeJefe.step * Number(multiplicadorPaso),
+                    Number(this.rangeJefe.max),
+                )
+            )
+        this.valorActual.innerHTML = this.rangeJefe.value
+        this.actualizarNumerosHtml();
+        return Number(this.rangeJefe.value)
+    }
+    setearValoresIndividuales() {
+        for (const actual of this.carpetasHijas) {
+            actual.range.value = this.rangeJefe.value
+        }
+    }
+    actualizarValoresHtml() {
+        let valorPromedio = 0;
+        for (const actual of this.carpetasHijas) {
+            actual.actualizarValoresHtml()
+            valorPromedio += trazoActivo.obtenerValorString(actual.valorProcedencia.accesoVariable)
+        }
+        valorPromedio = (valorPromedio / this.carpetasHijas.length).toFixed(2)
+        this.rangeJefe.value = valorPromedio
+        this.valorActualJefe.innerHTML = valorPromedio
+        this.rangeJefe.dataset.idTrazo = idPresetActivo
+        this.rangeJefe.dataset.idtrazo = idPresetActivo
+    }
+    actualizarNumerosHtml() {
+        for (const actual of this.carpetasHijas) {
+            actual.actualizarNumerosHtml();
+        }
+    }
 }
 
-function agregarValorAccion(ubicacion, valor) {
-    console.log(ubicacion)
-    ubicacion.insertAdjacentHTML('beforeend', `
+function agregarValorAccion(ubicacion, valor, antesDespues = 'afterbegin') {
+    ubicacion.insertAdjacentHTML(antesDespues, `
     <button class="valorPreset accion"  id="${valor.nombreCompleto}" data-idtrazo="${idPresetActivo}" onclick="
             carpetasValoresTrazo['${valor.nombreCompleto}'].accion(Number(this.dataset.idtrazo));
             renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]); 
@@ -265,13 +245,14 @@ function agregarValorAccion(ubicacion, valor) {
 
     carpetasValoresTrazo[valor.nombreCompleto] =
         new carpetaValorAccion(
+            valor,
             carpetaActual,
             (id) => { valor.accion(id) },
         )
 }
 
-function agregarValorSeleccionable(ubicacion, valor) {
-    ubicacion.insertAdjacentHTML('beforeend', `
+function agregarValorSeleccionable(ubicacion, valor, antesDespues = 'afterbegin') {
+    ubicacion.insertAdjacentHTML(antesDespues, `
     <div class="valorPreset ${valor.categoria} " id="${valor.nombreCompleto}" data-idtrazo="${idPresetActivo}">
             <div class="configuracionValor">
                 <div class="texto"> 
@@ -338,6 +319,7 @@ function agregarValorSeleccionable(ubicacion, valor) {
     }
     carpetasValoresTrazo[valor.nombreCompleto] =
         new carpetaValorSeleccionable(
+            valor,
             carpetaActual,
             carpetaActual.getElementsByClassName('nombreValor')[0],
             carpetaActual.getElementsByClassName('valorParametro')[0],
@@ -347,8 +329,8 @@ function agregarValorSeleccionable(ubicacion, valor) {
         )
 }
 
-function agregarValorSwitch(ubicacion, valor) {
-    ubicacion.insertAdjacentHTML('beforeend', `
+function agregarValorSwitch(ubicacion, valor, antesDespues = 'afterbegin') {
+    ubicacion.insertAdjacentHTML(antesDespues, `
      <div class="valorPreset valorSwitch  ${valor.categoria}" id="${valor.nombreCompleto}" data-idtrazo = "${idPresetActivo}">
             <div class="nombreValor">
                 ${valor.nombre}
@@ -369,9 +351,151 @@ function agregarValorSwitch(ubicacion, valor) {
     const carpetaActual = document.getElementById(valor.nombreCompleto)
     carpetasValoresTrazo[valor.nombreCompleto] =
         new carpetaValorSwitch(
+            valor,
             carpetaActual,
             carpetaActual.querySelector('.switch'),
         )
+
+    return carpetasValoresTrazo[valor.nombreCompleto]
+}
+
+function agregarValorNumerico(ubicacion, valor, antesDespues = 'afterbegin') {
+    const rango = trazo.obtenerRangoValor(valor.accesoVariable)
+    ubicacion.insertAdjacentHTML(antesDespues, `
+        <div class="valorPreset ${valor.categoria}" id="${valor.nombreCompleto}" data-idtrazo = "${idPresetActivo}">
+                <div class="configuracionValor">
+                     <div class="texto">
+                         <p  class="nombreValor"> ${valor.nombre} </p>
+                         <p class="valorParametro"></p>
+                     </div>
+                        <div class="inputs">
+                            <button type="button" class="botonResta" data-idtrazo = "${idPresetActivo}"
+                                onclick="
+                                    trazoActivo.${valor.accesoVariable} = carpetasValoresTrazo['${valor.nombreCompleto}'].restarPaso(Number(this.dataset.idtrazo)) 
+                                ">
+                                    -
+                            </button>
+                         <div class="rangeCaja inputRange">
+                         <input type="range" class="range" data-idtrazo = "${idPresetActivo}"
+                         oninput = "
+                            trazoActivo.${valor.accesoVariable} = Number(this.value) ;
+                            renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                            carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarValor(); 
+                          " 
+                          onchange="
+                          renderizarPreVisualizacionPreset(categoriaPresets.todos[Number(this.dataset.idtrazo)])
+                          ">
+                     </div>
+                 <button type="button" class="botonSuma" data-idtrazo = "${idPresetActivo}"
+                 onclick="
+                    trazoActivo.${valor.accesoVariable} = carpetasValoresTrazo['${valor.nombreCompleto}'].sumarPaso(Number(this.dataset.idtrazo)) 
+                 ">
+                     +
+                 </button>
+                 </div>
+            </div>
+        </div>
+    `);
+    const carpetaActual = document.getElementById(valor.nombreCompleto)
+    carpetasValoresTrazo[valor.nombreCompleto] =
+        new carpetaValorTrazoNumerico(
+            valor,
+            carpetaActual,
+            carpetaActual.getElementsByClassName('botonResta')[0],
+            carpetaActual.getElementsByClassName('botonSuma')[0],
+            carpetaActual.getElementsByClassName('range')[0],
+            carpetaActual.getElementsByClassName('nombreValor')[0],
+            carpetaActual.getElementsByClassName('valorParametro')[0],
+        )
+
+    carpetasValoresTrazo[valor.nombreCompleto].range.min = rango.minimo
+    carpetasValoresTrazo[valor.nombreCompleto].range.max = rango.maximo
+    carpetasValoresTrazo[valor.nombreCompleto].range.step = rango.salto
+
+    return carpetasValoresTrazo[valor.nombreCompleto]
+}
+
+function agregarValorConjunto(ubicacion, valor, antesDespues = 'afterbegin') {
+    let asignacionesValores = ''
+    for (const actual of valor.listaValores) {
+        asignacionesValores += 'trazoActivo.' + actual.accesoVariable + ' = Number(this.value) ;'
+    }
+    ubicacion.insertAdjacentHTML(antesDespues, `
+        <div class="conjuntoValoresPreset cerrado ${valor.categoria}"  id="${valor.nombreCompleto}">
+            <div class="valorPreset">
+                <div class="configuracionValor">
+                    <div class="texto">
+                        <p class="nombreValor"> ${valor.nombre} </p>
+                        <p class="valorParametro">0</p>
+                    </div>
+                    <div class="inputs">
+                        <button type="button" class="botonResta" onclick ="
+                        carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso()
+                        carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
+                        renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                        ">
+                        -
+                        </button>
+                        <div class="rangeCaja inputRange">
+                            <input type="range" class="range rangeJefe"  data-idtrazo = "${idPresetActivo}" 
+                            onchange="renderizarPreVisualizacionPreset(categoriaPresets.todos[Number(this.dataset.idtrazo)])"
+                            oninput ="${asignacionesValores}
+                            this.parentNode.parentNode.parentNode.querySelector('.valorParametro').innerHTML = this.value;
+                            carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
+                            renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                            "
+                            >
+                        </div>
+                        <button type="button" class="botonSuma" onclick="
+                        carpetasValoresTrazo['${valor.nombreCompleto}'].darPaso(-1)
+                        carpetasValoresTrazo['${valor.nombreCompleto}'].actualizarNumerosHtml(); 
+                        renderizar(categoriaPresets.todos[Number(this.dataset.idtrazo)]) ;
+                        ">
+                        +
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="lista">
+                <div class="separacionValor"></div>
+
+            </div>
+            <button class="plegarDesplegarConjunto" type="button" onclick="
+                let listaAlgo = this.parentNode
+                if(listaAlgo.classList.contains('abierto')){
+                    listaAlgo.classList.add('cerrado')
+                    listaAlgo.classList.remove('abierto')
+                }else{
+                    listaAlgo.classList.remove('cerrado')
+                    listaAlgo.classList.add('abierto')
+                }
+            ">
+                <img src="/interfaz/imagenes/flechaLargaVertical.svg" alt="">
+            </button>
+        </div>
+    `);
+    const carpetaActual = document.getElementById(valor.nombreCompleto)
+    const rangeJefe = carpetaActual.querySelector('.rangeJefe')
+    const valorActualJefe = carpetaActual.querySelector('.valorParametro')
+    const listaValores = carpetaActual.querySelector('.lista')
+    carpetasValoresTrazo[valor.nombreCompleto] =
+        new carpetaConjunto(
+            valor,
+            carpetaActual,
+            rangeJefe,
+            valorActualJefe
+        )
+
+    const rango = trazo.obtenerRangoValor(valor.listaValores[0].accesoVariable)
+
+
+    rangeJefe.min = rango.minimo
+    rangeJefe.max = rango.maximo
+    rangeJefe.step = rango.salto
+
+    for (const actual of valor.listaValores) {
+        carpetasValoresTrazo[valor.nombreCompleto].carpetasHijas.push(agregarValorNumerico(listaValores, actual, 'beforeend'))
+    }
 }
 
 function agregarValoresTrazo() {
@@ -380,21 +504,21 @@ function agregarValoresTrazo() {
         if (ubicacion.querySelector('.seccionCategoria.' + valor.categoria)) {
             ubicacion = ubicacion.querySelector('.seccionCategoria.' + valor.categoria)
         } else {
-            ubicacion.insertAdjacentHTML('beforeend', `
+            ubicacion.insertAdjacentHTML('afterbegin', `
             <div class="seccionCategoria ${valor.categoria}" >
-
             </div>
             `);
 
-            document.getElementById('categoriasValoresPreset').insertAdjacentHTML('beforeend', `
+            document.getElementById('categoriasValoresPreset').insertAdjacentHTML('afterbegin', `
                 <button button type = "button" class="categoriaValor" onclick = "mostrarCategoriaValorCorrecta('${valor.categoria}')" >
                     <p>${valor.categoria}</p>
                 </button>
             `);
             ubicacion = ubicacion.querySelector('.seccionCategoria.' + valor.categoria)
-
-            tiposCategoriasValor.push(valor.categoria)
         }
+
+        if (!tiposCategoriasValor.includes(valor.categoria))
+            tiposCategoriasValor.push(valor.categoria)
 
         switch (valor.tipoValor) {
             case 'numero':
@@ -409,21 +533,27 @@ function agregarValoresTrazo() {
             case 'accion':
                 agregarValorAccion(ubicacion, valor);
                 break;
+            case 'conjunto':
+                agregarValorConjunto(ubicacion, valor);
+                break;
             default:
-                console.log(valor.tipoValor)
+                ubicacion.insertAdjacentHTML('afterbegin', `
+                    <div class="separacionValor" >
+                    </div>`
+                );
                 break;
         }
-
     }
 }
 
 function actualizarValoresHtml() {
     for (const valor of valoresTrazo) {
-        carpetasValoresTrazo[valor.nombreCompleto]?.actualizarValoresHtml(valor);
+        if (valor.esSeparacion) continue
+        carpetasValoresTrazo[valor.nombreCompleto].actualizarValoresHtml();
     }
+    acomodarNombrePreset()
     renderizar(categoriaPresets.todos[idPresetActivo])
 }
-
 
 function acomodarDisplaysNone() {
     for (const actual of tiposCategoriasValor) {
@@ -432,9 +562,25 @@ function acomodarDisplaysNone() {
     document.querySelector('.seccionCategoria.' + categoriaValorSeleccionada).style.display = 'flex'
 }
 
+function acomodarNombrePreset() {
+    const nombrePreset = categoriaPresets.todos[idPresetActivo].nombre
+    document.getElementById('nombrePreset').innerHTML = nombrePreset
+    const presetActivo = document.getElementById('preset-' + idPresetActivo)
+
+    const modificadorPresetInput = document.getElementById('nombrePresetActivo')
+    if (modificadorPresetInput) {
+        modificadorPresetInput.placeholder = nombrePreset
+        modificadorPresetInput.value = ''
+    }
+    if (presetActivo) {
+        presetActivo.querySelector('.nombrePreset').innerHTML = nombrePreset
+    }
+}
+
 agregarValoresTrazo()
 actualizarValoresHtml()
 renderizar(categoriaPresets.todos[idPresetActivo])
+acomodarNombrePreset()
 acomodarDisplaysNone()
 
 function mostrarCategoriaValorCorrecta(categoria) {

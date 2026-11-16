@@ -574,7 +574,7 @@ class trazo {
             let valPred = valor !== 'rotacion' && valor !== 'h' ? 1 : 0
             this.inicioFin[valor] = {}
             this.inicioFin[valor].inicio = inicioFin[valor].inicio !== undefined ? inicioFin[valor].inicio : valPred
-            this.inicioFin[valor].fin = inicioFin[valor].inicio !== undefined ? inicioFin[valor].fin : valPred
+            this.inicioFin[valor].fin = inicioFin[valor].fin !== undefined ? inicioFin[valor].fin : valPred
         }
         //#endregion 
         //#region suavizado
@@ -632,7 +632,6 @@ class trazo {
         //#endregion
         //#endregion
     }
-
     separar = true
     static minimoSeparacion = 0.01;
     static valoresInicioFin = ['duracion', 'grosor', 'alpha', 'alto', 'ancho', 'rotacion', 'h', 's', 'v',]
@@ -642,7 +641,7 @@ class trazo {
         grosor: new rangoValor(1, 10, 300, 1),
         flujo: new rangoValor(0, 1, 1, 0.01),
         separacion: new rangoValor(0, 1, 10, 0.01),
-        puntosSuavizado: new rangoValor(2, 1, 50, 1),
+        puntosSuavizado: new rangoValor(2, 1, 100, 1),
         rotacionInicial: new rangoValor(0, 0, 6.28, 0.01),
         seguirRotacionTrayecto: new rangoValor(0, 0, 1, 0.01),
         anchoInicial: new rangoValor(0, 1, 1, 0.01),
@@ -679,7 +678,7 @@ class trazo {
                 if (!devolver[entrada])
                     devolver[entrada] = {}
                 for (const salida of trazo.valoresInicioFin)
-                    devolver[entrada][salida] = new rangoValor(0, 0, 1, 0.01)
+                    devolver[entrada][salida] = new rangoValor(-1, 0, 1, 0.01)
             }
             return devolver
         })(),
@@ -724,7 +723,6 @@ class trazo {
         }
         return elementoActual
     }
-
     obtenerValorString(valor) {
         const ruta = valor.split('.')
 
@@ -734,7 +732,6 @@ class trazo {
         }
         return elementoActual
     }
-
     cajaDelimitadora() { // se toma asi pq es cordenada relativa a punto inicial, la cord 0 siempre es 0 0 
         let x1 = 0;
         let y1 = 0;
@@ -773,24 +770,6 @@ class trazo {
             largo: x2 - x1,
             alto: y2 - y1
         }
-    }
-    invertirRGB(indice) {
-        const color = this.rgba[indice]
-        if (color) {
-            color.r = 255 - color.r;
-            color.g = 255 - color.g;
-            color.b = 255 - color.b;
-        }
-    }
-    invertirAlpha(indice) {
-        const color = this.rgba[indice]
-        if (color) {
-            color.a = 1 - color.a;
-        }
-    }
-    invertirCanalesRGBA(indice) {
-        this.invertirAlpha(indice)
-        this.invertirRGB(indice)
     }
     clonarRGBA() {
         const clonRGBA = [];
@@ -1118,11 +1097,10 @@ class trazo {
     obtenerTrayectoSuavizado({ puntos, puntosSuavizado, rebotar = false, inicioCalcular = 0, finCalcular = puntos.length - 1 }) {
         if (puntos.length === 1) return puntos;
         let trayectoSuavizado = [];
-        if (inicioCalcular === 0 && !rebotar)
-            trayectoSuavizado.push(puntos[0].clonar())
         const radio = Math.floor(puntosSuavizado / 2);
 
         for (let i = inicioCalcular; i <= finCalcular; i++) {
+            //#region
             let sumaX = 0,
                 sumaY = 0,
                 puntosValidos = 0,
@@ -1139,6 +1117,7 @@ class trazo {
                 sumaS = 0,
                 sumaV = 0;
 
+            //#endregion
             const minimo = (!rebotar) ? Math.max(0, i - radio) : i - radio;
             const maximo = (!rebotar) ? Math.min(puntos.length - 1, i + radio) : i + radio;
             for (let n = minimo; n <= maximo; n++) {
@@ -1165,6 +1144,7 @@ class trazo {
                 puntosValidos++;
             }
 
+            //#region
             const promX = sumaX / puntosValidos;
             const promY = sumaY / puntosValidos;
             const promPres = sumaPresion / puntosValidos;
@@ -1179,6 +1159,7 @@ class trazo {
             const promH = sumaH / puntosValidos;
             const promS = sumaS / puntosValidos;
             const promV = sumaV / puntosValidos;
+            //#endregion
 
             trayectoSuavizado.push(
                 new cordenada(
@@ -1200,8 +1181,7 @@ class trazo {
             );
         }
 
-        if (finCalcular === puntos.length - 1 && !rebotar)
-            trayectoSuavizado.push(puntos[puntos.length - 1].clonar());
+
         return trayectoSuavizado;
     }
     calcularPuntosInicioFin({ puntos, inicioCalcular = 0, finCalcular = puntos.length }) {
@@ -1612,7 +1592,7 @@ class trazo {
     }
     hsvVariable() {
         return (
-            this.ruidoH > 0 || this.ruidoS > 0 || this.ruidoV > 0 ||
+            this.ruido.h > 0 || this.ruido.s > 0 || this.ruido.v > 0 ||
 
             this.sensibilidad.msPx.h !== 0 || this.sensibilidad.presion.h !== 0 ||
             this.sensibilidad.msPx.s !== 0 || this.sensibilidad.presion.s !== 0 ||

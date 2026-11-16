@@ -590,6 +590,57 @@ class pincelSellos extends pincel {
         return returnar
     }
 }
+class pincelBarato extends pincel {
+    obtenerPuntosMoviles(trazo) {
+        return Math.round(trazo.puntosSuavizado * 1.5)
+    }
+
+    usar({ lienzo, lienzoIntermediario, trazo, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
+        if (trazo.rgba[0].a === 0) return
+        for (let n = inicioTrayectos; n <= finTrayectos; n++) {
+            let trayecto = trazo.trayectos[n]
+            let inicioCalcular = inicioTrayecto !== undefined ? inicioTrayecto : 0
+            let finCalcular = finTrayecto !== undefined ? finTrayecto : trazo.trayectos[n].length - 1
+
+            trayecto = trazo.obtenerTrayectoSuavizado({
+                rebotar: trazo.rebotarSuavizado,
+                puntos: trazo.trayectos[n],
+                puntosSuavizado: trazo.puntosSuavizado,
+
+                inicioCalcular,
+                finCalcular,
+            })
+
+            if (trazo.ruido.x > 0 || trazo.ruido.y > 0) {
+                trazo.calcularAleatorizacon({ cordenadas: trayecto, modificar: true, });
+            }
+            lienzoIntermediario.lienzoComun.pintarTrayectoLineas({
+                puntoInicialX: trazo.puntoInicial.x,
+                puntoInicialY: trazo.puntoInicial.y,
+                trayecto: trayecto,
+                grosor: trazo.grosor,
+                r: trazo.rgba[0].r,
+                g: trazo.rgba[0].g,
+                b: trazo.rgba[0].b,
+                a: 1,
+            })
+            lienzoIntermediario.lienzoComun.pintarTrayectoCirculo({
+                puntoInicialX: trazo.puntoInicial.x,
+                puntoInicialY: trazo.puntoInicial.y,
+                trayecto: trayecto,
+                radio: trazo.grosor / 2,
+                r: trazo.rgba[0].r,
+                g: trazo.rgba[0].g,
+                b: trazo.rgba[0].b,
+                a: 1,
+                rotacion: 0,
+                inicio: 0,
+                fin: Math.PI * 2,
+            })
+        }
+        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
+    }
+}
 class figuraSellos extends lineaSimple {
     constructor({ nombre, categoria, verticesFigura }) {
         super({ nombre, categoria })
@@ -753,50 +804,7 @@ class baldeSimple extends herramienta {
         return true;
     }
 }
-class pincelBarato extends pincel {
 
-    obtenerPuntosMoviles() {
-        return 2
-    }
-
-    usar({ lienzo, lienzoIntermediario, trazo, inicioTrayectos = 0, finTrayectos = trazo.trayectos.length - 1, inicioTrayecto, finTrayecto }) {
-        if (trazo.rgba[0].a === 0) return
-        for (let n = inicioTrayectos; n <= finTrayectos; n++) {
-            inicioTrayecto = inicioTrayecto !== undefined ? inicioTrayecto : 0
-            finTrayecto = finTrayecto !== undefined ? finTrayecto : trazo.trayectos[n].length - 1
-            console.log({ lienzo, lienzoIntermediario, trazo, inicioTrayectos, finTrayectos, inicioTrayecto, finTrayecto })
-            lienzoIntermediario.lienzoComun.pintarTrayectoLineas({
-                puntoInicialX: trazo.puntoInicial.x,
-                puntoInicialY: trazo.puntoInicial.y,
-                trayecto: trazo.trayectos[n],
-                grosor: trazo.grosor,
-                r: trazo.rgba[0].r,
-                g: trazo.rgba[0].g,
-                b: trazo.rgba[0].b,
-                a: 1,
-                inicioTrayecto,
-                finTrayecto
-            })
-
-            lienzoIntermediario.lienzoComun.pintarTrayectoCirculo({
-                puntoInicialX: trazo.puntoInicial.x,
-                puntoInicialY: trazo.puntoInicial.y,
-                trayecto: trazo.trayectos[n],
-                radio: trazo.grosor / 2,
-                r: trazo.rgba[0].r,
-                g: trazo.rgba[0].g,
-                b: trazo.rgba[0].b,
-                a: 1,
-                rotacion: 0,
-                inicio: 0,
-                fin: Math.PI * 2,
-                inicioTrayecto,
-                finTrayecto
-            })
-        }
-        lienzo.pegarLienzo({ lienzo: lienzoIntermediario.lienzoComun, x: 0, y: 0, alpha: trazo.rgba[0].a, modoPegado: trazo.modoDibujo })
-    }
-}
 
 pintor.cargarCategorias([
     { nombreCategoria: 'herramienta' },

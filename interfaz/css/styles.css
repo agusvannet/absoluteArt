@@ -249,7 +249,7 @@ button:hover {
 .preset .presentacion {
     width: 100%;
     height: 100%;
-    background-image: url(/interfaz/imagenes/fondoPng.avif);
+    background-image: var(--fondoPng);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 100% auto;
@@ -258,6 +258,7 @@ button:hover {
     justify-content: start;
 }
 
+.preset .presentacion #nombrePreset,
 .preset .presentacion .nombrePreset {
     position: absolute;
     height: fit-content;
@@ -268,6 +269,7 @@ button:hover {
     align-items: end;
     border-radius: 0 calc(var(--px) * 6) 0 0;
     font-size: calc(var(--px) * 16);
+    color: var(--colorFuenteOpuesta);
 }
 
 .preset .acciones {
@@ -371,6 +373,7 @@ button:hover {
     align-items: end;
     font-size: calc(var(--px) * 13);
     font-weight: bold;
+    color: var(--colorFuenteOpuesta);
 }
 
 #seleccionHerramientas.plegado {
@@ -396,7 +399,6 @@ button:hover {
     gap: var(--px);
     border-radius: calc(var(--px) * 7.5);
     overflow: hidden;
-
 }
 
 #configuracionPreset>.contenido .preVisualizacionPreset {
@@ -470,7 +472,7 @@ button:hover {
 .valorParametro {
     font-size: calc((var(--px) * 17));
     font-weight: 500;
-    color: white;
+    color: var(--colorFuente);
 }
 
 .valoresPreset .inputs {
@@ -481,7 +483,7 @@ button:hover {
 }
 
 .valoresPreset .inputs button {
-    color: white;
+    color: var(--colorFuente);
     font-weight: bolder;
     background-color: var(--colorCaracteristico);
     border-radius: 100%;
@@ -500,7 +502,7 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: calc((var(--px) * 5));
+    padding-inline: calc((var(--px) * 8));
     background-color: rgba(0, 0, 0, 0.15);
 }
 
@@ -696,7 +698,7 @@ button.categoriaValor>p {
 
 .switch.inactivo .bordesitoFondoSwitch,
 .switch.inactivo .fondoSwitch {
-    background-color: rgb(240, 0, 0);
+    background-color: rgb(190, 6, 6);
     transition: background-color var(--tiempoAnimacion) ease;
 }
 
@@ -751,4 +753,121 @@ button.categoriaValor>p {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+
+
+.valorTextoBoton {
+    width: 100%;
+    height: 55%;
+    display: flex;
+    justify-content: space-between;
+    gap: calc((var(--px) * 12));
+    display: flex;
+}
+
+.valorTextoBoton .contenedorInputTexto {
+    display: flex;
+    height: 100%;
+    width: 65%;
+    background-color: rgb(255, 255, 255);
+    border-radius: calc(var(--px) * 5);
+    border: calc(var(--px) * 3) solid var(--colorCaracteristico);
+    padding: calc(var(--px) * 4);
+}
+
+.valorTextoBoton .contenedorInputTexto button {
+    height: 100%;
+    aspect-ratio: 1/1;
+    display: flex;
+    margin-left: calc(var(--px) * 10);
+}
+
+.valorTextoBoton .contenedorInputTexto button:hover {
+    background-color: unset;
+}
+
+.valorTextoBoton>button {
+    height: 100%;
+    width: 35%;
+    background-color: var(--colorSeptimoPanel);
+    border-radius: calc(var(--px) * 2.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--colorFuente);
+    font-size: calc(var(--px) * 18);
+}
+
+.valorTextoBoton .contenedorInputTexto .inputTexto {
+    height: 100%;
+    max-height: fit-content;
+    width: 100%;
+    font-size: calc(var(--px) * 16);
+    border-bottom: calc(var(--px) * 2.5) solid var(--colorSecundarioPanel);
+}
+
+button img {
+    height: 100%;
+    width: 100%;
+}
+
+
+
+
+.conjuntoValoresPreset {
+    background-color: var(--colorCuartarioPanel);
+    border-radius: calc((var(--px) * 6));
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.conjuntoValoresPreset .lista {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--px) * 8);
+    height: fit-content;
+    overflow: hidden;
+}
+
+.conjuntoValoresPreset.cerrado .lista {
+    max-height: 0;
+    transition: max-height var(--tiempoAnimacion) ease;
+}
+
+.conjuntoValoresPreset.abierto .lista {
+    max-height: fit-content;
+    transition: max-height var(--tiempoAnimacion) ease;
+    padding: calc(var(--px) * 8);
+    padding-top: calc(var(--px) * 4);
+    padding-bottom: 0;
+}
+
+.conjuntoValoresPreset .lista>.valorPreset {
+    background-color: var(--colorCuatroYMedioanel);
+}
+
+.conjuntoValoresPreset .plegarDesplegarConjunto {
+    background-color: var(--colorCuatroYMedioanel);
+    height: calc((var(--px) * 20));
+    padding: calc(var(--px) * 4);
+    border-radius: calc(var(--px) * 5);
+    margin-top: calc(var(--px) * 8);
+}
+
+.conjuntoValoresPreset.cerrado .plegarDesplegarConjunto img {
+    transform: scaleY(-1);
+    transition: transform var(--tiempoAnimacion) ease;
+}
+
+.conjuntoValoresPreset.abierto .plegarDesplegarConjunto img {
+    transition: transform var(--tiempoAnimacion) ease;
+}
+
+.separacionValor {
+    width: 100%;
+    height: calc(var(--px) * 8);
+    background-color: var(--colorCuatroYMedioanel);
+    border-radius: calc(var(--px) * 8);
 }

@@ -23,7 +23,7 @@ class preset {
     }
     static contadorPresets = 0;
 
-    static rgbaGeneralPresets = [{ r: 255, g: 0, b: 0, a: 1 }, { r: 0, g: 255, b: 255, a: 1 }]
+    static rgbaGeneralPresets = [{ r: 255, g: 155, b: 0, a: 1 }, { r: 0, g: 255, b: 255, a: 1 }]
     static rgbaFondoBorrar = { r: 0, g: 0, b: 0, a: 1 }
     static maximoGrosorRenderizar = 50
 
@@ -142,7 +142,6 @@ class preset {
         this.subCategoria = respaldosPreset[this.id].subCategoria
         this.trazo = respaldosPreset[this.id].trazo.clonar(false)
         this.acomodarCordenadas()
-
     }
 
 }
@@ -186,33 +185,39 @@ function agregarPreset({ trazoPreset, nombre = 'generico', categoria = trazoPres
     return nuevoPreset
 }
 
-const figurasDibujar = ['cruzSellos', 'crepperSello', 'romboSello', 'estrellaSellos', 'lineaSello']
+const figurasDibujar = ['cruzSellos', 'crepperSello', 'rectanguloSello', 'romboSello', 'estrellaSellos', 'lineaSello']
 const modosDibujo = ['normal', 'borrar']
-for (const modo of modosDibujo) {
-    for (const figura of figurasDibujar) {
-        agregarPreset({
-            nombre: 'figura ',
-            categoria: 'figuras',
-            subCategoria: sello.nombre,
-            trazoPreset: new trazo({
-                herramienta: figura,
-                separacion: .2,
-                grosor: 20,
-
-                modoDibujo: modo,
-            })
-        })
-    }
+for (const figura of figurasDibujar) {
     agregarPreset({
-        nombre: 'pincel ',
-        categoria: 'pinceles',
+        nombre: 'figura ',
+        categoria: 'figuras',
         subCategoria: sello.nombre,
         trazoPreset: new trazo({
-            herramienta: 'pincelSellos',
-            separacion: .0,
+            herramienta: figura,
+            separacion: .2,
             grosor: 20,
-            modoDibujo: modo,
-            flujo: .25,
         })
     })
 }
+agregarPreset({
+    nombre: 'pincel ',
+    categoria: 'pinceles',
+    subCategoria: sello.nombre,
+    trazoPreset: new trazo({
+        herramienta: 'pincelSellos',
+        separacion: .0,
+        grosor: 20,
+        flujo: .25,
+    })
+})
+agregarPreset({
+    nombre: 'pincel ',
+    categoria: 'pinceles',
+    subCategoria: sello.nombre,
+    trazoPreset: new trazo({
+        herramienta: 'pincelBarato',
+        separacion: .0,
+        grosor: 20,
+        flujo: .25,
+    })
+})

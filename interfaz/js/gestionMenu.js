@@ -1,10 +1,32 @@
-let tiposHerramientas = ['cursor', 'pincel', 'borrador', 'figura', 'recorte', 'balde', 'texto', 'lazo', 'difuminar']
+let tiposHerramientas = ['cursor', 'pincel', 'borrador', 'figura', 'recorte', 'balde', 'lazo', 'difuminar']
 let tiposCategoriasValor = []
 
 let tipoHerramientaActiva = tiposHerramientas[0]
 let categoriaHerramientaActiva = 'todos'
 let idPresetActivo = 0;
-let categoriaValorSeleccionada = 'config'
+let categoriaValorSeleccionada = 'suavizado'
+const equivalenciaNombres = {
+    h: 'Tonalidad',
+    s: 'Saturacion',
+    v: 'Brillo',
+    x: 'Horizontal',
+    y: 'Vertical',
+    msPx: 'Velocidad',
+    duracion: 'Duracion',
+    grosor: 'Grosor',
+    alto: 'Alto',
+    ancho: 'Ancho',
+    rotacion: 'Rotacion',
+    alpha: 'Opacidad',
+}
+
+const categorizacionValores = {
+    cordenadas: ['x', 'y'],
+    color: ['h', 's', 'v'],
+    geometrico: ['grosor', 'alto', 'ancho', 'rotacion', 'alpha',],
+    Entradas: ['presion', 'msPx', 'inclinacionX', 'inclinacionY'],
+}
+
 function cambiarTipoHerramienta(nuevaHerramienta) {
     tipoHerramienta = nuevaHerramienta;
 }
@@ -35,49 +57,13 @@ function agregarGrupoValoresTrazo(valorTrazo) {
     categoriasValores[valorTrazo.categoria].agregarValor(valorTrazo)
 }
 
-class grupoValoresTrazo {
-    constructor(nombre) {
-        this.nombre = nombre;
-        this.contenido = []
-    }
-}
 const categoriasValores = {
 
 }
 
-class valorTrazo {
-    constructor({
-        idTrazo, categoria, nombre,
-        nombreCompleto, tipoValorTrazo, accesoVariable,
-        esPorcentual = false, tipoValor = 'numero', opciones,
-        esSeparacion = false, listaSelecciones, preVisualizable = false,
-
-        accion = () => { console.log('accion no agregada') },
-
-        funcionRenderizar = () => { console.log('funcion renderizar no agregada') }
-    }) {
-
-        this.nombre = nombre;
-        this.idTrazo = idTrazo;
-        this.accesoVariable = accesoVariable;
-        this.esPorcentual = esPorcentual;
-        this.tipoValorTrazo = tipoValorTrazo; // el tipo de valor estilo lo de ibis , en que seccion de la configuracion esta
-        this.tipoValor = tipoValor; // numerico o seleccionable 
-        this.opciones = opciones;
-        this.nombreCompleto = nombreCompleto;
-        this.categoria = categoria;
-        this.esSeparacion = esSeparacion
-        this.listaSelecciones = listaSelecciones;
-        this.preVisualizable = preVisualizable;
-        this.accion = accion;
-        this.funcionRenderizar = funcionRenderizar;
-    }
-    static categorias = []
-}
 
 const valoresTrazo = [
 ]
-
 
 class valorIndividual {
     constructor(categoria, nombre, accesoVariable = nombre, nombreCompleto = accesoVariable,) {
@@ -86,6 +72,53 @@ class valorIndividual {
         this.accesoVariable = accesoVariable;
         this.nombreCompleto = nombreCompleto;
     }
+}
+
+class valorTrazo {
+    constructor({ categoria, nombre, nombreCompleto, tipoValor }) {
+        this.nombre = nombre;
+        this.nombreCompleto = nombreCompleto;
+        this.categoria = categoria;
+        this.tipoValor = tipoValor;
+    }
+}
+
+class valorTrazoConjunto extends valorTrazo {
+    constructor({ categoria, nombre, nombreCompleto, listaValores = [], tipoValor = 'conjunto' }) {
+        super({ categoria, nombre, nombreCompleto, tipoValor })
+        this.listaValores = listaValores;
+    }
+}
+
+class valorTrazoIndividual extends valorTrazo {
+    constructor({
+        idTrazo, categoria, nombre,
+        nombreCompleto, tipoValorTrazo, accesoVariable,
+        esPorcentual = false, tipoValor = 'numero',
+        listaSelecciones, preVisualizable = false,
+        esSeparacion = false,
+
+        accion = () => { console.log('accion no agregada') },
+
+        funcionRenderizar = () => { console.log('funcion renderizar no agregada') }
+    }) {
+        super(categoria, nombre, nombreCompleto, tipoValor)
+
+        this.nombre = nombre;
+        this.idTrazo = idTrazo;
+        this.accesoVariable = accesoVariable;
+        this.esPorcentual = esPorcentual;
+        this.tipoValorTrazo = tipoValorTrazo; // el tipo de valor estilo lo de ibis , en que seccion de la configuracion esta
+        this.tipoValor = tipoValor; // numerico o seleccionable 
+        this.nombreCompleto = nombreCompleto;
+        this.categoria = categoria;
+        this.listaSelecciones = listaSelecciones;
+        this.preVisualizable = preVisualizable;
+        this.esSeparacion = esSeparacion;
+        this.accion = accion;
+        this.funcionRenderizar = funcionRenderizar;
+    }
+    static categorias = []
 }
 
 const valoresIndividuales = [
@@ -99,9 +132,22 @@ const valoresIndividuales = [
     new valorIndividual('suavizado', 'Puntos Suavizado', 'puntosSuavizado'),
 ]
 
+function agregarSeparador(categoria) {
+    valoresTrazo.unshift(
+        new valorTrazoIndividual({
+            categoria,
+            esSeparacion: true,
+            nombre: 's',
+            nombreCompleto: 's',
+            tipoValor: 's',
+        })
+    )
+}
+
 for (const actual of valoresIndividuales) {
-    valoresTrazo.push(
-        new valorTrazo({
+    agregarSeparador(actual.categoria)
+    valoresTrazo.unshift(
+        new valorTrazoIndividual({
             categoria: actual.categoria,
             idTrazo: idPresetActivo,
             nombre: actual.nombre,
@@ -109,73 +155,144 @@ for (const actual of valoresIndividuales) {
             nombreCompleto: actual.nombreCompleto,
         })
     )
-
 }
 
-for (const valor of cordenada.valores) {
-    valoresTrazo.push(
-        new valorTrazo({
+valoresTrazo.splice(1, 1)
+
+agregarSeparador('suavizado')
+
+const tiposSuavizado = Object.keys(categorizacionValores)
+for (const actual of tiposSuavizado) {
+    valoresTrazo.unshift(
+        new valorTrazoConjunto({
             categoria: 'suavizado',
             idTrazo: idPresetActivo,
-            nombre: 'suavizado de ' + valor,
-            accesoVariable: 'suavizado.' + valor,
-            nombreCompleto: 'suavizado' + valor,
+            nombre: 'suavizado ' + actual,
+            nombreCompleto: 'suavizado' + actual,
+            tipoValor: 'conjunto',
+            listaValores: (() => {
+                const devolver = []
+                for (const elemento of categorizacionValores[actual]) {
+                    devolver.push(
+                        new valorTrazoIndividual({
+                            categoria: 'suavizado',
+                            idTrazo: idPresetActivo,
+                            nombre: (equivalenciaNombres[elemento] ? equivalenciaNombres[elemento] : elemento),
+                            accesoVariable: 'suavizado.' + elemento,
+                            nombreCompleto: 'suavizado' + elemento,
+                        })
+                    )
+                }
+                return devolver
+            })()
         })
     )
+    agregarSeparador('suavizado')
 }
+
+valoresTrazo.shift()
 
 for (const entrada of trazo.valoresSensibilidades) {
-    for (const salida of trazo.valoresInicioFin) {
-        if (salida === 'duracion')
-            continue
-        valoresTrazo.push(
-            new valorTrazo({
-                categoria: 'sensibilidad',
-                idTrazo: idPresetActivo,
-                nombre: 'sens ante ' + entrada + ' de ' + salida,
-                accesoVariable: 'sensibilidad.' + entrada + '.' + salida,
-                nombreCompleto: 'sensibilidad' + entrada + salida,
-            })
-        )
-    }
+    valoresTrazo.unshift(
+        new valorTrazoConjunto({
+            categoria: 'sensibilidad',
+            idTrazo: idPresetActivo,
+            nombre: 'Sensibilidad a la ' + (equivalenciaNombres[entrada] ? equivalenciaNombres[entrada] : entrada),
+            nombreCompleto: 'Sensibilidad' + entrada,
+            tipoValor: 'conjunto',
+            listaValores: (() => {
+                const devolver = []
+                for (const salida of trazo.valoresInicioFin) {
+                    if (salida === 'duracion')
+                        continue
+                    devolver.push(
+                        new valorTrazoIndividual({
+                            categoria: 'sensibilidad',
+                            idTrazo: idPresetActivo,
+                            nombre: (equivalenciaNombres[salida] ? equivalenciaNombres[salida] : salida),
+                            accesoVariable: 'sensibilidad.' + entrada + '.' + salida,
+                            nombreCompleto: 'sensibilidad' + entrada + salida,
+                        })
+                    )
+                }
+                return devolver
+            })()
+        })
+    )
+    agregarSeparador('sensibilidad')
 }
-
+valoresTrazo.shift()
 
 const inFin = ['inicio', 'fin']
 for (const valor of trazo.valoresInicioFin) {
-    for (const inf of inFin) {
-        valoresTrazo.push(
-            new valorTrazo({
-                categoria: 'inicioFin',
-                idTrazo: idPresetActivo,
-                nombre: valor + ' del ' + inf,
-                accesoVariable: 'inicioFin.' + valor + '.' + inf,
-                nombreCompleto: 'inicioFin' + valor + inf,
-            })
-        )
-    }
-}
-
-for (const valor of trazo.valoresRuido) {
-    valoresTrazo.push(
-        new valorTrazo({
-            categoria: 'ruido',
+    valoresTrazo.unshift(
+        new valorTrazoConjunto({
+            categoria: 'inicioFin',
             idTrazo: idPresetActivo,
-            nombre: 'ruido de ' + valor,
-            accesoVariable: 'ruido.' + valor,
-            nombreCompleto: 'ruido' + valor,
+            nombre: (equivalenciaNombres[valor] ? equivalenciaNombres[valor] : valor) + ' Del Inicio Fin',
+            nombreCompleto: 'valoriniciofin' + valor,
+            tipoValor: 'conjunto',
+            listaValores: [
+                new valorTrazoIndividual({
+                    categoria: 'inicioFin',
+                    idTrazo: idPresetActivo,
+                    nombre: 'Inicio',
+                    accesoVariable: 'inicioFin.' + valor + '.inicio',
+                    nombreCompleto: 'inicioFin' + valor + 'inicio',
+                }),
+                new valorTrazoIndividual({
+                    categoria: 'inicioFin',
+                    idTrazo: idPresetActivo,
+                    nombre: 'Fin',
+                    accesoVariable: 'inicioFin.' + valor + '.fin',
+                    nombreCompleto: 'inicioFin' + valor + 'fin',
+                }),
+            ]
         })
     )
+    agregarSeparador('inicioFin')
 }
+valoresTrazo.shift()
+
+const tiposRuido = Object.keys(categorizacionValores)
+tiposRuido.splice(tiposRuido.indexOf('Entradas'), 1)
+for (const actual of tiposRuido) {
+    valoresTrazo.unshift(
+        new valorTrazoConjunto({
+            categoria: 'ruido',
+            idTrazo: idPresetActivo,
+            nombre: 'ruido ' + actual,
+            nombreCompleto: 'ruido' + actual,
+            tipoValor: 'conjunto',
+            listaValores: (() => {
+                const devolver = []
+                for (const elemento of categorizacionValores[actual]) {
+                    devolver.push(
+                        new valorTrazoIndividual({
+                            categoria: 'ruido',
+                            idTrazo: idPresetActivo,
+                            nombre: (equivalenciaNombres[elemento] ? equivalenciaNombres[elemento] : elemento),
+                            accesoVariable: 'ruido.' + elemento,
+                            nombreCompleto: 'ruido' + elemento,
+                        })
+                    )
+                }
+                return devolver
+            })()
+        })
+    )
+    agregarSeparador('ruido')
+}
+valoresTrazo.shift()
 
 const listaSellos = []
 
 for (const actual of pintor.obtenerCategoria('sello').herramientas) {
-    listaSellos.push(actual.nombre)
+    listaSellos.unshift(actual.nombre)
 }
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Modo Dibujo',
@@ -193,9 +310,9 @@ valoresTrazo.push(
         })(),
     })
 )
-
-valoresTrazo.push(
-    new valorTrazo({
+agregarSeparador('config')
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Sello dibujar',
@@ -212,7 +329,6 @@ valoresTrazo.push(
         })(),
         preVisualizable: true,
         funcionRenderizar: (lienzo, elemento) => {
-            console.log('a')
             lienzo.limpiar()
             pintor.obtenerHerramienta(elemento).usar({
                 x: lienzo.largo / 2,
@@ -225,9 +341,10 @@ valoresTrazo.push(
         }
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Figura dibujar',
@@ -249,6 +366,7 @@ valoresTrazo.push(
             const grosor = 4;
             const trazoDibujar = new trazo({
                 herramienta: elemento,
+                motorPincel: 'pincelBarato',
                 separacion: .0,
                 grosor,
                 rgba: preset.rgbaGeneralPresets,
@@ -258,9 +376,10 @@ valoresTrazo.push(
         }
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Pincel de Figura',
@@ -270,7 +389,6 @@ valoresTrazo.push(
         listaSelecciones: (() => {
             const devolver = []
             const listaOriginal = pintor.obtenerCategoria("pinceles").herramientas
-            console.log(listaOriginal)
             for (const actual of listaOriginal) {
                 devolver.push(actual.nombre)
             }
@@ -278,9 +396,10 @@ valoresTrazo.push(
         })(),
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Redondear Figura',
@@ -289,9 +408,10 @@ valoresTrazo.push(
         tipoValor: 'switch',
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'suavizado Ciclico',
@@ -300,9 +420,10 @@ valoresTrazo.push(
         tipoValor: 'switch',
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Respetar Verticalidad',
@@ -311,9 +432,10 @@ valoresTrazo.push(
         tipoValor: 'switch',
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Respetar Horizontalidad',
@@ -322,9 +444,10 @@ valoresTrazo.push(
         tipoValor: 'switch',
     })
 )
+agregarSeparador('config')
 
-valoresTrazo.push(
-    new valorTrazo({
+valoresTrazo.unshift(
+    new valorTrazoIndividual({
         categoria: 'config',
         idTrazo: idPresetActivo,
         nombre: 'Restablecer Preset',
@@ -337,4 +460,6 @@ valoresTrazo.push(
         }
     })
 )
+agregarSeparador('config')
 
+valoresTrazo.pop()
