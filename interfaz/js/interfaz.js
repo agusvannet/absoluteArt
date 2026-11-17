@@ -1,16 +1,32 @@
-
 function plegarDesplegar(idDuenio) {
     const carpeta = document.getElementById(idDuenio)
 
     if (carpeta.classList.contains('desplegado')) {
         carpeta.classList.remove('desplegado')
         carpeta.classList.add('plegado')
+        return false
     } else {
+        carpeta.classList.remove('plegado')
+        carpeta.classList.add('desplegado')
+        return true
+    }
+}
+
+function plegar(idDuenio) {
+    const carpeta = document.getElementById(idDuenio)
+    if (carpeta.classList.contains('plegado')) {
         carpeta.classList.remove('plegado')
         carpeta.classList.add('desplegado')
     }
 }
 
+function desplegar(idDuenio) {
+    const carpeta = document.getElementById(idDuenio)
+    if (carpeta.classList.contains('desplegado')) {
+        carpeta.classList.remove('desplegado')
+        carpeta.classList.add('plegado')
+    }
+}
 
 function agregarPresetHtml(preset) {
     const ubicacion = document.getElementById('listaPresets').getElementsByClassName('lista')[0]
@@ -19,8 +35,13 @@ function agregarPresetHtml(preset) {
         clases += ' grande'
     ubicacion.insertAdjacentHTML('beforeend', `
     <div class="${clases}" id="preset-${preset.id}">
-        <button type="button" class="presentacion" onclick =" cambiarPresetActivo(${preset.id}) ;  ; actualizarValoresHtml()">
-            <canvas width="1" height="1"></canvas>
+        <button type="button" class="presentacion" onclick ="
+        plegar('configuracionPreset') ;
+        cambiarPresetActivo(${preset.id})   ;
+        actualizarValoresHtml()
+        ">
+        
+         <canvas width="1" height="1"></canvas>
             <div class="nombrePreset">${preset.nombre}</div>
         </button>
         <div class="acciones">

@@ -30,7 +30,16 @@
     </div>
 
     <div class="desplegable desplegado" id="categoriasHerramienta">
-        <button class="boton sombreadoGeneral" type="button" onclick="plegarDesplegar('categoriasHerramienta')">
+        <button class="boton sombreadoGeneral" type="button" onclick="
+            const confPreset = document.getElementById('configuracionPreset')
+            if(plegarDesplegar('categoriasHerramienta')){
+                confPreset.classList.add('alejado')
+                console.log('u')
+            }else{
+                confPreset.classList.remove('alejado')
+                console.log('ua')
+            }
+            ">
             <img src="/interfaz/imagenes/flechita.svg" alt="">
         </button>
 
@@ -48,7 +57,7 @@
             <div class="seccionHerramientasCategoria">
                 <div class="cabezeraCategoria">
                     pinceles (0)
-                    <input type="text" name="" id="buscadorPresets" value="Buscador...">
+                    <input type="text" name="" id="buscadorPresets" placeholder="Buscador...">
                 </div>
 
 
@@ -57,11 +66,7 @@
                     <div class="lista">
 
                     </div>
-                    <div class="scrollBar vertical sombreadoGeneral">
-                        <div class="carril">
-                            <div class="barra"></div>
-                        </div>
-                    </div>
+
 
 
                 </div>
@@ -85,10 +90,12 @@
         </button>
     </div>
 
-    <div class="desplegable desplegado" id="configuracionPreset">
+    <div class="desplegable desplegado alejado" id="configuracionPreset">
         <div class=" contenido sombreadoGeneral">
             <div class="preVisualizacionPreset">
+
                 <div class="preset" id="previsualizacionPresetActual">
+                    
                     <div class="presentacion" id="presentacionPresetActual">
                         <canvas width="1" height="1"></canvas>
                         <div id="nombrePreset">preset</div>

@@ -92,7 +92,7 @@ button:hover {
     transform-origin: 0 0;
     opacity: 0;
     transform: scale(0);
-    pointer-events: auto;
+    pointer-events: none;
     transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
 }
 
@@ -105,9 +105,9 @@ button:hover {
 #categoriasHerramienta {
     position: absolute;
     top: 50%;
-    transform: calc(translateY(100%) + var(--padingGeneral));
-    width: calc(var(--px) * 55);
-    height: calc(var(--px) * 55);
+    transform: translateY(-50%);
+    width: calc(var(--px) * 56);
+    aspect-ratio: 1/1;
 }
 
 #categoriasHerramienta>.boton {
@@ -124,9 +124,8 @@ button:hover {
     transform: rotate(-90deg);
 }
 
-#categoriasHerramienta .boton img {
-    width: 55%;
-    height: 55%;
+#categoriasHerramienta>.boton img {
+    height: 80%;
 }
 
 #categoriasHerramienta .contenido {
@@ -138,6 +137,10 @@ button:hover {
     top: 50%;
     transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
     display: flex;
+}
+
+#categoriasHerramienta.desplegado {
+    --rightConfiguracionPreset: 30px
 }
 
 #categoriasHerramienta.desplegado>.boton {
@@ -233,6 +236,11 @@ button:hover {
     font-size: calc(var(--px) * 18);
     margin-right: calc(var(--px) * var(--padingGeneral));
 }
+
+#buscadorPresets::placeholder {
+    color: color-mix(in srgb, var(--colorFuente) 60%, transparent);
+}
+
 
 .preset {
     width: 100%;
@@ -343,7 +351,7 @@ button:hover {
 }
 
 #seleccionHerramientas .boton img {
-    height: 150%;
+    height: 100%;
     transform: rotate(-90deg);
     transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
 
@@ -387,6 +395,38 @@ button:hover {
     transform: rotate(90deg);
 }
 
+#configuracionPreset {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(calc(var(--px) * (56 + var(--padingGeneral))));
+    transition: transform var(--tiempoAnimacion) ease;
+}
+
+#configuracionPreset.alejado {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%) translateX(calc(var(--px) * (418 + var(--padingGeneral))));
+    transition: transform var(--tiempoAnimacion) ease;
+}
+
+
+#configuracionPreset>button {
+    width: calc(var(--px) * 56);
+    aspect-ratio: 1/1;
+    position: relative;
+    z-index: 10;
+    background-color: var(--colorPanel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(var(--px) * 10);
+    transform: rotate(-90deg);
+    transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
+}
+
+#configuracionPreset>button img {
+    height: 80%;
+}
 
 #configuracionPreset>.contenido {
     height: calc(var(--px) * 748);
@@ -399,6 +439,9 @@ button:hover {
     gap: var(--px);
     border-radius: calc(var(--px) * 7.5);
     overflow: hidden;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 #configuracionPreset>.contenido .preVisualizacionPreset {
@@ -408,7 +451,6 @@ button:hover {
     border-radius: calc(var(--px) * 7.5);
     overflow: hidden;
 }
-
 
 #configuracionPreset>.contenido .configuracionPreset {
     width: 100%;
@@ -422,13 +464,40 @@ button:hover {
     border-radius: calc(var(--px) * 7.5);
 }
 
+#configuracionPreset.desplegado>.boton {
+    transform: translateY(calc(var(--px) * -335)) translateX(calc(var(--px) * (var(--padingGeneral) / 2 + 2))) rotate(90deg) scale(.8);
+    border-radius: calc(var(--px) * 5);
+    background-color: color-mix(in srgb, var(--colorQuintoPanel) 90%, transparent);
+    transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease, background-color var(--tiempoAnimacion) ease;
+}
 
+#cerrarConfiguracionPreset {
+    box-sizing: border-box;
+    position: absolute;
+    width: calc(var(--px) * 46);
+    background-color: color-mix(in srgb, var(--colorQuintoPanel) 90%, transparent);
+    aspect-ratio: 1/1;
+    display: flex;
+    z-index: 10;
+    padding: calc(var(--px) * 8);
+    align-items: center;
+    justify-content: center;
+}
+
+#cerrarConfiguracionPreset img {
+    transform: rotate(180deg);
+}
 
 #configuracionPreset.desplegado>.contenido {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%) translateX(100%);
-    /* acomodar esto despues , esto es solo para sacar de encima de las categorias */
+    transform: scale(1) translateY(-50%);
+    opacity: 1;
+    transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
+}
+
+#configuracionPreset.plegado>.contenido {
+    transform: scale(0) translateY(-50%);
+    opacity: 0;
+    transition: transform var(--tiempoAnimacion) ease, opacity var(--tiempoAnimacion) ease;
 }
 
 #configuracionPreset>.contenido #categoriasValoresPreset {
@@ -756,7 +825,6 @@ button.categoriaValor>p {
 }
 
 
-
 .valorTextoBoton {
     width: 100%;
     height: 55%;
@@ -811,8 +879,6 @@ button img {
     height: 100%;
     width: 100%;
 }
-
-
 
 
 .conjuntoValoresPreset {

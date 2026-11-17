@@ -20,7 +20,7 @@
 
     --colorBordeadoSuave: #6A6A6A;
 
-    --tiempoAnimacion: .25s;
+    --tiempoAnimacion: .2s;
 
     --colorFuente: white;
     --colorFuenteOpuesta: black;
@@ -29,6 +29,7 @@
     --fondoPng: url(/interfaz/imagenes/fondoPng.avif);
 
     --zIndexContenidoFugaz: 200;
+
 }
 
 /*
